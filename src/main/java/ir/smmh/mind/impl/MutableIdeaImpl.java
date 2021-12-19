@@ -1,5 +1,7 @@
 package ir.smmh.mind.impl;
 
+import ir.smmh.common.MutableAdapter;
+import ir.smmh.common.impl.MutableImpl;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Property;
 import org.jetbrains.annotations.NotNull;
@@ -7,32 +9,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collections;
 import java.util.Set;
 
-public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable {
-
-    private boolean dirty = true;
+public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, MutableAdapter<Idea.Immutable> {
 
     public MutableIdeaImpl(String name, Set<Idea> intensions, Set<Property<?>> properties, Set<Property<?>> staticProperties) {
         super(name, intensions, properties, staticProperties);
-    }
-
-    @Override
-    public @NotNull Immutable freeze() {
-        return new ImmutableIdeaImpl(getName(), Collections.unmodifiableSet(intensions), Collections.unmodifiableSet(properties), Collections.unmodifiableSet(staticProperties));
-    }
-
-    @Override
-    public boolean isDirty() {
-        return dirty;
-    }
-
-    @Override
-    public void taint() {
-        dirty = true;
-    }
-
-    @Override
-    public void onClean() {
-        dirty = false;
     }
 
     @Override
@@ -58,5 +38,17 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable {
             staticProperties.add(property);
             taint();
         }
+    }
+
+    private final ir.smmh.common.Mutable<Immutable> mutableAdapter = new MutableImpl<>() {
+        @Override
+        public @NotNull Immutable freeze() {
+            return new ImmutableIdeaImpl(getName(), Collections.unmodifiableSet(intensions), Collections.unmodifiableSet(properties), Collections.unmodifiableSet(staticProperties));
+        }
+    };
+
+    @Override
+    public ir.smmh.common.Mutable<Immutable> getMutableAdapter() {
+        return mutableAdapter;
     }
 }

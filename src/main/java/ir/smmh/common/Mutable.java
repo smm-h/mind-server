@@ -13,6 +13,7 @@ public interface Mutable<Immutable> {
     /**
      * Creates and returns a new object of type immutable that is in
      * every way equal to this object, except it cannot be mutated.
+     *
      * @return An immutable version of this object
      * @implNote This may cache and return a pre-existing object to
      * increase performance, if it is not dirty (check using isDirty)
@@ -36,6 +37,7 @@ public interface Mutable<Immutable> {
     /**
      * Override this to implement manually cleaning this object. This is
      * for computationally intense tasks that must not be done at every mutation.
+     *
      * @implNote You should not call this directly. Call clean instead.
      */
     void onClean();

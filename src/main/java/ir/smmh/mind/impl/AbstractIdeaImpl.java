@@ -1,7 +1,7 @@
 package ir.smmh.mind.impl;
 
-import ir.smmh.mind.Instance;
 import ir.smmh.mind.Idea;
+import ir.smmh.mind.Instance;
 import ir.smmh.mind.Property;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 
 public abstract class AbstractIdeaImpl implements Idea {
-    
+
     private final String name;
     protected final Set<Idea> intensions;
     protected final Set<Property<?>> properties;

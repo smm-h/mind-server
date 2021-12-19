@@ -28,8 +28,7 @@ public interface Instance {
 
     <T> void set(Property<T> property, Object value);
 
-    @Nullable
-    <T> T get(Property<T> property);
+    @Nullable <T> T get(Property<T> property);
 
     boolean is(Idea idea);
 

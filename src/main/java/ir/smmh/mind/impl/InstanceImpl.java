@@ -34,10 +34,11 @@ public class InstanceImpl implements Instance {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T get(Property<T> property) {
         try {
             return (T) values.get(property);
-        }catch (ClassCastException e) {
+        } catch (ClassCastException e) {
             return null;
         }
     }
