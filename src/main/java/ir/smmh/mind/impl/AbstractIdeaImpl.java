@@ -1,25 +1,28 @@
 package ir.smmh.mind.impl;
 
+import ir.smmh.common.ForEach;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Instance;
 import ir.smmh.mind.Property;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.util.*;
 
 public abstract class AbstractIdeaImpl implements Idea {
 
     private final String name;
     protected final Set<Idea> intensions;
-    protected final Set<Property<?>> properties;
-    protected final Set<Property<?>> staticProperties;
+    protected final Map<String, Property<?>> properties;
+    protected final Map<String, Property<?>> staticProperties;
 
-    public AbstractIdeaImpl(String name, Set<Idea> intensions, Set<Property<?>> properties, Set<Property<?>> staticProperties) {
+    private static final ForEach.Mappable<Property<?>, String, Property<?>> mapper = p -> new AbstractMap.SimpleEntry<>(p.getName(), p);
+
+    public AbstractIdeaImpl(String name, Set<Idea> intensions, Iterable<Property<?>> properties, Iterable<Property<?>> staticProperties) {
         this.name = name;
         this.intensions = intensions;
-        this.properties = properties;
-        this.staticProperties = staticProperties;
+        this.properties = mapper.toMap(properties);
+        this.staticProperties = mapper.toMap(staticProperties);
     }
 
     @Override
@@ -34,7 +37,7 @@ public abstract class AbstractIdeaImpl implements Idea {
 
     @Override
     public Set<Property<?>> getDirectProperties() {
-        return properties;
+        return new HashSet<>(properties.values());
     }
 
     @Override

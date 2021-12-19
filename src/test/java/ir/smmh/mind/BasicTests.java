@@ -8,21 +8,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BasicTests {
 
+    private Mind.Mutable m;
+    private Idea.Mutable a, b, c, t;
+    private Property<Instance> p;
+
+    private void reset() {
+        m = new MutableMindImpl();
+        a = m.imagine("a");
+        b = m.imagine("b");
+        c = m.imagine("c");
+        t = m.imagine("t");
+        p = new PropertyImpl<>(a, "p", t, null);
+    }
+
     @Test
     public void testIntension() {
-        final Mind.Mutable mind = new MutableMindImpl();
-        final Idea.Mutable a = mind.imagine("a");
-        final Idea.Mutable b = mind.imagine("b");
+        reset();
         a.become(b);
         assertTrue(a.is(b));
     }
 
     @Test
     public void testTransitivity() {
-        final Mind.Mutable mind = new MutableMindImpl();
-        final Idea.Mutable a = mind.imagine("a");
-        final Idea.Mutable b = mind.imagine("b");
-        final Idea.Mutable c = mind.imagine("c");
+        reset();
         a.become(b);
         b.become(c);
         assertTrue(a.is(c));
@@ -30,11 +38,15 @@ public class BasicTests {
 
     @Test
     public void testPossession() {
-        final Mind.Mutable mind = new MutableMindImpl();
-        final Idea.Mutable a = mind.imagine("a");
-        final Idea.Mutable t = mind.imagine("t");
-        final Property<Object> p = new PropertyImpl<>(a, "p", t, null);
+        reset();
         a.possess(p);
+        assertTrue(a.has(p));
+    }
+
+    @Test
+    public void testTransitivePossession() {
+        reset();
+        b.possess(p);
         assertTrue(a.has(p));
     }
 }

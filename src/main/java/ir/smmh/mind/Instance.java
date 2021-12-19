@@ -18,7 +18,9 @@ public interface Instance {
         Set<Property<?>> properties = type.getAllProperties();
         if (properties != null) {
             for (Property<?> property : properties) {
-                object.put(property.getName(), get(property));
+                var q = get(property);
+                if (q instanceof Instance) q = ((Instance) q).serialize();
+                object.put(property.getName(), q);
             }
         }
         return object;

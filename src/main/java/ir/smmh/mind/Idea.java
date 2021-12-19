@@ -139,9 +139,9 @@ public interface Idea {
 
         void become(Idea idea);
 
-        void possess(Property<?> property);
+        <T> Property<T> possess(String name, Idea type, T defaultValue);
 
-        void reify(Property<?> property, String value);
+        <T> Property<T> reify(String name, Idea type, T value);
     }
 
     interface Immutable extends Idea {
