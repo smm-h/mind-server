@@ -11,19 +11,33 @@ public interface Idea {
     String getName();
 
     default boolean is(Idea idea) {
-        final Set<Idea> d = getDirectIntensions();
-        if (d == null) {
-            return false;
-        } else if (d.contains(idea)) {
+
+        // If idea is me, I am it
+        if (idea == this)
             return true;
-        } else {
-            for (Idea i : d) {
-                if (i.is(idea)) {
-                    return true;
-                }
-            }
+
+        // If I have no direct intensions, I am not it
+        final Set<Idea> d = getDirectIntensions();
+        if (d == null)
             return false;
+
+        // If idea is in my direct intensions, I am it
+        if (d.contains(idea))
+            return true;
+
+        // If any of my intensions are idea, I am it
+        for (Idea i : d) {
+            if (i.is(idea)) {
+                return true;
+            }
         }
+
+        // If none of my intensions are idea, I am not it
+        return false;
+    }
+
+    default boolean has(Property<?> property) {
+        return is(property.getOrigin());
     }
 
     @Nullable
