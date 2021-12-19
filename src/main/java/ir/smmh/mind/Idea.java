@@ -49,40 +49,18 @@ public interface Idea {
     }
 
     @Nullable
-    Set<Idea> getDirectExtensions();
+    Set<Property<?>> getDirectProperties();
 
     @Nullable
-    default Set<Idea> getAllExtensions() {
-        final Set<Idea> set = getDirectExtensions();
-        if (set == null) {
-            return null;
-        } else {
-            final Set<Idea> d = getDirectExtensions();
-            if (d != null) {
-                for (Idea extension : d) {
-                    final Set<Idea> all = extension.getAllExtensions();
-                    if (all != null) {
-                        set.addAll(all);
-                    }
-                }
-            }
-        }
-        return set;
-    }
-
-    @Nullable
-    Set<Property> getDirectProperties();
-
-    @Nullable
-    default Set<Property> getAllProperties() {
-        final Set<Property> set = getDirectProperties();
+    default Set<Property<?>> getAllProperties() {
+        final Set<Property<?>> set = getDirectProperties();
         if (set == null) {
             return null;
         } else {
             final Set<Idea> allIntensions = getAllIntensions();
             if (allIntensions != null) {
                 for (Idea intension : allIntensions) {
-                    final Set<Property> allProperties = intension.getAllProperties();
+                    final Set<Property<?>> allProperties = intension.getAllProperties();
                     if (allProperties != null) {
                         set.addAll(allProperties);
                     }
@@ -103,9 +81,9 @@ public interface Idea {
                 }
             }
         }
-        final Set<Property> p = getDirectProperties();
+        final Set<Property<?>> p = getDirectProperties();
         if (p != null) {
-            for (Property property : p) {
+            for (Property<?> property : p) {
                 if (!serialization.has(property.getName())) {
                     return false;
                 }
@@ -115,27 +93,27 @@ public interface Idea {
     }
 
     default Instance deserialize(JSONObject serialization) {
-        Instance instance = createBlank();
+        Instance instance = instantiate();
         final Set<Idea> d = getDirectIntensions();
         if (d != null) {
             for (Idea idea : d) {
-                instance.set(idea, idea.deserialize(serialization.getJSONObject(idea.getName())));
+                instance.setLink(idea, idea.deserialize(serialization.getJSONObject(idea.getName())));
             }
         }
-        final Set<Property> p = getDirectProperties();
+        final Set<Property<?>> p = getDirectProperties();
         if (p != null) {
-            for (Property property : p) {
-                instance.set(property, serialization.getInt(property.getName()));
+            for (Property<?> property : p) {
+                instance.set(property, serialization.get(property.getName()));
             }
         }
         return instance;
     }
 
     @NotNull
-    Instance createBlank();
+    Instance instantiate();
 
     @Nullable
-    default Instance createFrom(JSONObject serialization) {
+    default Instance instantiate(JSONObject serialization) {
         if (canBeDeserialized(serialization)) {
             return deserialize(serialization);
         } else {

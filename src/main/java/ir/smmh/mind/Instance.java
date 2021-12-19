@@ -14,26 +14,27 @@ public interface Instance {
     default JSONObject serialize() {
         final JSONObject object = new JSONObject();
         Idea type = getType();
-        object.put("type", type.getName());
-        Set<Property> properties = type.getAllProperties();
+        object.put("~", type.getName());
+        Set<Property<?>> properties = type.getAllProperties();
         if (properties != null) {
-            for (Property property : properties) {
+            for (Property<?> property : properties) {
                 object.put(property.getName(), get(property));
             }
         }
         return object;
     }
 
-    boolean has(Property property);
+    <T> boolean has(Property<T> property);
 
-    void set(Property property, int value);
+    <T> void set(Property<T> property, Object value);
 
-    int get(Property property);
+    @Nullable
+    <T> T get(Property<T> property);
 
     boolean is(Idea idea);
 
-    void set(Idea idea, Instance instance);
+    void setLink(Idea idea, Instance instance);
 
     @Nullable
-    Instance get(Idea idea);
+    Instance getLink(Idea idea);
 }

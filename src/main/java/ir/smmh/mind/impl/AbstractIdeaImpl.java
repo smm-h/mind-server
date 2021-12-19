@@ -8,16 +8,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public class IdeaImpl implements Idea {
+public abstract class AbstractIdeaImpl implements Idea {
     
     private final String name;
-    private final Set<Idea> intensions;
-    private final Set<Property> properties;
+    protected final Set<Idea> intensions;
+    protected final Set<Property<?>> properties;
+    protected final Set<Property<?>> staticProperties;
 
-    public IdeaImpl(String name, Set<Idea> intensions, Set<Property> properties) {
+    public AbstractIdeaImpl(String name, Set<Idea> intensions, Set<Property<?>> properties, Set<Property<?>> staticProperties) {
         this.name = name;
         this.intensions = intensions;
         this.properties = properties;
+        this.staticProperties = staticProperties;
     }
 
     @Override
@@ -31,28 +33,18 @@ public class IdeaImpl implements Idea {
     }
 
     @Override
-    public @Nullable Set<Idea> getDirectExtensions() {
-        return null;
-    }
-
-    @Override
-    public Set<Property> getDirectProperties() {
+    public Set<Property<?>> getDirectProperties() {
         return properties;
     }
 
     @Override
-    public @NotNull Instance createBlank() {
-        return null;
+    public @NotNull Instance instantiate() {
+        return new InstanceImpl(this);
     }
 
     @Override
     public String toString() {
         return name;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        return this == o;
     }
 
     @Override

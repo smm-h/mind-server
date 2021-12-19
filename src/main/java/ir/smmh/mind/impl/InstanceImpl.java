@@ -11,7 +11,7 @@ import java.util.Map;
 public class InstanceImpl implements Instance {
 
     private final @NotNull Idea type;
-    private final Map<Property, Integer> values = new HashMap<>();
+    private final Map<Property<?>, Object> values = new HashMap<>();
     private final Map<Idea, Instance> intensions = new HashMap<>();
 
     public InstanceImpl(@NotNull Idea type) {
@@ -24,18 +24,22 @@ public class InstanceImpl implements Instance {
     }
 
     @Override
-    public boolean has(Property property) {
+    public <T> boolean has(Property<T> property) {
         return values.containsKey(property);
     }
 
     @Override
-    public void set(Property property, int value) {
+    public <T> void set(Property<T> property, Object value) {
         values.put(property, value);
     }
 
     @Override
-    public int get(Property property) {
-        return values.get(property);
+    public <T> T get(Property<T> property) {
+        try {
+            return (T) values.get(property);
+        }catch (ClassCastException e) {
+            return null;
+        }
     }
 
     @Override
@@ -44,12 +48,12 @@ public class InstanceImpl implements Instance {
     }
 
     @Override
-    public void set(Idea idea, Instance instance) {
+    public void setLink(Idea idea, Instance instance) {
         intensions.put(idea, instance);
     }
 
     @Override
-    public Instance get(Idea idea) {
+    public Instance getLink(Idea idea) {
         return intensions.get(idea);
     }
 }
