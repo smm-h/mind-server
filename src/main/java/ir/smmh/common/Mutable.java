@@ -1,4 +1,4 @@
-package ir.smmh.mind;
+package ir.smmh.common;
 
 /**
  * A mutable object is an object that when it is mutated it calls the taint
@@ -6,7 +6,18 @@ package ir.smmh.mind;
  * clean method which calls the overridden onClean method if it is dirty.
  * The onClean method must make it non-dirty again.
  */
-public interface Mutable {
+public interface Mutable<Immutable> {
+
+    /**
+     * Creates and returns a new object of type immutable that is in
+     * every way equal to this object, except it cannot be mutated.
+     * @return An immutable version of this object
+     * @implNote This may cache and return a pre-existing object to
+     * increase performance, if it is not dirty (check using isDirty)
+     * @implNote Please call clean before implementing this to ensure
+     * returning a correct object.
+     */
+    Immutable freeze();
 
     /**
      * @return Whether or not it is dirty.

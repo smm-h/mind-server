@@ -120,4 +120,16 @@ public interface Idea {
             return null;
         }
     }
+
+    interface Mutable extends Idea, ir.smmh.common.Mutable<Immutable> {
+
+        void become(Idea idea);
+
+        void possess(Property<?> property);
+
+        void reify(Property<?> property, String value);
+    }
+
+    interface Immutable extends Idea {
+    }
 }

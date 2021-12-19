@@ -1,17 +1,22 @@
 package ir.smmh.mind.impl;
 
 import ir.smmh.mind.Idea;
-import ir.smmh.mind.MutableIdea;
 import ir.smmh.mind.Property;
 
+import java.util.Collections;
 import java.util.Set;
 
-public class MutableIdeaImpl extends AbstractIdeaImpl implements MutableIdea {
+public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable {
 
     private boolean dirty = true;
 
     public MutableIdeaImpl(String name, Set<Idea> intensions, Set<Property<?>> properties, Set<Property<?>> staticProperties) {
         super(name, intensions, properties, staticProperties);
+    }
+
+    @Override
+    public Immutable freeze() {
+        return new ImmutableIdeaImpl(getName(), Collections.unmodifiableSet(intensions), Collections.unmodifiableSet(properties), Collections.unmodifiableSet(staticProperties));
     }
 
     @Override
