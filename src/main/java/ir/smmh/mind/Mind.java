@@ -4,7 +4,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public interface Mind {
-
+    /**
+     * Finds and returns an idea with a given name.
+     *
+     * @param name The name of the idea
+     * @return The idea in this mind with that name
+     */
     @Nullable
     Idea find(String name);
 
@@ -14,14 +19,14 @@ public interface Mind {
      */
     interface Mutable extends Mind, ir.smmh.common.Mutable<Immutable> {
         /**
-         * Find and return an idea with a given name.
+         * Finds and returns an idea with a given name. It creates the
+         * idea if none with that name exists.
          *
-         * @param name   The name of an idea
-         * @param create Create the idea if none is found with that name
-         * @return The mutable idea in this mind with that name
+         * @param name The name of an idea
+         * @return A mutable idea in this mind with that name
          */
         @NotNull
-        Idea.Mutable imagine(String name, boolean create);
+        Idea.Mutable imagine(String name);
 
         @Override
         @Nullable Idea.Mutable find(String name);
