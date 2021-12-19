@@ -2,6 +2,7 @@ package ir.smmh.mind.impl;
 
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Property;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Set;
@@ -15,7 +16,7 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable {
     }
 
     @Override
-    public Immutable freeze() {
+    public @NotNull Immutable freeze() {
         return new ImmutableIdeaImpl(getName(), Collections.unmodifiableSet(intensions), Collections.unmodifiableSet(properties), Collections.unmodifiableSet(staticProperties));
     }
 

@@ -1,5 +1,7 @@
 package ir.smmh.common;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A mutable object is an object that when it is mutated it calls the taint
  * method which makes it dirty, and when it needs to be clean, it calls the
@@ -17,6 +19,7 @@ public interface Mutable<Immutable> {
      * @implNote Please call clean before implementing this to ensure
      * returning a correct object.
      */
+    @NotNull
     Immutable freeze();
 
     /**
