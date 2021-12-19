@@ -2,15 +2,16 @@ package ir.smmh.mind.impl;
 
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Property;
+import ir.smmh.mind.Value;
 
-public class PropertyImpl<T> implements Property<T> {
+public class PropertyImpl implements Property {
 
     private final Idea origin;
     private final String name;
     private final Idea type;
-    private final T defaultValue;
+    private final Value defaultValue;
 
-    public PropertyImpl(Idea origin, String name, Idea type, T defaultValue) {
+    public PropertyImpl(Idea origin, String name, Idea type, Value defaultValue) {
         this.origin = origin;
         this.name = name;
         this.type = type;
@@ -33,7 +34,7 @@ public class PropertyImpl<T> implements Property<T> {
     }
 
     @Override
-    public T getDefaultValue() {
+    public Value getDefaultValue() {
         return defaultValue;
     }
 

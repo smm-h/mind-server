@@ -1,6 +1,6 @@
 package ir.smmh.mind;
 
-public interface Property<T> {
+public interface Property {
 
     Idea getOrigin();
 
@@ -8,5 +8,5 @@ public interface Property<T> {
 
     Idea getType();
 
-    T getDefaultValue();
+    Value getDefaultValue();
 }

@@ -1,7 +1,10 @@
 package ir.smmh.mind;
 
+import ir.smmh.mind.impl.NumberValue;
+import ir.smmh.mind.impl.StringValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
 public interface Mind {
     /**
@@ -12,6 +15,18 @@ public interface Mind {
      */
     @Nullable
     Idea find(String name);
+
+    default Value valueOf(JSONObject object) {
+        final String kind = object.getString("~");
+        switch (kind) {
+            case "number":
+                return new NumberValue(object.getNumber("value"));
+            case "string":
+                return new StringValue(object.getString("value"));
+            default:
+                return find(kind).deserialize(object);
+        }
+    }
 
     /**
      * A mind is an interface that allows you to imagine coherent ideas,

@@ -3,6 +3,7 @@ package ir.smmh.mind.impl;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Instance;
 import ir.smmh.mind.Property;
+import ir.smmh.mind.Value;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -11,7 +12,7 @@ import java.util.Map;
 public class InstanceImpl implements Instance {
 
     private final @NotNull Idea type;
-    private final Map<Property<?>, Object> values = new HashMap<>();
+    private final Map<Property, Value> values = new HashMap<>();
     private final Map<Idea, Instance> intensions = new HashMap<>();
 
     public InstanceImpl(@NotNull Idea type) {
@@ -24,23 +25,18 @@ public class InstanceImpl implements Instance {
     }
 
     @Override
-    public <T> boolean has(Property<T> property) {
+    public boolean has(Property property) {
         return values.containsKey(property);
     }
 
     @Override
-    public <T> void set(Property<T> property, Object value) {
+    public void set(Property property, Value value) {
         values.put(property, value);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T get(Property<T> property) {
-        try {
-            return (T) values.get(property);
-        } catch (ClassCastException e) {
-            return null;
-        }
+    public Value get(Property property) {
+        return values.get(property);
     }
 
     @Override

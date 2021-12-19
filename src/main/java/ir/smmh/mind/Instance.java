@@ -6,7 +6,7 @@ import org.json.JSONObject;
 
 import java.util.Set;
 
-public interface Instance {
+public interface Instance extends Value {
     @NotNull
     Idea getType();
 
@@ -15,22 +15,20 @@ public interface Instance {
         final JSONObject object = new JSONObject();
         Idea type = getType();
         object.put("~", type.getName());
-        Set<Property<?>> properties = type.getAllProperties();
+        Set<Property> properties = type.getAllProperties();
         if (properties != null) {
-            for (Property<?> property : properties) {
-                var q = get(property);
-                if (q instanceof Instance) q = ((Instance) q).serialize();
-                object.put(property.getName(), q);
+            for (Property property : properties) {
+                object.put(property.getName(), get(property).serialize());
             }
         }
         return object;
     }
 
-    <T> boolean has(Property<T> property);
+    boolean has(Property property);
 
-    <T> void set(Property<T> property, Object value);
+    void set(Property property, Value value);
 
-    @Nullable <T> T get(Property<T> property);
+    @Nullable Value get(Property property);
 
     boolean is(Idea idea);
 

@@ -23,7 +23,7 @@ public class MutableMindImpl extends AbstractMindImpl<Idea.Mutable> implements M
     public @NotNull Idea.Mutable imagine(String name) {
         Idea.Mutable idea = find(name);
         if (idea == null) {
-            idea = new MutableIdeaImpl(name, new HashSet<>(), new HashSet<>(), new HashSet<>());
+            idea = new MutableIdeaImpl(this, name, new HashSet<>(), new HashSet<>(), new HashSet<>());
             ideas.put(name, idea);
             taint();
         }

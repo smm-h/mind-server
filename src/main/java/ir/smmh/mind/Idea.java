@@ -8,6 +8,8 @@ import java.util.Set;
 
 public interface Idea {
 
+    Mind getMind();
+
     String getName();
 
     default boolean is(Idea idea) {
@@ -36,7 +38,7 @@ public interface Idea {
         return false;
     }
 
-    default boolean has(Property<?> property) {
+    default boolean has(Property property) {
         return is(property.getOrigin());
     }
 
@@ -63,18 +65,18 @@ public interface Idea {
     }
 
     @Nullable
-    Set<Property<?>> getDirectProperties();
+    Set<Property> getDirectProperties();
 
     @Nullable
-    default Set<Property<?>> getAllProperties() {
-        final Set<Property<?>> set = getDirectProperties();
+    default Set<Property> getAllProperties() {
+        final Set<Property> set = getDirectProperties();
         if (set == null) {
             return null;
         } else {
             final Set<Idea> allIntensions = getAllIntensions();
             if (allIntensions != null) {
                 for (Idea intension : allIntensions) {
-                    final Set<Property<?>> allProperties = intension.getAllProperties();
+                    final Set<Property> allProperties = intension.getAllProperties();
                     if (allProperties != null) {
                         set.addAll(allProperties);
                     }
@@ -95,9 +97,9 @@ public interface Idea {
                 }
             }
         }
-        final Set<Property<?>> p = getDirectProperties();
+        final Set<Property> p = getDirectProperties();
         if (p != null) {
-            for (Property<?> property : p) {
+            for (Property property : p) {
                 if (!serialization.has(property.getName())) {
                     return false;
                 }
@@ -114,10 +116,10 @@ public interface Idea {
                 instance.setLink(idea, idea.deserialize(serialization.getJSONObject(idea.getName())));
             }
         }
-        final Set<Property<?>> p = getDirectProperties();
+        final Set<Property> p = getDirectProperties();
         if (p != null) {
-            for (Property<?> property : p) {
-                instance.set(property, serialization.get(property.getName()));
+            for (Property property : p) {
+                instance.set(property, getMind().valueOf(serialization.getJSONObject(property.getName())));
             }
         }
         return instance;
@@ -139,9 +141,13 @@ public interface Idea {
 
         void become(Idea idea);
 
-        <T> Property<T> possess(String name, Idea type, T defaultValue);
+        default Property possess(String name, Idea type) {
+            return possess(name, type, null);
+        }
 
-        <T> Property<T> reify(String name, Idea type, T value);
+        Property possess(String name, Idea type, Value defaultValue);
+
+        Property reify(String name, Idea type, Value value);
     }
 
     interface Immutable extends Idea {

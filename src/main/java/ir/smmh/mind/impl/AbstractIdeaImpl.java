@@ -1,28 +1,39 @@
 package ir.smmh.mind.impl;
 
-import ir.smmh.common.ForEach;
+import ir.smmh.common.Comprehension;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Instance;
+import ir.smmh.mind.Mind;
 import ir.smmh.mind.Property;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public abstract class AbstractIdeaImpl implements Idea {
 
-    private final String name;
+    protected final Mind mind;
+    protected final String name;
     protected final Set<Idea> intensions;
-    protected final Map<String, Property<?>> properties;
-    protected final Map<String, Property<?>> staticProperties;
+    protected final Map<String, Property> properties;
+    protected final Map<String, Property> staticProperties;
 
-    private static final ForEach.Mappable<Property<?>, String, Property<?>> mapper = p -> new AbstractMap.SimpleEntry<>(p.getName(), p);
+    private static final Comprehension.Map<Property, String, Property> mapper = p -> new AbstractMap.SimpleEntry<>(p.getName(), p);
 
-    public AbstractIdeaImpl(String name, Set<Idea> intensions, Iterable<Property<?>> properties, Iterable<Property<?>> staticProperties) {
+    public AbstractIdeaImpl(Mind mind, String name, Set<Idea> intensions, Iterable<Property> properties, Iterable<Property> staticProperties) {
+        this.mind = mind;
         this.name = name;
         this.intensions = intensions;
-        this.properties = mapper.toMap(properties);
-        this.staticProperties = mapper.toMap(staticProperties);
+        this.properties = mapper.comprehend(properties);
+        this.staticProperties = mapper.comprehend(staticProperties);
+    }
+
+    @Override
+    public Mind getMind() {
+        return mind;
     }
 
     @Override
@@ -36,7 +47,7 @@ public abstract class AbstractIdeaImpl implements Idea {
     }
 
     @Override
-    public Set<Property<?>> getDirectProperties() {
+    public Set<Property> getDirectProperties() {
         return new HashSet<>(properties.values());
     }
 

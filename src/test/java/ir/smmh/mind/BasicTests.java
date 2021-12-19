@@ -1,7 +1,6 @@
 package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MutableMindImpl;
-import ir.smmh.mind.impl.PropertyImpl;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -10,7 +9,6 @@ public class BasicTests {
 
     private Mind.Mutable m;
     private Idea.Mutable a, b, c, t;
-    private Property<Instance> p;
 
     private void reset() {
         m = new MutableMindImpl();
@@ -18,7 +16,6 @@ public class BasicTests {
         b = m.imagine("b");
         c = m.imagine("c");
         t = m.imagine("t");
-        p = new PropertyImpl<>(a, "p", t, null);
     }
 
     @Test
@@ -39,14 +36,15 @@ public class BasicTests {
     @Test
     public void testPossession() {
         reset();
-        a.possess(p);
+        final Property p = a.possess("p", t);
         assertTrue(a.has(p));
     }
 
     @Test
     public void testTransitivePossession() {
         reset();
-        b.possess(p);
+        a.become(b);
+        final Property p = b.possess("p", t);
         assertTrue(a.has(p));
     }
 }
