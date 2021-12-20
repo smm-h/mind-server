@@ -1,5 +1,7 @@
 package ir.smmh.mind;
 
+import ir.smmh.net.API;
+import ir.smmh.util.Generator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -137,7 +139,7 @@ public interface Idea {
         }
     }
 
-    interface Mutable extends Idea, ir.smmh.util.Mutable<Immutable> {
+    interface Mutable extends Idea, ir.smmh.util.Mutable<Immutable>, API {
 
         void become(Idea idea);
 
@@ -145,7 +147,7 @@ public interface Idea {
             return possess(name, type, null);
         }
 
-        Property possess(String name, Idea type, Value defaultValue);
+        Property possess(String name, Idea type, Generator<Value> defaultValue);
 
         Property reify(String name, Idea type, Value value);
     }

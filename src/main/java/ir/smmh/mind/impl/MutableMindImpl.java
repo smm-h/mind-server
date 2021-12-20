@@ -1,5 +1,6 @@
 package ir.smmh.mind.impl;
 
+import ir.smmh.net.StandardAPI;
 import ir.smmh.util.MutableAdapter;
 import ir.smmh.util.impl.MutableImpl;
 import ir.smmh.mind.Idea;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashSet;
 import java.util.Map;
 
-public class MutableMindImpl extends AbstractMindImpl<Idea.Mutable> implements Mind.Mutable, MutableAdapter<Mind.Immutable> {
+public class MutableMindImpl extends AbstractMindImpl<Idea.Mutable>, StandardAPI implements Mind.Mutable, MutableAdapter<Mind.Immutable> {
 
     public MutableMindImpl() {
         super();

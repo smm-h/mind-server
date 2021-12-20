@@ -2,6 +2,7 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.NumberValue;
 import ir.smmh.mind.impl.StringValue;
+import ir.smmh.net.API;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -24,15 +25,21 @@ public interface Mind {
             case "string":
                 return new StringValue(object.getString("value"));
             default:
-                return find(kind).deserialize(object);
+                final Idea idea = find(kind);
+                if (idea == null) {
+                    System.err.println("no such kind: " + kind);
+                    return null;
+                }
+                return idea.deserialize(object);
         }
     }
 
     /**
-     * A mind is an interface that allows you to imagine coherent ideas,
-     * mutate them, and
+     * A mutable mind is an interface that allows you to imagine mutable
+     * ideas, mutate them, and once they are coherent, freeze it to get
+     * an immutable mind.
      */
-    interface Mutable extends Mind, ir.smmh.util.Mutable<Immutable> {
+    interface Mutable extends Mind, ir.smmh.util.Mutable<Immutable>, API {
         /**
          * Finds and returns an idea with a given name. It creates the
          * idea if none with that name exists.

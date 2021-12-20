@@ -1,5 +1,7 @@
 package ir.smmh.mind;
 
+import ir.smmh.util.Generator;
+
 public interface Property {
 
     Idea getOrigin();
@@ -8,5 +10,5 @@ public interface Property {
 
     Idea getType();
 
-    Value getDefaultValue();
+    Generator<Value> getDefaultValue();
 }

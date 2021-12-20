@@ -7,6 +7,9 @@ import org.jetbrains.annotations.NotNull;
  * method which makes it dirty, and when it needs to be clean, it calls the
  * clean method which calls the overridden onClean method if it is dirty.
  * The onClean method must make it non-dirty again.
+ *
+ * @implNote Anything mutable might also be an API
+ * @see ir.smmh.net.API
  */
 public interface Mutable<Immutable> {
 
