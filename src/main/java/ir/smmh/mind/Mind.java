@@ -2,6 +2,7 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.NumberValue;
 import ir.smmh.mind.impl.StringValue;
+import ir.smmh.util.Generator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -57,4 +58,6 @@ public interface Mind {
         @Override
         @Nullable Idea.Immutable find(String name);
     }
+
+    Generator<Value> makeValueGenerator(@NotNull JSONObject source);
 }

@@ -1,4 +1,4 @@
-package ir.smmh.net;
+package ir.smmh.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -40,22 +40,22 @@ public abstract class StandardAPI<M extends Method> implements API {
     public final int UNEXPECTED_ERROR = defineError(99, "Unexpected error occurred");
 
     @NotNull
-    public String respond(int errorCode) {
+    public JSONObject respond(int errorCode) {
         return respond(errorCode, null, null);
     }
 
     @NotNull
-    public String respond(int errorCode, Throwable thrown) {
+    public JSONObject respond(int errorCode, Throwable thrown) {
         return respond(errorCode, thrown, null);
     }
 
     @NotNull
-    public String respond(JSONObject results) {
+    public JSONObject respond(JSONObject results) {
         return respond(NO_ERROR, null, results);
     }
 
     @NotNull
-    private String respond(int errorCode, Throwable thrown, JSONObject results) {
+    private JSONObject respond(int errorCode, Throwable thrown, JSONObject results) {
         final JSONObject response = new JSONObject();
         response.put("error_code", errorCode);
         response.put("description", errorCodes.get(errorCode));
@@ -66,7 +66,7 @@ public abstract class StandardAPI<M extends Method> implements API {
         if (results != null) {
             response.put("results", results);
         }
-        return response.toString();
+        return response;
     }
 
     @NotNull
@@ -78,17 +78,17 @@ public abstract class StandardAPI<M extends Method> implements API {
             try {
                 methodName = request.getString("method");
             } catch (JSONException e) {
-                return respond(COULD_NOT_PARSE_REQUEST, e);
+                return respond(COULD_NOT_PARSE_REQUEST, e).toString();
             }
             final M method = findMethod(methodName);
             if (method == null) {
-                return respond(METHOD_NOT_FOUND);
+                return respond(METHOD_NOT_FOUND).toString();
             } else {
                 @NotNull final JSONObject parameters;
                 try {
                     parameters = request.getJSONObject("parameters");
                 } catch (JSONException e) {
-                    return respond(COULD_NOT_PARSE_REQUEST, e);
+                    return respond(COULD_NOT_PARSE_REQUEST, e).toString();
                 }
                 if (method instanceof Method.AuthenticatedMethod) {
                     @SuppressWarnings("rawtypes")
@@ -99,22 +99,22 @@ public abstract class StandardAPI<M extends Method> implements API {
                         try {
                             authentication = request.has("authentication") ? request.getJSONObject("authentication") : null;
                         } catch (JSONException e) {
-                            return respond(COULD_NOT_PARSE_REQUEST, e);
+                            return respond(COULD_NOT_PARSE_REQUEST, e).toString();
                         }
                         return me.processAuthenticatedMethod(am, authentication, parameters);
                     } else {
                         System.err.println("You can have authenticated methods only within an authenticated API");
-                        return respond(BUG);
+                        return respond(BUG).toString();
                     }
                 } else if (method instanceof Method.Plain) {
                     return ((Method.Plain) method).process(parameters).toString();
                 } else {
                     System.err.println("You must not extend/implement Method directly");
-                    return respond(BUG);
+                    return respond(BUG).toString();
                 }
             }
         } catch (Throwable throwable) {
-            return respond(UNEXPECTED_ERROR, throwable);
+            return respond(UNEXPECTED_ERROR, throwable).toString();
         }
     }
 }

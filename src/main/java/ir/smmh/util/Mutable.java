@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  * The onClean method must make it non-dirty again.
  *
  * @implNote Anything mutable might also be an API
- * @see ir.smmh.net.API
+ * @see ir.smmh.api.API
  */
 public interface Mutable<Immutable> {
 

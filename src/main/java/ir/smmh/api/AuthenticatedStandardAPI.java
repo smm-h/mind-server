@@ -1,4 +1,4 @@
-package ir.smmh.net;
+package ir.smmh.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +34,6 @@ public abstract class AuthenticatedStandardAPI<M extends Method, A> extends Stan
 
     public abstract A authenticate(JSONObject authentication);
 
-    public final int ACCESS_DENIED = defineError(11, "Access denied");
     public final int AUTHENTICATION_FAILED = defineError(12, "Authentication failed");
 
     @SuppressWarnings("unchecked")
@@ -44,20 +43,20 @@ public abstract class AuthenticatedStandardAPI<M extends Method, A> extends Stan
             method = (Method.AuthenticatedMethod<A>) uncheckedMethod;
         } catch (ClassCastException e) {
             System.err.println("Failed to cast an unchecked authenticated method");
-            return respond(BUG);
+            return respond(BUG).toString();
         }
         @Nullable final A authenticated = authenticate(authentication);
         if (method instanceof Method.AuthenticationRequired) {
             final Method.AuthenticationRequired<A> required = (Method.AuthenticationRequired<A>) method;
             if (authenticated == null)
-                return respond(AUTHENTICATION_FAILED);
+                return respond(AUTHENTICATION_FAILED).toString();
             return required.process(authenticated, parameters).toString();
         } else if (method instanceof Method.AuthenticationOptional) {
             final Method.AuthenticationOptional<A> optional = (Method.AuthenticationOptional<A>) method;
             return optional.process(authenticated, parameters).toString();
         } else {
             System.err.println("You must not extend/implement Method.Authenticated directly");
-            return respond(BUG);
+            return respond(BUG).toString();
         }
     }
 }

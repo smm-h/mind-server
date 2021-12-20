@@ -8,7 +8,6 @@ import ir.smmh.util.Generator;
 import ir.smmh.util.MutableAdapter;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
-import org.json.JSONObject;
 
 import java.util.Collections;
 import java.util.Set;
@@ -24,20 +23,6 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, M
         if (!intensions.contains(idea)) {
             intensions.add(idea);
             taint();
-        }
-    }
-
-    private class G implements Generator<Value> {
-        @NotNull
-        private final JSONObject source;
-
-        private G(@NotNull JSONObject source) {
-            this.source = source;
-        }
-
-        @Override
-        public Value generate() {
-            return mind.valueOf(source);
         }
     }
 
