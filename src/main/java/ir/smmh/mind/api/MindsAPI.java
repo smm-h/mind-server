@@ -35,7 +35,7 @@ public class MindsAPI extends StandardAPI {
         });
 
         defineMethod("imagine", (Method) (p) -> {
-            getMind(p).imagine(p.getString("idea"));
+            getMind(p).imagine(p.getString("name"));
             return respond(NO_ERROR);
         });
 
@@ -67,5 +67,17 @@ public class MindsAPI extends StandardAPI {
             }
             return respond(NO_ERROR);
         });
+
+        defineMethod("is", (Method) (p) -> {
+            JSONObject r = new JSONObject();
+            r.put("is", getIdea(p).is(getIdea(p, "intension")));
+            return respond(r);
+        });
+
+//        defineMethod("has", (Method) (p) -> {
+//            JSONObject r = new JSONObject();
+//            r.put("has", getIdea(p).has(getIdea(p, "intension")));
+//            return respond(r);
+//        });
     }
 }
