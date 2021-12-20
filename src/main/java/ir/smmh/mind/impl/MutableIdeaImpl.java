@@ -4,7 +4,6 @@ import ir.smmh.mind.Idea;
 import ir.smmh.mind.Mind;
 import ir.smmh.mind.Property;
 import ir.smmh.mind.Value;
-import ir.smmh.net.StandardAPI;
 import ir.smmh.util.Generator;
 import ir.smmh.util.MutableAdapter;
 import ir.smmh.util.impl.MutableImpl;
@@ -14,28 +13,10 @@ import org.json.JSONObject;
 import java.util.Collections;
 import java.util.Set;
 
-public class MutableIdeaImpl extends AbstractIdeaImpl, StandardAPI implements Idea.Mutable, MutableAdapter<Idea.Immutable> {
+public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, MutableAdapter<Idea.Immutable> {
 
     public MutableIdeaImpl(Mind mind, String name, Set<Idea> intensions, Iterable<Property> properties, Iterable<Property> staticProperties) {
         super(mind, name, intensions, properties, staticProperties);
-    }
-
-    @Override
-    public @NotNull JSONObject processJSON(@NotNull JSONObject request) {
-        final String method = request.getString("method");
-        switch (method) {
-            case "become":
-                become(mind.find(request.getString("idea")));
-                break;
-            case "possess":
-                possess(request.getString("name"), mind.find(request.getString("type")), new G(request.getJSONObject("defaultValue")));
-                break;
-            case "reify":
-                reify(request.getString("name"), mind.find(request.getString("type")), mind.valueOf(request.getJSONObject("value")));
-                break;
-            default:
-                System.err.println("no such method: " + method);
-        }
     }
 
     @Override

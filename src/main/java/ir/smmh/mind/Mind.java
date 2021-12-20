@@ -2,7 +2,6 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.NumberValue;
 import ir.smmh.mind.impl.StringValue;
-import ir.smmh.net.API;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -39,7 +38,7 @@ public interface Mind {
      * ideas, mutate them, and once they are coherent, freeze it to get
      * an immutable mind.
      */
-    interface Mutable extends Mind, ir.smmh.util.Mutable<Immutable>, API {
+    interface Mutable extends Mind, ir.smmh.util.Mutable<Immutable> {
         /**
          * Finds and returns an idea with a given name. It creates the
          * idea if none with that name exists.

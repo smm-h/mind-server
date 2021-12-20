@@ -1,6 +1,8 @@
 package ir.smmh.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public interface Comprehension<I, O> {
     O forEach(I i);

@@ -1,6 +1,5 @@
 package ir.smmh.mind;
 
-import ir.smmh.net.API;
 import ir.smmh.util.Generator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -139,7 +138,7 @@ public interface Idea {
         }
     }
 
-    interface Mutable extends Idea, ir.smmh.util.Mutable<Immutable>, API {
+    interface Mutable extends Idea, ir.smmh.util.Mutable<Immutable> {
 
         void become(Idea idea);
 

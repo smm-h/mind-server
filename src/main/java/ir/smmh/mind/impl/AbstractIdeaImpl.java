@@ -1,10 +1,10 @@
 package ir.smmh.mind.impl;
 
-import ir.smmh.util.Comprehension;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Instance;
 import ir.smmh.mind.Mind;
 import ir.smmh.mind.Property;
+import ir.smmh.util.Comprehension;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
