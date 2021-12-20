@@ -1,27 +1,26 @@
-package ir.smmh.mind;
+package ir.smmh.mind.api;
 
-import ir.smmh.mind.impl.MutableMindImpl;
+import ir.smmh.mind.Property;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class BasicTests {
+class BasicTests {
 
-    private Mind.Mutable m;
-    private Idea.Mutable a, b, c, t;
+    MindsAPI api;
 
     @BeforeEach
     void setUp() {
-        m = new MutableMindImpl();
-        a = m.imagine("a");
-        b = m.imagine("b");
-        c = m.imagine("c");
-        t = m.imagine("t");
+        api = new MindsAPI();
     }
 
     @Test
     public void testIntension() {
+        final JSONObject request = new JSONObject();
+        request.put("method", )
+        final JSONObject response = api.process(request);
         a.become(b);
         assertTrue(a.is(b));
     }

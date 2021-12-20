@@ -14,16 +14,19 @@ import java.util.Map;
  * 'method', 'parameters', and optionally 'authentication' keys, and whose
  * responses are JSON maps that contain the 'error_code', 'description', and
  * optionally 'results' keys.
- *
- * @param <M> An API-specific method type
  */
-public abstract class StandardAPI<M extends Method> implements API {
+public abstract class StandardAPI implements API {
 
-    @Nullable
-    public abstract M findMethod(@NotNull String methodName);
+    private final Map<String, Method> methods = new HashMap<>();
+    public void defineMethod(@NotNull String name, @NotNull Method method) {
+        if (methods.containsKey(name)) {
+            throw new IllegalArgumentException("method name already exists: " + name);
+        } else {
+            methods.put(name, method);
+        }
+    }
 
     private final Map<Integer, String> errorCodes = new HashMap<>();
-
     public int defineError(int code, @NotNull String description) {
         if (errorCodes.containsKey(code)) {
             throw new IllegalArgumentException("error code already exists: " + code);
@@ -70,51 +73,54 @@ public abstract class StandardAPI<M extends Method> implements API {
     }
 
     @NotNull
-//    @SuppressWarnings("unchecked")
-    public String process(@NotNull String requestString) {
+    public String process(@NotNull String request) {
+        return process(new JSONObject(new JSONTokener(request))).toString();
+    }
+
+    @NotNull
+    public JSONObject process(final @NotNull JSONObject request) {
         try {
-            final JSONObject request = new JSONObject(new JSONTokener(requestString));
             final String methodName;
             try {
                 methodName = request.getString("method");
             } catch (JSONException e) {
-                return respond(COULD_NOT_PARSE_REQUEST, e).toString();
+                return respond(COULD_NOT_PARSE_REQUEST, e);
             }
-            final M method = findMethod(methodName);
+            final Method method = methods.get(methodName);
             if (method == null) {
-                return respond(METHOD_NOT_FOUND).toString();
+                return respond(METHOD_NOT_FOUND);
             } else {
                 @NotNull final JSONObject parameters;
                 try {
                     parameters = request.getJSONObject("parameters");
                 } catch (JSONException e) {
-                    return respond(COULD_NOT_PARSE_REQUEST, e).toString();
+                    return respond(COULD_NOT_PARSE_REQUEST, e);
                 }
                 if (method instanceof Method.AuthenticatedMethod) {
                     @SuppressWarnings("rawtypes")
                     Method.AuthenticatedMethod am = (Method.AuthenticatedMethod) method;
                     if (this instanceof AuthenticatedStandardAPI) {
-                        AuthenticatedStandardAPI<M, ?> me = ((AuthenticatedStandardAPI<M, ?>) this);
+                        AuthenticatedStandardAPI<?> me = ((AuthenticatedStandardAPI<?>) this);
                         @Nullable final JSONObject authentication;
                         try {
                             authentication = request.has("authentication") ? request.getJSONObject("authentication") : null;
                         } catch (JSONException e) {
-                            return respond(COULD_NOT_PARSE_REQUEST, e).toString();
+                            return respond(COULD_NOT_PARSE_REQUEST, e);
                         }
                         return me.processAuthenticatedMethod(am, authentication, parameters);
                     } else {
                         System.err.println("You can have authenticated methods only within an authenticated API");
-                        return respond(BUG).toString();
+                        return respond(BUG);
                     }
                 } else if (method instanceof Method.Plain) {
-                    return ((Method.Plain) method).process(parameters).toString();
+                    return ((Method.Plain) method).process(parameters);
                 } else {
                     System.err.println("You must not extend/implement Method directly");
-                    return respond(BUG).toString();
+                    return respond(BUG);
                 }
             }
         } catch (Throwable throwable) {
-            return respond(UNEXPECTED_ERROR, throwable).toString();
+            return respond(UNEXPECTED_ERROR, throwable);
         }
     }
 }
