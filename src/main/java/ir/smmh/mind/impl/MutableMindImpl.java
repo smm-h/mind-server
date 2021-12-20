@@ -1,7 +1,7 @@
 package ir.smmh.mind.impl;
 
-import ir.smmh.common.MutableAdapter;
-import ir.smmh.common.impl.MutableImpl;
+import ir.smmh.util.MutableAdapter;
+import ir.smmh.util.impl.MutableImpl;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Mind;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +30,7 @@ public class MutableMindImpl extends AbstractMindImpl<Idea.Mutable> implements M
         return idea;
     }
 
-    private final ir.smmh.common.Mutable<Immutable> mutableAdapter = new MutableImpl<>() {
+    private final ir.smmh.util.Mutable<Immutable> mutableAdapter = new MutableImpl<>() {
         @Override
         public @NotNull Immutable freeze() {
             // TODO freezing a mind
@@ -39,7 +39,7 @@ public class MutableMindImpl extends AbstractMindImpl<Idea.Mutable> implements M
     };
 
     @Override
-    public ir.smmh.common.Mutable<Immutable> getMutableAdapter() {
+    public ir.smmh.util.Mutable<Immutable> getMutableAdapter() {
         return mutableAdapter;
     }
 }

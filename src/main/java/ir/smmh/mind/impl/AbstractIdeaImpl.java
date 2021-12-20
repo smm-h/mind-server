@@ -1,6 +1,6 @@
 package ir.smmh.mind.impl;
 
-import ir.smmh.common.Comprehension;
+import ir.smmh.util.Comprehension;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Instance;
 import ir.smmh.mind.Mind;

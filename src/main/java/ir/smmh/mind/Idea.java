@@ -137,7 +137,7 @@ public interface Idea {
         }
     }
 
-    interface Mutable extends Idea, ir.smmh.common.Mutable<Immutable> {
+    interface Mutable extends Idea, ir.smmh.util.Mutable<Immutable> {
 
         void become(Idea idea);
 

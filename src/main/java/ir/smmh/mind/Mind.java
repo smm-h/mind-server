@@ -32,7 +32,7 @@ public interface Mind {
      * A mind is an interface that allows you to imagine coherent ideas,
      * mutate them, and
      */
-    interface Mutable extends Mind, ir.smmh.common.Mutable<Immutable> {
+    interface Mutable extends Mind, ir.smmh.util.Mutable<Immutable> {
         /**
          * Finds and returns an idea with a given name. It creates the
          * idea if none with that name exists.

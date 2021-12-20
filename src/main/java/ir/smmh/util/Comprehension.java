@@ -1,4 +1,4 @@
-package ir.smmh.common;
+package ir.smmh.util;
 
 import java.util.*;
 

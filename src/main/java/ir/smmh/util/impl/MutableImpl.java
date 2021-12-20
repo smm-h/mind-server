@@ -1,6 +1,6 @@
-package ir.smmh.common.impl;
+package ir.smmh.util.impl;
 
-import ir.smmh.common.Mutable;
+import ir.smmh.util.Mutable;
 
 public abstract class MutableImpl<T> implements Mutable<T> {
 

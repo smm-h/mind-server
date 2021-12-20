@@ -1,4 +1,4 @@
-package ir.smmh.common;
+package ir.smmh.util;
 
 import org.jetbrains.annotations.NotNull;
 

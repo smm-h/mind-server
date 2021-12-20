@@ -1,7 +1,7 @@
 package ir.smmh.mind.impl;
 
-import ir.smmh.common.MutableAdapter;
-import ir.smmh.common.impl.MutableImpl;
+import ir.smmh.util.MutableAdapter;
+import ir.smmh.util.impl.MutableImpl;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Mind;
 import ir.smmh.mind.Property;
@@ -44,7 +44,7 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, M
         return staticProperties.get(name);
     }
 
-    private final ir.smmh.common.Mutable<Immutable> mutableAdapter = new MutableImpl<>() {
+    private final ir.smmh.util.Mutable<Immutable> mutableAdapter = new MutableImpl<>() {
         @Override
         public @NotNull Immutable freeze() {
             return new ImmutableIdeaImpl(mind, name, Collections.unmodifiableSet(intensions), properties.values(), staticProperties.values());
@@ -52,7 +52,7 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, M
     };
 
     @Override
-    public ir.smmh.common.Mutable<Immutable> getMutableAdapter() {
+    public ir.smmh.util.Mutable<Immutable> getMutableAdapter() {
         return mutableAdapter;
     }
 }
