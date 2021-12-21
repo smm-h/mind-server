@@ -35,6 +35,12 @@ public class MindsAPI extends StandardAPI {
             return respond(NO_ERROR);
         });
 
+        defineMethod("idea", (Method) (p) -> {
+            JSONObject r = new JSONObject();
+            r.put("code", getIdea(p).encode());
+            return respond(r);
+        });
+
         defineMethod("imagine", (Method) (p) -> {
             getMind(p).imagine(p.getString("name"));
             return respond(NO_ERROR);

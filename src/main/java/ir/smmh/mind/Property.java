@@ -11,4 +11,8 @@ public interface Property {
     Idea getType();
 
     Generator<Value> getDefaultValue();
+
+    default String encode() {
+        return "has " + getName() + " as " + getType().getName();
+    }
 }

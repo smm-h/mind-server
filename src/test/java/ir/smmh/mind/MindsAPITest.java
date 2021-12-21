@@ -18,6 +18,7 @@ class MindsAPITest {
         imagine("a");
         imagine("b");
         imagine("c");
+        imagine("d");
         imagine("t");
     }
 
@@ -49,6 +50,16 @@ class MindsAPITest {
         process("become", parameters);
     }
 
+    void possess(String idea, String name, String type, String defaultValue) {
+        final JSONObject parameters = new JSONObject();
+        parameters.put("mind", mindName);
+        parameters.put("idea", idea);
+        parameters.put("name", name);
+        parameters.put("type", type);
+        parameters.put("defaultValue", defaultValue);
+        process("possess", parameters);
+    }
+
     boolean is(String idea, String intension) {
         final JSONObject parameters = new JSONObject();
         parameters.put("mind", mindName);
@@ -65,7 +76,15 @@ class MindsAPITest {
         parameters.put("idea", idea);
         parameters.put("name", name);
         final JSONObject response = process("has", parameters);
+        System.out.println(response);
         return response.getJSONObject("results").getBoolean("has");
+    }
+
+    String idea(String idea) {
+        final JSONObject parameters = new JSONObject();
+        parameters.put("mind", mindName);
+        parameters.put("idea", idea);
+        return process("idea", parameters).getJSONObject("results").getString("code");
     }
 
     @Test
@@ -76,21 +95,26 @@ class MindsAPITest {
 
     @Test
     public void testTransitivity() {
-        become("a", "b");
+        become("c", "d");
         become("b", "c");
+        become("a", "b");
         assertTrue(is("a", "c"));
+        assertTrue(is("b", "d"));
+        assertTrue(is("a", "d"));
+        System.out.println(idea("a"));
     }
 
-//    @Test
-//    public void testPossession() {
-//        final Property p = a.possess("p", t);
-//        assertTrue(a.has(p));
-//    }
-//
-//    @Test
-//    public void testTransitivePossession() {
-//become("a", "b");
-//        final Property p = b.possess("p", t);
-//        assertTrue(a.has(p));
-//    }
+    @Test
+    public void testPossession() {
+        possess("a", "p", "t", "null");
+        System.out.println(idea("a"));
+        assertTrue(has("a", "p"));
+    }
+
+    @Test
+    public void testTransitivePossession() {
+        become("a", "b");
+        possess("b", "p", "t", "null");
+        assertTrue(has("a", "p"));
+    }
 }

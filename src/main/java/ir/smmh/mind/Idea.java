@@ -2,6 +2,7 @@ package ir.smmh.mind;
 
 import ir.smmh.util.Comprehension;
 import ir.smmh.util.Generator;
+import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -169,5 +170,31 @@ public interface Idea {
     }
 
     interface Immutable extends Idea {
+    }
+
+    default String encode() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("is ").append(getName());
+        final Set<Idea> d = getDirectIntensions();
+        final Set<Property> p = getDirectProperties();
+        if ((d == null || d.isEmpty()) && (p == null || p.isEmpty())) {
+            builder.append(" {}");
+        } else {
+            builder.append(" {\n");
+            if (d != null) {
+                for (Idea idea : d) {
+                    builder.append(StringUtil.tabIn(idea.encode()));
+                    builder.append('\n');
+                }
+            }
+            if (p != null) {
+                for (Property property : p) {
+                    builder.append(StringUtil.tabIn(property.encode()));
+                    builder.append('\n');
+                }
+            }
+            builder.append('}');
+        }
+        return builder.toString();
     }
 }
