@@ -74,7 +74,10 @@ public abstract class StandardAPI implements API {
 
     @NotNull
     public String process(@NotNull String request) {
-        return process(new JSONObject(new JSONTokener(request))).toString();
+        System.out.println("\n>>> " + request);
+        final JSONObject response = process(new JSONObject(new JSONTokener(request)));
+        (response.getInt("error_code") == 0 ? System.out : System.err).println("=== " + response);
+        return response.toString();
     }
 
     @NotNull

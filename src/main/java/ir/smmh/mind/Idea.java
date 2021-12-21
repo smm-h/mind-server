@@ -174,7 +174,7 @@ public interface Idea {
 
     default String encode() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("is ").append(getName());
+        builder.append(getName());
         final Set<Idea> d = getDirectIntensions();
         final Set<Property> p = getDirectProperties();
         if ((d == null || d.isEmpty()) && (p == null || p.isEmpty())) {
@@ -183,7 +183,7 @@ public interface Idea {
             builder.append(" {\n");
             if (d != null) {
                 for (Idea idea : d) {
-                    builder.append(StringUtil.tabIn(idea.encode()));
+                    builder.append(StringUtil.tabIn("is " + idea.encode()));
                     builder.append('\n');
                 }
             }

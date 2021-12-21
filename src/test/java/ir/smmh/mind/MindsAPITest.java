@@ -26,7 +26,12 @@ class MindsAPITest {
         final JSONObject request = new JSONObject();
         request.put("method", method);
         request.put("parameters", parameters);
-        return api.process(request);
+        System.out.print("\n>>> ");
+        System.out.println(request);
+        final JSONObject response = api.process(request);
+        System.out.print("=== ");
+        System.out.println(response);
+        return response;
     }
     
     void mind() {
@@ -50,7 +55,7 @@ class MindsAPITest {
         process("become", parameters);
     }
 
-    void possess(String idea, String name, String type, String defaultValue) {
+    void possess(String idea, String name, String type, JSONObject defaultValue) {
         final JSONObject parameters = new JSONObject();
         parameters.put("mind", mindName);
         parameters.put("idea", idea);
@@ -65,9 +70,7 @@ class MindsAPITest {
         parameters.put("mind", mindName);
         parameters.put("idea", idea);
         parameters.put("intension", intension);
-        final JSONObject response = process("is", parameters);
-        System.out.println(response);
-        return response.getJSONObject("results").getBoolean("is");
+        return process("is", parameters).getJSONObject("results").getBoolean("is");
     }
 
     boolean has(String idea, String name) {
@@ -75,9 +78,7 @@ class MindsAPITest {
         parameters.put("mind", mindName);
         parameters.put("idea", idea);
         parameters.put("name", name);
-        final JSONObject response = process("has", parameters);
-        System.out.println(response);
-        return response.getJSONObject("results").getBoolean("has");
+        return process("has", parameters).getJSONObject("results").getBoolean("has");
     }
 
     String idea(String idea) {
@@ -101,20 +102,18 @@ class MindsAPITest {
         assertTrue(is("a", "c"));
         assertTrue(is("b", "d"));
         assertTrue(is("a", "d"));
-        System.out.println(idea("a"));
     }
 
     @Test
     public void testPossession() {
-        possess("a", "p", "t", "null");
-        System.out.println(idea("a"));
+        possess("a", "p", "t", new JSONObject());
         assertTrue(has("a", "p"));
     }
 
     @Test
     public void testTransitivePossession() {
         become("a", "b");
-        possess("b", "p", "t", "null");
+        possess("b", "p", "t", new JSONObject());
         assertTrue(has("a", "p"));
     }
 }

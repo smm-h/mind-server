@@ -53,6 +53,7 @@ public class MindsAPI extends StandardAPI {
 
         defineMethod("possess", (Method) (p) -> {
             getIdea(p).possess(p.getString("name"), getIdea(p, "type"), getMind(p).makeValueGenerator(p.getJSONObject("defaultValue")));
+            int a = 5;
             return respond(NO_ERROR);
         });
 
