@@ -1,5 +1,6 @@
 package ir.smmh.mind;
 
+import ir.smmh.util.Comprehension;
 import ir.smmh.util.Generator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +14,11 @@ public interface Idea {
 
     String getName();
 
-    default boolean is(Idea idea) {
+    default boolean is(@Nullable Idea idea) {
+
+        // If idea is null, I am not it
+        if (idea == null)
+            return false;
 
         // If idea is me, I am it
         if (idea == this)
@@ -39,8 +44,20 @@ public interface Idea {
         return false;
     }
 
-    default boolean has(Property property) {
-        return is(property.getOrigin());
+    default boolean has(@Nullable Property property) {
+        return property != null && is(property.getOrigin());
+    }
+
+    default boolean is(@NotNull String idea) {
+        return is(getMind().find(idea));
+    }
+
+    default boolean has(@NotNull String property) {
+        for (Idea idea : ((Comprehension.Set<Property, Idea>) Property::getOrigin).comprehend(getMind().findProperties(property))) {
+            if (is(idea))
+                return true;
+        }
+        return false;
     }
 
     @Nullable

@@ -29,7 +29,9 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, M
     @Override
     public Property possess(String name, Idea type, Generator<Value> defaultValue) {
         if (!properties.containsKey(name)) {
-            properties.put(name, new PropertyImpl(this, name, type, defaultValue));
+            Property property = new PropertyImpl(this, name, type, defaultValue);
+            ((MutableMindImpl) mind).addProperty(property);
+            properties.put(name, property);
             taint();
         }
         return properties.get(name);
@@ -38,8 +40,9 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, M
     @Override
     public Property reify(String name, Idea type, Value value) {
         if (!staticProperties.containsKey(name)) {
-//            properties.remove(name);
-            staticProperties.put(name, new PropertyImpl(this, name, type, () -> value));
+            Property property = new PropertyImpl(this, name, type, () -> value);
+            ((MutableMindImpl) mind).addProperty(property);
+            staticProperties.put(name, property);
             taint();
         }
         return staticProperties.get(name);

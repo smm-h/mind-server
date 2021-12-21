@@ -1,4 +1,4 @@
-package ir.smmh.mind.api;
+package ir.smmh.mind;
 
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class BasicTests {
+class MindsAPITest {
 
     MindsAPI api;
     final String mindName = "test";
@@ -59,14 +59,14 @@ class BasicTests {
         return response.getJSONObject("results").getBoolean("is");
     }
 
-//    boolean has(String idea, String name) {
-//        final JSONObject parameters = new JSONObject();
-//        parameters.put("mind", mindName);
-//        parameters.put("idea", idea);
-//        parameters.put("name", name);
-//        final JSONObject response = process("has", parameters);
-//        return response.getJSONObject("results").getBoolean("has");
-//    }
+    boolean has(String idea, String name) {
+        final JSONObject parameters = new JSONObject();
+        parameters.put("mind", mindName);
+        parameters.put("idea", idea);
+        parameters.put("name", name);
+        final JSONObject response = process("has", parameters);
+        return response.getJSONObject("results").getBoolean("has");
+    }
 
     @Test
     public void testIntension() {

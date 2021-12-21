@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BasicTests {
+public class MindTest {
 
     private Mind.Mutable m;
     private Idea.Mutable a, b, c, t;

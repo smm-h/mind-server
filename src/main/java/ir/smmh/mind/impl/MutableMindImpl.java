@@ -2,6 +2,7 @@ package ir.smmh.mind.impl;
 
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Mind;
+import ir.smmh.mind.Property;
 import ir.smmh.util.MutableAdapter;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,14 @@ public class MutableMindImpl extends AbstractMindImpl<Idea.Mutable> implements M
             taint();
         }
         return idea;
+    }
+
+    void addProperty(Property property) {
+        final String name = property.getName();
+        if (!properties.containsKey(name)) {
+            properties.put(name, new HashSet<>());
+        }
+        properties.get(name).add(property);
     }
 
     private final ir.smmh.util.Mutable<Immutable> mutableAdapter = new MutableImpl<>() {

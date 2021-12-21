@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
+import java.util.Set;
+
 public interface Mind {
     /**
      * Finds and returns an idea with a given name.
@@ -16,6 +18,14 @@ public interface Mind {
      */
     @Nullable
     Idea find(String name);
+
+    /**
+     * Returns a set of all the properties in this mind with a given name
+     * @param name The name of a property
+     * @return A set of properties with that name
+     */
+    @Nullable
+    Set<Property> findProperties(String name);
 
     default Value valueOf(JSONObject object) {
         final String kind = object.getString("~");

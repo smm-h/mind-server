@@ -1,8 +1,6 @@
-package ir.smmh.mind.api;
+package ir.smmh.mind;
 
 import ir.smmh.api.StandardAPI;
-import ir.smmh.mind.Idea;
-import ir.smmh.mind.Mind;
 import ir.smmh.mind.impl.MutableMindImpl;
 import org.json.JSONObject;
 
@@ -10,6 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MindsAPI extends StandardAPI {
+
+    public interface Method extends ir.smmh.api.Method.Plain {
+    }
 
     private final Map<String, Mind.Mutable> minds = new HashMap<>();
 
@@ -74,10 +75,10 @@ public class MindsAPI extends StandardAPI {
             return respond(r);
         });
 
-//        defineMethod("has", (Method) (p) -> {
-//            JSONObject r = new JSONObject();
-//            r.put("has", getIdea(p).has(getIdea(p, "intension")));
-//            return respond(r);
-//        });
+        defineMethod("has", (Method) (p) -> {
+            JSONObject r = new JSONObject();
+            r.put("has", getIdea(p).has(p.getString("name")));
+            return respond(r);
+        });
     }
 }
