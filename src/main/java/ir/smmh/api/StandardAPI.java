@@ -18,6 +18,13 @@ import java.util.Map;
 public abstract class StandardAPI implements API {
 
     private final Map<String, Method> methods = new HashMap<>();
+    private final Map<Integer, String> errorCodes = new HashMap<>();
+    public final int BUG = defineError(-1, "Internal bug encountered");
+    public final int NO_ERROR = defineError(0, "Successful");
+    public final int COULD_NOT_PARSE_REQUEST = defineError(1, "Missing keys or bad values in request");
+    public final int METHOD_NOT_FOUND = defineError(2, "Method not found");
+    public final int UNEXPECTED_ERROR = defineError(99, "Unexpected error occurred");
+
     public void defineMethod(@NotNull String name, @NotNull Method method) {
         if (methods.containsKey(name)) {
             throw new IllegalArgumentException("method name already exists: " + name);
@@ -26,7 +33,7 @@ public abstract class StandardAPI implements API {
         }
     }
 
-    private final Map<Integer, String> errorCodes = new HashMap<>();
+    // TODO defineError should not take an int
     public int defineError(int code, @NotNull String description) {
         if (errorCodes.containsKey(code)) {
             throw new IllegalArgumentException("error code already exists: " + code);
@@ -35,12 +42,6 @@ public abstract class StandardAPI implements API {
         }
         return code;
     }
-
-    public final int BUG = defineError(-1, "Internal bug encountered");
-    public final int NO_ERROR = defineError(0, "Successful");
-    public final int COULD_NOT_PARSE_REQUEST = defineError(1, "Missing keys or bad values in request");
-    public final int METHOD_NOT_FOUND = defineError(2, "Method not found");
-    public final int UNEXPECTED_ERROR = defineError(99, "Unexpected error occurred");
 
     @NotNull
     public JSONObject respond(int errorCode) {
@@ -72,16 +73,26 @@ public abstract class StandardAPI implements API {
         return response;
     }
 
-    @NotNull
-    public String process(@NotNull String request) {
-        System.out.println("\n>>> " + request);
-        final JSONObject response = process(new JSONObject(new JSONTokener(request)));
-        (response.getInt("error_code") == 0 ? System.out : System.err).println("=== " + response);
-        return response.toString();
+    @Override
+    public @NotNull String process(@NotNull String request) {
+        return processJSON(request).toString();
     }
 
     @NotNull
-    public JSONObject process(final @NotNull JSONObject request) {
+    public JSONObject processJSON(@NotNull String request) {
+        System.out.println("\n>>> " + request);
+        JSONObject response;
+        try {
+            response = processJSON(new JSONObject(new JSONTokener(request)));
+        } catch (JSONException e) {
+            response = respond(COULD_NOT_PARSE_REQUEST, e);
+        }
+        (response.getInt("error_code") == 0 ? System.out : System.err).println("=== " + response);
+        return response;
+    }
+
+    @NotNull
+    private JSONObject processJSON(final @NotNull JSONObject request) {
         try {
             final String methodName;
             try {

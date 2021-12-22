@@ -4,16 +4,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * A standard API is an API whose requests are JSON maps that contain the
  * 'method', 'parameters', and optionally 'authentication' keys, and whose
  * responses are JSON maps that contain the 'error_code', 'description', and
  * optionally 'results' keys.
  *
- * @param <M> An API-specific method type
  * @param <A> An API-specific authenticated type, usually a log-in session
  */
 public abstract class AuthenticatedStandardAPI<A> extends StandardAPI {

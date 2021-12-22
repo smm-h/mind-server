@@ -26,14 +26,9 @@ class MindsAPITest {
         final JSONObject request = new JSONObject();
         request.put("method", method);
         request.put("parameters", parameters);
-        System.out.print("\n>>> ");
-        System.out.println(request);
-        final JSONObject response = api.process(request);
-        System.out.print("=== ");
-        System.out.println(response);
-        return response;
+        return api.processJSON(request.toString());
     }
-    
+
     void mind() {
         final JSONObject parameters = new JSONObject();
         parameters.put("name", mindName);

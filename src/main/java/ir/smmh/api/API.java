@@ -3,7 +3,7 @@ package ir.smmh.api;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Any object that can process a given non-null string called a request in some
+ * Any object that can processJSON a given non-null string called a request in some
  * arbitrary way and return a non-null string as a response, without throwing any
  * errors or exceptions, is an API.
  */

@@ -21,6 +21,7 @@ public interface Mind {
 
     /**
      * Returns a set of all the properties in this mind with a given name
+     *
      * @param name The name of a property
      * @return A set of properties with that name
      */
