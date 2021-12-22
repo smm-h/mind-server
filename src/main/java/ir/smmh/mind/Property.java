@@ -1,6 +1,6 @@
 package ir.smmh.mind;
 
-import ir.smmh.util.Generator;
+import java.util.function.Supplier;
 
 public interface Property {
 
@@ -10,7 +10,7 @@ public interface Property {
 
     Idea getType();
 
-    Generator<Value> getDefaultValue();
+    Supplier<Value> getDefaultValue();
 
     default String encode() {
         return "has " + getName() + " as " + getType().getName();

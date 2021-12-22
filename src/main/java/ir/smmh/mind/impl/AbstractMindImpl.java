@@ -4,7 +4,6 @@ import ir.smmh.mind.Idea;
 import ir.smmh.mind.Mind;
 import ir.smmh.mind.Property;
 import ir.smmh.mind.Value;
-import ir.smmh.util.Generator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -13,6 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public abstract class AbstractMindImpl<I extends Idea> implements Mind {
 
@@ -52,7 +52,7 @@ public abstract class AbstractMindImpl<I extends Idea> implements Mind {
     }
 
     @Override
-    public Generator<Value> makeValueGenerator(@NotNull JSONObject source) {
+    public Supplier<Value> makeValueGenerator(@NotNull JSONObject source) {
         return () -> valueOf(source);
     }
 }

@@ -2,12 +2,12 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.NumberValue;
 import ir.smmh.mind.impl.StringValue;
-import ir.smmh.util.Generator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 public interface Mind {
     /**
@@ -70,5 +70,5 @@ public interface Mind {
         @Nullable Idea.Immutable find(String name);
     }
 
-    Generator<Value> makeValueGenerator(@NotNull JSONObject source);
+    Supplier<Value> makeValueGenerator(@NotNull JSONObject source);
 }

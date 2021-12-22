@@ -4,13 +4,13 @@ import ir.smmh.mind.Idea;
 import ir.smmh.mind.Mind;
 import ir.smmh.mind.Property;
 import ir.smmh.mind.Value;
-import ir.smmh.util.Generator;
 import ir.smmh.util.MutableAdapter;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, MutableAdapter<Idea.Immutable> {
 
@@ -27,7 +27,7 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, M
     }
 
     @Override
-    public Property possess(String name, Idea type, Generator<Value> defaultValue) {
+    public Property possess(String name, Idea type, Supplier<Value> defaultValue) {
         if (!properties.containsKey(name)) {
             Property property = new PropertyImpl(this, name, type, defaultValue);
             ((MutableMindImpl) mind).addProperty(property);

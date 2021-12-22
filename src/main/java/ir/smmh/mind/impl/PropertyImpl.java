@@ -3,16 +3,17 @@ package ir.smmh.mind.impl;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Property;
 import ir.smmh.mind.Value;
-import ir.smmh.util.Generator;
+
+import java.util.function.Supplier;
 
 public class PropertyImpl implements Property {
 
     private final Idea origin;
     private final String name;
     private final Idea type;
-    private final Generator<Value> defaultValue;
+    private final Supplier<Value> defaultValue;
 
-    public PropertyImpl(Idea origin, String name, Idea type, Generator<Value> defaultValue) {
+    public PropertyImpl(Idea origin, String name, Idea type, Supplier<Value> defaultValue) {
         this.origin = origin;
         this.name = name;
         this.type = type;
@@ -35,7 +36,7 @@ public class PropertyImpl implements Property {
     }
 
     @Override
-    public Generator<Value> getDefaultValue() {
+    public Supplier<Value> getDefaultValue() {
         return defaultValue;
     }
 

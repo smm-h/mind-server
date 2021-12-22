@@ -1,13 +1,13 @@
 package ir.smmh.mind;
 
 import ir.smmh.util.Comprehension;
-import ir.smmh.util.Generator;
 import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 public interface Idea {
 
@@ -164,7 +164,7 @@ public interface Idea {
             return possess(name, type, null);
         }
 
-        Property possess(String name, Idea type, Generator<Value> defaultValue);
+        Property possess(String name, Idea type, Supplier<Value> defaultValue);
 
         Property reify(String name, Idea type, Value value);
     }
