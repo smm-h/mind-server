@@ -3,42 +3,14 @@ package ir.smmh.storage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * This kind of storage is a bridge between RAM and a permanent storage.
- *
- * @param <T> The specific type of permanently store-able objects contained
- *            in this storage
- */
-public interface Storage<T extends PermanentlyStored> {
+public interface Storage {
 
-    @NotNull
-    PermanentStorage getFileSystem();
-
-    default boolean exists(@Nullable String id) {
-        return id != null && (existsInMemory(id) || existsOnDisk(id));
-    }
-
-    boolean existsOnDisk(@NotNull String id);
-
-    boolean existsInMemory(@NotNull String id);
+    boolean exists(@NotNull final String id);
 
     @Nullable
-    default T find(@Nullable String id) {
-        if (id == null) return null;
-        if (!existsInMemory(id)) {
-            T object = findOnDisk(id);
-            if (object != null) {
-                addToMemory(object);
-            }
-        }
-        return findInMemory(id);
-    }
+    String read(@NotNull final String id);
 
-    void addToMemory(@NotNull T object);
+    boolean write(@NotNull final String id, @NotNull final String contents);
 
-    @Nullable
-    T findInMemory(@NotNull String id);
-
-    @Nullable
-    T findOnDisk(@NotNull String id);
+    boolean delete(@NotNull final String id);
 }

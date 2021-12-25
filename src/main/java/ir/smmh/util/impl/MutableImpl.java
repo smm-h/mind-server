@@ -2,7 +2,7 @@ package ir.smmh.util.impl;
 
 import ir.smmh.util.Mutable;
 
-public abstract class MutableImpl<T> implements Mutable<T> {
+public class MutableImpl implements Mutable {
 
     private boolean dirty = true;
 

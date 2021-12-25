@@ -3,6 +3,7 @@ package ir.smmh.net.client;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@SuppressWarnings("SameReturnValue")
 public interface Client {
 
     int getDefaultPort();

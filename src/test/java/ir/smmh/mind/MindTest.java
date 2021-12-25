@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MindTest {
 
+    @SuppressWarnings("FieldCanBeLocal")
     private Mind.Mutable m;
     private Idea.Mutable a, b, c, t;
 

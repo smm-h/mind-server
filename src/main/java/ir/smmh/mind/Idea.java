@@ -1,6 +1,8 @@
 package ir.smmh.mind;
 
+import ir.smmh.storage.Stored;
 import ir.smmh.util.Comprehension;
+import ir.smmh.util.Named;
 import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,19 +11,17 @@ import org.json.JSONObject;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public interface Idea {
+public interface Idea extends Named {
 
     Mind getMind();
 
-    String getName();
-
     default boolean is(@Nullable Idea idea) {
 
-        // If idea is null, I am not it
+        // If it is null, I am not it
         if (idea == null)
             return false;
 
-        // If idea is me, I am it
+        // If it is me, I am it
         if (idea == this)
             return true;
 
@@ -30,18 +30,18 @@ public interface Idea {
         if (d == null)
             return false;
 
-        // If idea is in my direct intensions, I am it
+        // If it is in my direct intensions, I am it
         if (d.contains(idea))
             return true;
 
-        // If any of my intensions are idea, I am it
+        // If any of my direct intensions are it, I am it
         for (Idea i : d) {
             if (i.is(idea)) {
                 return true;
             }
         }
 
-        // If none of my intensions are idea, I am not it
+        // If none of my intensions are it, I am not it
         return false;
     }
 
@@ -50,14 +50,34 @@ public interface Idea {
     }
 
     default boolean is(@NotNull String idea) {
-        return is(getMind().find(idea));
+        return is(getMind().findIdeaByName(idea));
     }
 
-    default boolean has(@NotNull String property) {
-        for (Idea idea : ((Comprehension.Set<Property, Idea>) Property::getOrigin).comprehend(getMind().findProperties(property))) {
-            if (is(idea))
+    boolean hasDirectly(@NotNull String propertyName);
+
+    default boolean has(@Nullable String propertyName) {
+
+        // If its name is null, I do not have it
+        if (propertyName == null)
+            return false;
+
+        // If I directly have it, I have it
+        if (hasDirectly(propertyName))
+            return true;
+
+        // If I have no direct intensions, I do not have it
+        final Set<Idea> d = getDirectIntensions();
+        if (d == null)
+            return false;
+
+        // If any of my direct intensions have it, I have it
+        for (Idea i : d) {
+            if (i.has(propertyName)) {
                 return true;
+            }
         }
+
+        // If none of my intensions are idea, I am not it
         return false;
     }
 
@@ -138,7 +158,7 @@ public interface Idea {
         final Set<Property> p = getDirectProperties();
         if (p != null) {
             for (Property property : p) {
-                instance.set(property, getMind().valueOf(serialization.getJSONObject(property.getName())));
+                instance.set(property, Value.of(serialization.getJSONObject(property.getName()), getMind()::findIdeaByName));
             }
         }
         return instance;
@@ -156,9 +176,11 @@ public interface Idea {
         }
     }
 
-    interface Mutable extends Idea, ir.smmh.util.Mutable<Immutable> {
+    interface Mutable extends Idea, Stored {
 
-        void become(Idea idea);
+        default void become(Idea idea) {become(idea.getName());}
+
+        void become(String ideaName);
 
         default Property possess(String name, Idea type) {
             return possess(name, type, null);

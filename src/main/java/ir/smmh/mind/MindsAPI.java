@@ -19,7 +19,7 @@ public class MindsAPI extends StandardAPI {
     }
 
     private Idea.Mutable getIdea(JSONObject p, String key) {
-        return getMind(p).find(p.getString(key));
+        return getMind(p).findIdeaByName(p.getString(key));
     }
 
     private Idea.Mutable getIdea(JSONObject p) {
@@ -30,7 +30,7 @@ public class MindsAPI extends StandardAPI {
         defineMethod("mind", (Method) (p) -> {
             final String name = p.getString("name");
             if (!minds.containsKey(name)) {
-                minds.put(name, new MutableMindImpl());
+                minds.put(name, new MutableMindImpl(name, null));
             }
             return respond(NO_ERROR);
         });
@@ -53,12 +53,11 @@ public class MindsAPI extends StandardAPI {
 
         defineMethod("possess", (Method) (p) -> {
             getIdea(p).possess(p.getString("name"), getIdea(p, "type"), getMind(p).makeValueGenerator(p.getJSONObject("defaultValue")));
-            int a = 5;
             return respond(NO_ERROR);
         });
 
         defineMethod("reify", (Method) (p) -> {
-            getIdea(p).reify(p.getString("name"), getIdea(p, "type"), getMind(p).valueOf(p.getJSONObject("value")));
+            getIdea(p).reify(p.getString("name"), getIdea(p, "type"), Value.of(p.getJSONObject("value"), getMind(p)::findIdeaByName));
             return respond(NO_ERROR);
         });
 

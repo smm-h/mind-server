@@ -11,20 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * @implNote Anything mutable might also be an API
  * @see ir.smmh.api.API
  */
-public interface Mutable<Immutable> {
-
-    /**
-     * Creates and returns a new object of type immutable that is in
-     * every way equal to this object, except it cannot be mutated.
-     *
-     * @return An immutable version of this object
-     * @implNote This may cache and return a pre-existing object to
-     * increase performance, if it is not dirty (check using isDirty)
-     * @implNote Please call clean before implementing this to ensure
-     * returning a correct object.
-     */
-    @NotNull
-    Immutable freeze();
+public interface Mutable {
 
     /**
      * @return Whether or not it is dirty.
@@ -50,5 +37,41 @@ public interface Mutable<Immutable> {
      */
     default void clean() {
         if (isDirty()) onClean();
+    }
+
+    interface Immutablizable<Immutable> extends Mutable {
+        /**
+         * Creates and returns a new object of type immutable that is in
+         * every way equal to this object, except it cannot be mutated.
+         *
+         * @return An immutable version of this object
+         * @implNote This may cache and return a pre-existing object to
+         * increase performance, if it is not dirty (check using isDirty)
+         * @implNote Please call clean before implementing this to ensure
+         * returning a correct object.
+         */
+        @NotNull
+        Immutable freeze();
+    }
+
+    interface Injected extends Mutable {
+
+        @NotNull
+        Mutable getInjectedMutable();
+
+        @Override
+        default boolean isDirty() {
+            return getInjectedMutable().isDirty();
+        }
+
+        @Override
+        default void taint() {
+            getInjectedMutable().taint();
+        }
+
+        @Override
+        default void onClean() {
+            getInjectedMutable().onClean();
+        }
     }
 }

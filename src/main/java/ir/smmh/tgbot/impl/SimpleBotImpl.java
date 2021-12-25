@@ -1,6 +1,7 @@
 package ir.smmh.tgbot.impl;
 
 import ir.smmh.tgbot.SimpleBot;
+import ir.smmh.util.JSONUtil;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -76,7 +77,7 @@ public abstract class SimpleBotImpl implements SimpleBot {
                         .build(), HttpResponse.BodyHandlers.ofString()
                 )
                         .thenApply(HttpResponse::body)
-                        .thenApply(s -> new JSONObject(new JSONTokener(s)))
+                        .thenApply(JSONUtil::parse)
                         .thenAccept(this::handle)
                         .join();
             } catch (Throwable throwable) {

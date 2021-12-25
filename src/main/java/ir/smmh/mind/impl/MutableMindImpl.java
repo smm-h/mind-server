@@ -2,53 +2,89 @@ package ir.smmh.mind.impl;
 
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Mind;
-import ir.smmh.mind.Property;
-import ir.smmh.util.MutableAdapter;
+import ir.smmh.mind.Value;
+import ir.smmh.storage.Storage;
+import ir.smmh.util.JSONUtil;
+import ir.smmh.util.Lookup;
+import ir.smmh.util.Mutable;
+import ir.smmh.util.impl.LookupImpl;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
 import java.util.HashSet;
-import java.util.Map;
+import java.util.function.Supplier;
 
-public class MutableMindImpl extends AbstractMindImpl<Idea.Mutable> implements Mind.Mutable, MutableAdapter<Mind.Immutable> {
+public class MutableMindImpl implements Mind.Mutable, Mutable.Injected {
 
-    public MutableMindImpl() {
-        super();
+    private final String name;
+    private final @NotNull Lookup.Mutable<Idea.Mutable> ideas;
+    //    private final @NotNull Lookup.Multi.Mutable<Property> properties;
+    private final ir.smmh.util.Mutable mutableAdapter = new MutableImpl();
+
+    public MutableMindImpl(String name, @Nullable Iterable<Idea.Mutable> ideas) {
+        this.name = name;
+        this.ideas = new LookupImpl.Mutable<>(ideas);
     }
 
-    public MutableMindImpl(Map<String, Idea.Mutable> ideas) {
-        super(ideas);
+    // TODO freezing a mind
+
+    public MutableMindImpl(JSONObject object) {
+        this.name = object.getString("name");
+        Iterable<Idea.Mutable> i = JSONUtil.arrayOfObjects(object, "ideas", new HashSet<>(), o -> new MutableIdeaImpl(this, o));
+        this.ideas = new LookupImpl.Mutable<>(i);
+    }
+
+    @Override
+    public @Nullable Idea.Mutable findIdeaByName(String name) {
+        return ideas.find(name);
+    }
+
+    @Override
+    public Supplier<Value> makeValueGenerator(@NotNull JSONObject source) {
+        return () -> Value.of(source, this::findIdeaByName);
+    }
+
+    @Override
+    public @NotNull Storage getStorage() {
+        return storage;
+    }
+
+    @Override
+    public void onClean() {
+        Mutable.super.onClean();
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return name;
     }
 
     @Override
     public @NotNull Idea.Mutable imagine(String name) {
-        Idea.Mutable idea = find(name);
+        @Nullable Idea.Mutable idea = ideas.find(name);
         if (idea == null) {
             idea = new MutableIdeaImpl(this, name, new HashSet<>(), new HashSet<>(), new HashSet<>());
-            ideas.put(name, idea);
+            ideas.add(idea);
             taint();
         }
         return idea;
     }
 
-    void addProperty(Property property) {
-        final String name = property.getName();
-        if (!properties.containsKey(name)) {
-            properties.put(name, new HashSet<>());
-        }
-        properties.get(name).add(property);
+    @Override
+    public @NotNull Lookup<Idea.Mutable> getIdeaLookup() {
+        return ideas;
     }
 
-    private final ir.smmh.util.Mutable<Immutable> mutableAdapter = new MutableImpl<>() {
-        @Override
-        public @NotNull Immutable freeze() {
-            // TODO freezing a mind
-            return new ImmutableMindImpl();
-        }
-    };
+    @Override
+    public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+        return mutableAdapter;
+    }
 
     @Override
-    public ir.smmh.util.Mutable<Immutable> getMutableAdapter() {
-        return mutableAdapter;
+    public @NotNull String serialize() {
+        return null;
+        // TODO serialize mind
     }
 }

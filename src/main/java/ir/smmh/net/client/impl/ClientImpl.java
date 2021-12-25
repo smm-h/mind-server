@@ -64,7 +64,7 @@ public class ClientImpl implements Client {
                 System.err.println("Could not close resources");
             }
         } catch (UnknownHostException u) {
-            System.err.println("Could not find the host");
+            System.err.println("Could not findIdeaByName the host");
         } catch (IOException e) {
             System.err.println("Connection failed");
         }

@@ -18,7 +18,8 @@ public interface Instance extends Value {
         Set<Property> properties = type.getAllProperties();
         if (properties != null) {
             for (Property property : properties) {
-                object.put(property.getName(), get(property).serialize());
+                Value value = get(property);
+                object.put(property.getName(), value == null ? JSONObject.NULL : value.serialize());
             }
         }
         return object;

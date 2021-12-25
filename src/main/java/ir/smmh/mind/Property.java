@@ -1,12 +1,12 @@
 package ir.smmh.mind;
 
+import ir.smmh.util.Named;
+
 import java.util.function.Supplier;
 
-public interface Property {
+public interface Property extends Named {
 
     Idea getOrigin();
-
-    String getName();
 
     Idea getType();
 

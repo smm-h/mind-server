@@ -1,27 +1,94 @@
 package ir.smmh.mind.impl;
 
-import ir.smmh.mind.Idea;
-import ir.smmh.mind.Mind;
-import ir.smmh.mind.Property;
-import ir.smmh.mind.Value;
-import ir.smmh.util.MutableAdapter;
+import ir.smmh.mind.*;
+import ir.smmh.storage.Storage;
+import ir.smmh.util.Comprehension;
+import ir.smmh.util.JSONUtil;
+import ir.smmh.util.Mutable;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, MutableAdapter<Idea.Immutable> {
+import static java.util.Map.entry;
 
-    public MutableIdeaImpl(Mind mind, String name, Set<Idea> intensions, Iterable<Property> properties, Iterable<Property> staticProperties) {
-        super(mind, name, intensions, properties, staticProperties);
+public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
+
+    private static final Comprehension.Map<Property, String, Property> c = p -> entry(p.getName(), p);
+    private final Mind mind;
+    private final String name;
+    private final Set<String> intensions;
+    private final Map<String, Property> properties;
+    private final Map<String, Property> staticProperties;
+    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl();
+    private final S intensionsCache = new S();
+
+    public MutableIdeaImpl(Mind mind, String name, Set<String> intensions, Iterable<Property> properties, Iterable<Property> staticProperties) {
+        this.mind = mind;
+        this.name = name;
+        this.intensions = intensions;
+        this.properties = c.comprehend(properties);
+        this.staticProperties = c.comprehend(staticProperties);
+    }
+
+    public MutableIdeaImpl(Mind mind, JSONObject object) {
+        this.mind = mind;
+        this.name = object.getString("name");
+        this.intensions = JSONUtil.arrayOfStrings(object, "intensions", new HashSet<>());
+        this.properties = JSONUtil.arrayOfObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o));
+        this.staticProperties = JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new PropertyImpl(this, o));
     }
 
     @Override
-    public void become(Idea idea) {
-        if (!intensions.contains(idea)) {
-            intensions.add(idea);
+    public Mind getMind() {
+        return mind;
+    }
+
+    @Override
+    public boolean hasDirectly(@NotNull String propertyName) {
+        return properties.containsKey(propertyName);
+    }
+
+    @Override
+    public @NotNull String getName() {
+        return name;
+    }
+
+    @Override
+    public @Nullable Set<Idea> getDirectIntensions() {
+        return intensionsCache;
+    }
+
+    @Override
+    public Set<Property> getDirectProperties() {
+        return new HashSet<>(properties.values());
+    }
+
+    @Override
+    public @NotNull Instance instantiate() {
+        return new InstanceImpl(this);
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+
+    @Override
+    public void become(String ideaName) {
+        if (!intensions.contains(ideaName)) {
+            intensions.add(ideaName);
+            intensionsCache.taint();
             taint();
         }
     }
@@ -30,7 +97,6 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, M
     public Property possess(String name, Idea type, Supplier<Value> defaultValue) {
         if (!properties.containsKey(name)) {
             Property property = new PropertyImpl(this, name, type, defaultValue);
-            ((MutableMindImpl) mind).addProperty(property);
             properties.put(name, property);
             taint();
         }
@@ -41,22 +107,34 @@ public class MutableIdeaImpl extends AbstractIdeaImpl implements Idea.Mutable, M
     public Property reify(String name, Idea type, Value value) {
         if (!staticProperties.containsKey(name)) {
             Property property = new PropertyImpl(this, name, type, () -> value);
-            ((MutableMindImpl) mind).addProperty(property);
             staticProperties.put(name, property);
             taint();
         }
         return staticProperties.get(name);
     }
 
-    private final ir.smmh.util.Mutable<Immutable> mutableAdapter = new MutableImpl<>() {
-        @Override
-        public @NotNull Immutable freeze() {
-            return new ImmutableIdeaImpl(mind, name, Collections.unmodifiableSet(intensions), properties.values(), staticProperties.values());
-        }
-    };
+    @Override
+    public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+        return injectedMutable;
+    }
 
     @Override
-    public ir.smmh.util.Mutable<Immutable> getMutableAdapter() {
-        return mutableAdapter;
+    public @NotNull Storage getStorage() {
+        return storage;
+    }
+
+    @Override
+    public @NotNull String serialize() {
+        return null;
+        // TODO serialize idea
+    }
+
+    private static class S extends HashSet<Idea> implements ir.smmh.util.Mutable.Injected {
+        private final ir.smmh.util.Mutable injectedMutable = new MutableImpl();
+
+        @Override
+        public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+            return injectedMutable;
+        }
     }
 }

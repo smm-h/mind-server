@@ -1,5 +1,6 @@
-package ir.smmh.storage;
+package ir.smmh.storage.impl;
 
+import ir.smmh.storage.Storage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -7,11 +8,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class PermanentStorageImpl implements PermanentStorage {
+public class StorageImpl implements Storage {
 
     private final String root;
 
-    public PermanentStorageImpl(@NotNull final String root) {
+    public StorageImpl(@NotNull final String root) {
         this.root = root;
     }
 

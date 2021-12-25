@@ -1,44 +1,84 @@
 package ir.smmh.util;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
+@SuppressWarnings("unused")
 public interface JSONUtil {
-    @NotNull
-    static Set<String> getStringSet() {
-        return new LinkedHashSet<>();
+
+    static @Nullable JSONObject parse(@NotNull String string) {
+        try {
+            return new JSONObject(new JSONTokener(string));
+        } catch (JSONException e) {
+            return null;
+        }
     }
 
-    @NotNull
-    static Set<String> getStringSet(@NotNull final JSONObject object, @NotNull final String key) {
-        final Set<String> set = getStringSet();
+    static <C extends Collection<Boolean>> @NotNull C arrayOfBooleans(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination) {
+        return arrayOfBooleans(object, key, destination, Util::itself);
+    }
+
+    static <T, C extends Collection<T>> @NotNull C arrayOfBooleans(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination, @NotNull Function<Boolean, T> convertor) {
+        addFromBooleans(destination::add, object, key, convertor);
+        return destination;
+    }
+
+    static <T, C extends Collection<T>> @NotNull C arrayOfNumbers(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination, @NotNull Function<Number, T> convertor) {
+        addFromNumbers(destination::add, object, key, convertor);
+        return destination;
+    }
+
+    static <C extends Collection<String>> @NotNull C arrayOfStrings(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination) {
+        return arrayOfStrings(object, key, destination, Util::itself);
+    }
+
+    static <T, C extends Collection<T>> @NotNull C arrayOfStrings(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination, @NotNull Function<String, T> convertor) {
+        addFromStrings(destination::add, object, key, convertor);
+        return destination;
+    }
+
+    static <T, C extends Collection<T>> @NotNull C arrayOfObjects(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination, @NotNull Function<JSONObject, T> convertor) {
+        addFromJSONObjects(destination::add, object, key, convertor);
+        return destination;
+    }
+
+    static <T> void addFromBooleans(@NotNull Consumer<T> add, @NotNull final JSONObject object, @NotNull final String key, @NotNull Function<Boolean, T> convertor) {
         if (object.has(key)) {
             final JSONArray array = object.getJSONArray(key);
             for (int i = 0; i < array.length(); i++)
-                set.add(array.getString(i));
+                add.accept(convertor.apply(array.getBoolean(i)));
         }
-        return set;
     }
 
-    @NotNull
-    static List<String> getStringList() {
-        return new ArrayList<>();
-    }
-
-    @NotNull
-    static List<String> getStringList(@NotNull final JSONObject object, @NotNull final String key) {
-        final List<String> list = getStringList();
+    static <T> void addFromNumbers(@NotNull Consumer<T> add, @NotNull final JSONObject object, @NotNull final String key, @NotNull Function<Number, T> convertor) {
         if (object.has(key)) {
             final JSONArray array = object.getJSONArray(key);
             for (int i = 0; i < array.length(); i++)
-                list.add(array.getString(i));
+                add.accept(convertor.apply(array.getNumber(i)));
         }
-        return list;
+    }
+
+    static <T> void addFromStrings(@NotNull Consumer<T> add, @NotNull final JSONObject object, @NotNull final String key, @NotNull Function<String, T> convertor) {
+        if (object.has(key)) {
+            final JSONArray array = object.getJSONArray(key);
+            for (int i = 0; i < array.length(); i++)
+                add.accept(convertor.apply(array.getString(i)));
+        }
+    }
+
+    static <T> void addFromJSONObjects(@NotNull Consumer<T> add, @NotNull final JSONObject object, @NotNull final String key, @NotNull Function<JSONObject, T> convertor) {
+        if (object.has(key)) {
+            final JSONArray array = object.getJSONArray(key);
+            for (int i = 0; i < array.length(); i++)
+                add.accept(convertor.apply(array.getJSONObject(i)));
+        }
     }
 }
