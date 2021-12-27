@@ -25,18 +25,29 @@ public interface Mutable {
     void taint();
 
     /**
-     * Override this to implement manually cleaning this object. This is
-     * for computationally intense tasks that must not be done at every mutation.
+     * Add to this to implement manually cleaning up this object. This is
+     * for tasks that though must be done after every mutation, they can be
+     * done after several mutations without affecting correctness.
+     */
+    void addOnCleanListener(OnCleanListener listener);
+
+    /**
+     * This is for internal use; this is called within {@link #clean}.
      *
      * @implNote You should not call this directly. Call clean instead.
      */
     void onClean();
 
     /**
-     * Calls onClean if it is dirty; otherwise does nothing.
+     * Calls {@link #onClean} if it {@link #isDirty}; otherwise does nothing.
      */
     default void clean() {
         if (isDirty()) onClean();
+    }
+
+    @FunctionalInterface
+    interface OnCleanListener {
+        void onClean();
     }
 
     interface Immutablizable<Immutable> extends Mutable {
@@ -62,6 +73,11 @@ public interface Mutable {
         @Override
         default boolean isDirty() {
             return getInjectedMutable().isDirty();
+        }
+
+        @Override
+        default void addOnCleanListener(OnCleanListener listener) {
+            getInjectedMutable().addOnCleanListener(listener);
         }
 
         @Override
