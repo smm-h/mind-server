@@ -183,13 +183,13 @@ public interface Idea extends Named {
 
         void become(String ideaName);
 
-        default Property possess(String name, Idea type) {
+        default Property possess(String name, String type) {
             return possess(name, type, null);
         }
 
-        Property possess(String name, Idea type, Supplier<Value> defaultValue);
+        Property possess(String name, String type, Supplier<Value> defaultValue);
 
-        Property reify(String name, Idea type, Value value);
+        Property reify(String name, String type, Value value);
     }
 
     interface Immutable extends Idea {

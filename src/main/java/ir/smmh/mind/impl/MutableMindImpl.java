@@ -4,6 +4,8 @@ import ir.smmh.mind.Idea;
 import ir.smmh.mind.Mind;
 import ir.smmh.mind.Value;
 import ir.smmh.storage.Storage;
+import ir.smmh.storage.Stored;
+import ir.smmh.storage.impl.StorageImpl;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.Lookup;
 import ir.smmh.util.Mutable;
@@ -46,6 +48,8 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected {
     public Supplier<Value> makeValueGenerator(@NotNull JSONObject source) {
         return () -> Value.of(source, this::findIdeaByName);
     }
+
+    private final Storage storage = new StorageImpl("minds");
 
     @Override
     public @NotNull Storage getStorage() {

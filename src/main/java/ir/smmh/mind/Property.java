@@ -8,11 +8,11 @@ public interface Property extends Named {
 
     Idea getOrigin();
 
-    Idea getType();
+    String getType();
 
     Supplier<Value> getDefaultValue();
 
     default String encode() {
-        return "has " + getName() + " as " + getType().getName();
+        return "has " + getName() + " as " + getType();
     }
 }

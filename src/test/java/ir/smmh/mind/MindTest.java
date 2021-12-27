@@ -1,6 +1,7 @@
 package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MutableMindImpl;
+import ir.smmh.util.RandomUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,15 +11,16 @@ public class MindTest {
 
     @SuppressWarnings("FieldCanBeLocal")
     private Mind.Mutable m;
-    private Idea.Mutable a, b, c, t;
+    private Idea.Mutable a, b, c;
+    private String t;
 
     @BeforeEach
     void setUp() {
-        m = new MutableMindImpl();
+        m = new MutableMindImpl("test" + RandomUtil.generateRandomHex(6), null);
         a = m.imagine("a");
         b = m.imagine("b");
         c = m.imagine("c");
-        t = m.imagine("t");
+        m.imagine(t = "t");
     }
 
     @Test

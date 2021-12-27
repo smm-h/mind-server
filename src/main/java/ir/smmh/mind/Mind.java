@@ -2,6 +2,7 @@ package ir.smmh.mind;
 
 import ir.smmh.storage.Stored;
 import ir.smmh.util.Lookup;
+import ir.smmh.util.Named;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +10,7 @@ import org.json.JSONObject;
 
 import java.util.function.Supplier;
 
-public interface Mind {
+public interface Mind extends Named {
 
     @Nullable Idea findIdeaByName(String name);
 

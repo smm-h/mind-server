@@ -4,6 +4,7 @@ import ir.smmh.mind.Idea;
 import ir.smmh.mind.Property;
 import ir.smmh.mind.Value;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
 
 import java.util.function.Supplier;
 
@@ -11,14 +12,23 @@ public class PropertyImpl implements Property {
 
     private final Idea origin;
     private final String name;
-    private final Idea type;
+    private final String type;
     private final Supplier<Value> defaultValue;
 
-    public PropertyImpl(Idea origin, String name, Idea type, Supplier<Value> defaultValue) {
+    public PropertyImpl(Idea origin, String name, String type, Supplier<Value> defaultValue) {
         this.origin = origin;
         this.name = name;
         this.type = type;
         this.defaultValue = defaultValue;
+    }
+
+    public PropertyImpl(Idea origin, JSONObject object) {
+        this(
+                origin,
+                object.getString("name"),
+                object.getString("type"),
+                () -> Value.of(object.getJSONObject("defaultValue"), origin.getMind()::findIdeaByName)
+        );
     }
 
     @Override
@@ -32,7 +42,7 @@ public class PropertyImpl implements Property {
     }
 
     @Override
-    public Idea getType() {
+    public String getType() {
         return type;
     }
 

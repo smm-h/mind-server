@@ -2,6 +2,7 @@ package ir.smmh.mind.impl;
 
 import ir.smmh.mind.*;
 import ir.smmh.storage.Storage;
+import ir.smmh.storage.impl.StorageImpl;
 import ir.smmh.util.Comprehension;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.Mutable;
@@ -40,8 +41,8 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
         this.mind = mind;
         this.name = object.getString("name");
         this.intensions = JSONUtil.arrayOfStrings(object, "intensions", new MutableHashSet<>());
-        this.properties = JSONUtil.arrayOfObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o));
-        this.staticProperties = JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new PropertyImpl(this, o));
+        this.properties = c.comprehend(JSONUtil.arrayOfObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
+        this.staticProperties = c.comprehend(JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
     }
 
     @Override
@@ -94,7 +95,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     }
 
     @Override
-    public Property possess(String name, Idea type, Supplier<Value> defaultValue) {
+    public Property possess(String name, String type, Supplier<Value> defaultValue) {
         if (!properties.containsKey(name)) {
             Property property = new PropertyImpl(this, name, type, defaultValue);
             properties.put(name, property);
@@ -104,7 +105,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     }
 
     @Override
-    public Property reify(String name, Idea type, Value value) {
+    public Property reify(String name, String type, Value value) {
         if (!staticProperties.containsKey(name)) {
             Property property = new PropertyImpl(this, name, type, () -> value);
             staticProperties.put(name, property);
@@ -118,9 +119,15 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
         return injectedMutable;
     }
 
+    private final Storage storage = new StorageImpl(getMind().getName());
     @Override
     public @NotNull Storage getStorage() {
         return storage;
+    }
+
+    @Override
+    public void onClean() {
+        Mutable.super.onClean();
     }
 
     @Override

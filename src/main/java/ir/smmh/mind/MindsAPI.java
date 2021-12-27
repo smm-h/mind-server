@@ -52,12 +52,12 @@ public class MindsAPI extends StandardAPI {
         });
 
         defineMethod("possess", (Method) (p) -> {
-            getIdea(p).possess(p.getString("name"), getIdea(p, "type"), getMind(p).makeValueGenerator(p.getJSONObject("defaultValue")));
+            getIdea(p).possess(p.getString("name"), p.getString("type"), getMind(p).makeValueGenerator(p.getJSONObject("defaultValue")));
             return respond(NO_ERROR);
         });
 
         defineMethod("reify", (Method) (p) -> {
-            getIdea(p).reify(p.getString("name"), getIdea(p, "type"), Value.of(p.getJSONObject("value"), getMind(p)::findIdeaByName));
+            getIdea(p).reify(p.getString("name"), p.getString("type"), Value.of(p.getJSONObject("value"), getMind(p)::findIdeaByName));
             return respond(NO_ERROR);
         });
 
