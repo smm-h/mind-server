@@ -1,7 +1,6 @@
 package ir.smmh.mind;
 
 import ir.smmh.storage.Stored;
-import ir.smmh.util.Comprehension;
 import ir.smmh.util.Named;
 import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -178,7 +177,9 @@ public interface Idea extends Named {
 
     interface Mutable extends Idea, Stored {
 
-        default void become(Idea idea) {become(idea.getName());}
+        default void become(Idea idea) {
+            become(idea.getName());
+        }
 
         void become(String ideaName);
 

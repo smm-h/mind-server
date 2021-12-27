@@ -90,4 +90,7 @@ public interface Mutable {
             getInjectedMutable().onClean();
         }
     }
+
+    interface Set<T> extends Mutable, java.util.Set<T> {
+    }
 }

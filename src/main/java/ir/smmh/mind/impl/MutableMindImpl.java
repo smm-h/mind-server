@@ -8,6 +8,7 @@ import ir.smmh.util.JSONUtil;
 import ir.smmh.util.Lookup;
 import ir.smmh.util.Mutable;
 import ir.smmh.util.impl.LookupImpl;
+import ir.smmh.util.impl.MutableHashSet;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,7 +66,7 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected {
     public @NotNull Idea.Mutable imagine(String name) {
         @Nullable Idea.Mutable idea = ideas.find(name);
         if (idea == null) {
-            idea = new MutableIdeaImpl(this, name, new HashSet<>(), new HashSet<>(), new HashSet<>());
+            idea = new MutableIdeaImpl(this, name, new MutableHashSet<>(), new HashSet<>(), new HashSet<>());
             ideas.add(idea);
             taint();
         }

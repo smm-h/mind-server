@@ -5,6 +5,7 @@ import ir.smmh.storage.Storage;
 import ir.smmh.util.Comprehension;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.Mutable;
+import ir.smmh.util.impl.MutableHashSet;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +13,6 @@ import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import static java.util.Map.entry;
@@ -26,7 +26,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     private final Map<String, Property> properties;
     private final Map<String, Property> staticProperties;
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl();
-    private final S intensionsCache = new S();
+    private final ir.smmh.util.Mutable.Set<Idea> intensionsCache = new MutableHashSet<>();
 
     public MutableIdeaImpl(Mind mind, String name, Set<String> intensions, Iterable<Property> properties, Iterable<Property> staticProperties) {
         this.mind = mind;
@@ -39,7 +39,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     public MutableIdeaImpl(Mind mind, JSONObject object) {
         this.mind = mind;
         this.name = object.getString("name");
-        this.intensions = JSONUtil.arrayOfStrings(object, "intensions", new HashSet<>());
+        this.intensions = JSONUtil.arrayOfStrings(object, "intensions", new MutableHashSet<>());
         this.properties = JSONUtil.arrayOfObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o));
         this.staticProperties = JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new PropertyImpl(this, o));
     }
@@ -66,7 +66,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
 
     @Override
     public Set<Property> getDirectProperties() {
-        return new HashSet<>(properties.values());
+        return new MutableHashSet<>(properties.values());
     }
 
     @Override
@@ -127,14 +127,5 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     public @NotNull String serialize() {
         return null;
         // TODO serialize idea
-    }
-
-    private static class S extends HashSet<Idea> implements ir.smmh.util.Mutable.Injected {
-        private final ir.smmh.util.Mutable injectedMutable = new MutableImpl();
-
-        @Override
-        public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
-            return injectedMutable;
-        }
     }
 }

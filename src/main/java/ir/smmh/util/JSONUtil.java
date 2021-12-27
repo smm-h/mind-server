@@ -7,7 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
