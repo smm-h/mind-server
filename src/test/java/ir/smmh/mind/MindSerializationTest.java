@@ -2,7 +2,9 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MindStorageGate;
 import ir.smmh.util.JSONUtil;
+import ir.smmh.util.impl.MutableImpl;
 import org.json.JSONObject;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,5 +27,10 @@ class MindSerializationTest {
         JSONObject object = JSONUtil.parse(m.serialize());
         assertNotNull(object);
         assertEquals(1, object.getJSONArray("ideas").length());
+    }
+
+    @AfterAll
+    static void cleanEverything() {
+        MutableImpl.cleanEverything();
     }
 }

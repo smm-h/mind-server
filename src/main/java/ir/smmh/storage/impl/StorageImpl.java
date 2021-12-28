@@ -26,8 +26,8 @@ public class StorageImpl implements Storage {
         this(root, Log.fromOutStream(out), Log.fromErrStream(err));
     }
 
-    public StorageImpl(@NotNull String root) {
-        this(root, root + "OUT.LOG", root + "ERR.LOG");
+    public StorageImpl(@NotNull String name) {
+        this("db/" + name, "log/" + name + "_OUT.LOG", "log/" + name + "_ERR.LOG");
     }
 
     @Override

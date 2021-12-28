@@ -45,7 +45,7 @@ public class LookupImpl<T extends Named> implements Lookup.Iterable<T> {
             return true;
         }
 
-        private final ir.smmh.util.Mutable injectedMutable = new MutableImpl();
+        private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
         @Override
         public @NotNull ir.smmh.util.Mutable getInjectedMutable() {

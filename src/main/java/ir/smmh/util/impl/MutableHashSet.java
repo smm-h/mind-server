@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class MutableHashSet<T> extends HashSet<T> implements Mutable.Set<T>, ir.smmh.util.Mutable.Injected {
-    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl();
+    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
     public MutableHashSet() {
         super();

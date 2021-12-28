@@ -23,7 +23,7 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
 
     private final String name;
     private final @NotNull Lookup.Mutable<MutableIdeaImpl> ideas;
-    private final ir.smmh.util.Mutable mutableAdapter = new MutableImpl();
+    private final ir.smmh.util.Mutable mutableAdapter = new MutableImpl(this);
     private final Storage storage = new StorageImpl("minds");
 
     public MutableMindImpl(String name, @Nullable Iterable<MutableIdeaImpl> ideas) {

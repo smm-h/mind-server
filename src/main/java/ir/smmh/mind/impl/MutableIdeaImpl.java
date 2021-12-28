@@ -28,7 +28,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     private final Set<String> intensions;
     private final Map<String, PropertyImpl> properties;
     private final Map<String, StaticPropertyImpl> staticProperties;
-    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl();
+    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
     private final Storage storage;
     private java.util.Set<Idea> intensionsCache;
 
