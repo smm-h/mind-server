@@ -1,5 +1,6 @@
 package ir.smmh.mind;
 
+import ir.smmh.util.JSONUtil;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class MindsAPITest {
         final JSONObject request = new JSONObject();
         request.put("method", method);
         request.put("parameters", parameters);
-        return api.processJSON(request.toString());
+        return JSONUtil.parse(api.process(request.toString()));
     }
 
     void mind() {

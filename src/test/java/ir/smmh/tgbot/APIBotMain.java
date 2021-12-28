@@ -3,7 +3,7 @@ package ir.smmh.tgbot;
 import ir.smmh.mind.MindsAPI;
 import ir.smmh.tgbot.impl.StandardAPIBotImpl;
 
-class APIBotTest {
+class APIBotMain {
 
     public static void main(String[] args) {
 

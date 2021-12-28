@@ -2,7 +2,7 @@ package ir.smmh.mind;
 
 import ir.smmh.tgbot.Bot;
 
-class OntologueTest {
+class OntologueMain {
 
     public static void main(String[] args) {
 
