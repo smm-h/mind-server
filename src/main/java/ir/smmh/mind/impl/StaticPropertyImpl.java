@@ -1,14 +1,11 @@
 package ir.smmh.mind.impl;
 
 import ir.smmh.mind.Idea;
-import ir.smmh.mind.Property;
 import ir.smmh.mind.StaticProperty;
 import ir.smmh.mind.Value;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
-
-import java.util.function.Supplier;
 
 public class StaticPropertyImpl implements StaticProperty, Serializable.JSON {
 

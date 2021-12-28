@@ -3,8 +3,6 @@ package ir.smmh.mind;
 import ir.smmh.util.Named;
 import ir.smmh.util.Serializable;
 
-import java.util.function.Supplier;
-
 public interface StaticProperty extends Serializable, Named {
 
     Idea getOrigin();
