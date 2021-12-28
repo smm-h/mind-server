@@ -3,10 +3,11 @@ package ir.smmh.mind;
 import ir.smmh.mind.impl.NumberValue;
 import ir.smmh.mind.impl.StringValue;
 import ir.smmh.util.Lookup;
+import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
-public interface Value {
+public interface Value extends Serializable.JSON {
     static Value of(JSONObject object, Lookup<Idea> lookup) {
         final java.lang.String name = object.getString("~");
         switch (name) {
@@ -25,8 +26,6 @@ public interface Value {
         }
     }
 
-    @NotNull JSONObject serialize();
-
     default boolean isPrimitive() {
         return false;
     }
@@ -41,13 +40,13 @@ public interface Value {
     }
 
     interface Number extends Primitive<java.lang.Number> {
-        default @NotNull JSONObject serialize() {
+        default @NotNull JSONObject serializeJSON() {
             return new JSONObject("{\"~\": \"number\", \"value\": \"" + JSONObject.numberToString(getValue()) + "\"}");
         }
     }
 
     interface String extends Primitive<java.lang.String> {
-        default @NotNull JSONObject serialize() {
+        default @NotNull JSONObject serializeJSON() {
             return new JSONObject("{\"~\": \"string\", \"value\": \"" + JSONObject.quote(getValue()) + "\"}");
         }
     }

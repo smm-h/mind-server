@@ -13,4 +13,6 @@ public interface Storage {
     boolean write(@NotNull final String id, @NotNull final String contents);
 
     boolean delete(@NotNull final String id);
+
+    void deleteAll();
 }

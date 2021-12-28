@@ -11,6 +11,10 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface StorageGate<T extends Stored> {
 
+    void clearMemory();
+
+    void clearDisk();
+
     @NotNull T createBlank(String identifier);
 
     @Nullable T deserialize(String identifier, String serialization);

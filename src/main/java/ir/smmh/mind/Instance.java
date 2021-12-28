@@ -11,7 +11,7 @@ public interface Instance extends Value {
     Idea getType();
 
     @NotNull
-    default JSONObject serialize() {
+    default JSONObject serializeJSON() {
         final JSONObject object = new JSONObject();
         Idea type = getType();
         object.put("~", type.getName());

@@ -6,6 +6,7 @@ import ir.smmh.storage.impl.StorageImpl;
 import ir.smmh.util.Comprehension;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.Mutable;
+import ir.smmh.util.Serializable;
 import ir.smmh.util.impl.MutableHashSet;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
@@ -18,24 +19,25 @@ import java.util.function.Supplier;
 
 import static java.util.Map.entry;
 
-public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
+public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializable.JSON {
 
-    private static final Comprehension.Map<Property, String, Property> c = p -> entry(p.getName(), p);
+    private static final Comprehension.Map<PropertyImpl, String, PropertyImpl> c = p -> entry(p.getName(), p);
+    private static final Comprehension.Map<StaticPropertyImpl, String, StaticPropertyImpl> sc = p -> entry(p.getName(), p);
     private final Mind mind;
     private final String name;
     private final Set<String> intensions;
-    private final Map<String, Property> properties;
-    private final Map<String, Property> staticProperties;
+    private final Map<String, PropertyImpl> properties;
+    private final Map<String, StaticPropertyImpl> staticProperties;
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl();
     private final Storage storage;
     private java.util.Set<Idea> intensionsCache;
 
-    public MutableIdeaImpl(@NotNull Mind mind, @NotNull String name, @NotNull Set<String> intensions, @NotNull Iterable<Property> properties, @NotNull Iterable<Property> staticProperties) {
+    public MutableIdeaImpl(@NotNull Mind mind, @NotNull String name, @NotNull Set<String> intensions, @NotNull Iterable<PropertyImpl> properties, @NotNull Iterable<StaticPropertyImpl> staticProperties) {
         this.mind = mind;
         this.name = name;
         this.intensions = intensions;
         this.properties = c.comprehend(properties);
-        this.staticProperties = c.comprehend(staticProperties);
+        this.staticProperties = sc.comprehend(staticProperties);
         this.storage = new StorageImpl(mind.getName());
         setup();
     }
@@ -45,12 +47,23 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
         this.name = object.getString("name");
         this.intensions = JSONUtil.arrayOfStrings(object, "intensions", new MutableHashSet<>());
         this.properties = c.comprehend(JSONUtil.arrayOfObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
-        this.staticProperties = c.comprehend(JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
+        this.staticProperties = sc.comprehend(JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new StaticPropertyImpl(this, o)));
         this.storage = new StorageImpl(mind.getName());
         setup();
     }
 
+    @Override
+    public @NotNull JSONObject serializeJSON() {
+        JSONObject object = new JSONObject();
+        object.put("name", name);
+        object.put("intensions", intensions);
+        object.put("properties", properties.values()); // ((Comprehension.List<String, PropertyImpl>) properties::get).comprehend(properties.keySet()));
+        object.put("static-properties", staticProperties.values()); // ((Comprehension.List<String, PropertyImpl>) staticProperties::get).comprehend(staticProperties.keySet()));
+        return object;
+    }
+
     private void setup() {
+        setupStored();
         intensions.addOnCleanListener(() -> intensionsCache = ((Comprehension.Set<String, Idea>) mind::findIdeaByName).comprehend(intensions));
     }
 
@@ -78,6 +91,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     @Override
     public java.util.Set<Property> getDirectProperties() {
         return new HashSet<>(properties.values());
+        // TODO optimize with caching
     }
 
     @Override
@@ -104,9 +118,9 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     }
 
     @Override
-    public Property possess(String name, String type, Supplier<Value> defaultValue) {
+    public PropertyImpl possess(String name, String type, Supplier<Value> defaultValue) {
         if (!properties.containsKey(name)) {
-            Property property = new PropertyImpl(this, name, type, defaultValue);
+            PropertyImpl property = new PropertyImpl(this, name, type, defaultValue);
             properties.put(name, property);
             taint();
         }
@@ -114,9 +128,9 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     }
 
     @Override
-    public Property reify(String name, String type, Value value) {
+    public StaticPropertyImpl reify(String name, String type, Value value) {
         if (!staticProperties.containsKey(name)) {
-            Property property = new PropertyImpl(this, name, type, () -> value);
+            StaticPropertyImpl property = new StaticPropertyImpl(this, name, type, value);
             staticProperties.put(name, property);
             taint();
         }
@@ -131,16 +145,5 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     @Override
     public @NotNull Storage getStorage() {
         return storage;
-    }
-
-    @Override
-    public void onClean() {
-        Mutable.super.onClean();
-    }
-
-    @Override
-    public @NotNull String serialize() {
-        return encode();
-        // TODO JSON serialize idea
     }
 }

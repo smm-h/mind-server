@@ -5,15 +5,16 @@ import ir.smmh.util.Serializable;
 
 import java.util.function.Supplier;
 
-public interface Property extends Serializable, Named {
+public interface StaticProperty extends Serializable, Named {
 
     Idea getOrigin();
 
     String getType();
 
-    Supplier<Value> getDefaultValue();
+    Value getValue();
 
     default String encode() {
-        return "has " + getName() + " as " + getType();
+        return "reify " + getName() + " as " + getType();
+        // TODO encode static property
     }
 }

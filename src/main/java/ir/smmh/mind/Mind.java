@@ -1,5 +1,6 @@
 package ir.smmh.mind;
 
+import ir.smmh.mind.impl.MutableIdeaImpl;
 import ir.smmh.storage.Stored;
 import ir.smmh.util.Lookup;
 import ir.smmh.util.Named;
@@ -18,8 +19,7 @@ public interface Mind extends Named {
 
     /**
      * A mutable mind is an interface that allows you to imagine mutable
-     * ideas, mutate them, and once they are coherent, freeze it to get
-     * an immutable mind.
+     * ideas and mutate them.
      */
     interface Mutable extends Mind, Stored {
         /**
@@ -31,7 +31,7 @@ public interface Mind extends Named {
          */
         @NotNull Idea.Mutable imagine(String name);
 
-        @NotNull Lookup<Idea.Mutable> getIdeaLookup();
+        Lookup.@NotNull Mutable<MutableIdeaImpl> getIdeaLookup();
 
         default @Nullable Idea.Mutable findIdeaByName(String name) {
             return getIdeaLookup().find(name);

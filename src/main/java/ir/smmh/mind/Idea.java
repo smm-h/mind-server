@@ -189,7 +189,7 @@ public interface Idea extends Named {
 
         Property possess(String name, String type, Supplier<Value> defaultValue);
 
-        Property reify(String name, String type, Value value);
+        StaticProperty reify(String name, String type, Value value);
     }
 
     interface Immutable extends Idea {

@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StorageImpl implements Storage {
 
@@ -51,6 +53,24 @@ public class StorageImpl implements Storage {
         } catch (IOException e) {
             System.err.println("FAILED TO DELETE FILE: " + filename);
             return false;
+        }
+    }
+
+    @Override
+    public void deleteAll() {
+        final Stream<Path> files;
+        try {
+            files = Files.list(Path.of(root));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        for (Path file : files.collect(Collectors.toList())) {
+            try {
+                Files.delete(file);
+            } catch (IOException ignored) {
+                // TODO log events
+            }
         }
     }
 }

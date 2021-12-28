@@ -2,6 +2,7 @@ package ir.smmh.mind.impl;
 
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Property;
+import ir.smmh.mind.StaticProperty;
 import ir.smmh.mind.Value;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
@@ -9,26 +10,26 @@ import org.json.JSONObject;
 
 import java.util.function.Supplier;
 
-public class PropertyImpl implements Property, Serializable.JSON {
+public class StaticPropertyImpl implements StaticProperty, Serializable.JSON {
 
     private final Idea origin;
     private final String name;
     private final String type;
-    private final Supplier<Value> defaultValue;
+    private final Value value;
 
-    public PropertyImpl(Idea origin, String name, String type, Supplier<Value> defaultValue) {
+    public StaticPropertyImpl(Idea origin, String name, String type, Value value) {
         this.origin = origin;
         this.name = name;
         this.type = type;
-        this.defaultValue = defaultValue;
+        this.value = value;
     }
 
-    public PropertyImpl(Idea origin, JSONObject object) {
+    public StaticPropertyImpl(Idea origin, JSONObject object) {
         this(
                 origin,
                 object.getString("name"),
                 object.getString("type"),
-                () -> Value.of(object.getJSONObject("defaultValue"), origin.getMind()::findIdeaByName)
+                Value.of(object.getJSONObject("value"), origin.getMind()::findIdeaByName)
         );
     }
 
@@ -37,7 +38,7 @@ public class PropertyImpl implements Property, Serializable.JSON {
         JSONObject object = new JSONObject();
         object.put("name", name);
         object.put("type", type);
-        object.put("defaultValue", defaultValue.get().serializeJSON());
+        object.put("value", value.serializeJSON());
         return object;
     }
 
@@ -57,8 +58,8 @@ public class PropertyImpl implements Property, Serializable.JSON {
     }
 
     @Override
-    public Supplier<Value> getDefaultValue() {
-        return defaultValue;
+    public Value getValue() {
+        return value;
     }
 
     @Override
@@ -69,9 +70,9 @@ public class PropertyImpl implements Property, Serializable.JSON {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof PropertyImpl)) return false;
+        if (!(o instanceof StaticPropertyImpl)) return false;
 
-        PropertyImpl property = (PropertyImpl) o;
+        StaticPropertyImpl property = (StaticPropertyImpl) o;
 
         if (!origin.equals(property.origin)) return false;
         if (!name.equals(property.name)) return false;
