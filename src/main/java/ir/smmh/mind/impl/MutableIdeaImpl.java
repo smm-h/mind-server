@@ -27,14 +27,17 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     private final Map<String, Property> properties;
     private final Map<String, Property> staticProperties;
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl();
-    private final ir.smmh.util.Mutable.Set<Idea> intensionsCache = new MutableHashSet<>();
+    private final Storage storage;
+    private java.util.Set<Idea> intensionsCache;
 
-    public MutableIdeaImpl(Mind mind, String name, Set<String> intensions, Iterable<Property> properties, Iterable<Property> staticProperties) {
+    public MutableIdeaImpl(@NotNull Mind mind, @NotNull String name, @NotNull Set<String> intensions, @NotNull Iterable<Property> properties, @NotNull Iterable<Property> staticProperties) {
         this.mind = mind;
         this.name = name;
         this.intensions = intensions;
         this.properties = c.comprehend(properties);
         this.staticProperties = c.comprehend(staticProperties);
+        this.storage = new StorageImpl(mind.getName());
+        setup();
     }
 
     public MutableIdeaImpl(Mind mind, JSONObject object) {
@@ -43,6 +46,12 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
         this.intensions = JSONUtil.arrayOfStrings(object, "intensions", new MutableHashSet<>());
         this.properties = c.comprehend(JSONUtil.arrayOfObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
         this.staticProperties = c.comprehend(JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
+        this.storage = new StorageImpl(mind.getName());
+        setup();
+    }
+
+    private void setup() {
+        intensions.addOnCleanListener(() -> intensionsCache = ((Comprehension.Set<String, Idea>) mind::findIdeaByName).comprehend(intensions));
     }
 
     @Override
@@ -61,13 +70,14 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     }
 
     @Override
-    public @Nullable Set<Idea> getDirectIntensions() {
+    public @Nullable java.util.Set<Idea> getDirectIntensions() {
+        intensions.clean();
         return intensionsCache;
     }
 
     @Override
-    public Set<Property> getDirectProperties() {
-        return new MutableHashSet<>(properties.values());
+    public java.util.Set<Property> getDirectProperties() {
+        return new HashSet<>(properties.values());
     }
 
     @Override
@@ -89,7 +99,6 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
     public void become(String ideaName) {
         if (!intensions.contains(ideaName)) {
             intensions.add(ideaName);
-            intensionsCache.taint();
             taint();
         }
     }
@@ -119,7 +128,6 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
         return injectedMutable;
     }
 
-    private final Storage storage = new StorageImpl(getMind().getName());
     @Override
     public @NotNull Storage getStorage() {
         return storage;
@@ -132,7 +140,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected {
 
     @Override
     public @NotNull String serialize() {
-        return null;
-        // TODO serialize idea
+        return encode();
+        // TODO JSON serialize idea
     }
 }

@@ -67,7 +67,7 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected {
     }
 
     @Override
-    public @NotNull Idea.Mutable imagine(String name) {
+    public @NotNull Idea.Mutable imagine(@NotNull String name) {
         @Nullable Idea.Mutable idea = ideas.find(name);
         if (idea == null) {
             idea = new MutableIdeaImpl(this, name, new MutableHashSet<>(), new HashSet<>(), new HashSet<>());

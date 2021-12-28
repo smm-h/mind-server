@@ -3,6 +3,7 @@ package ir.smmh.mind;
 import ir.smmh.mind.impl.MutableMindImpl;
 import ir.smmh.util.RandomUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

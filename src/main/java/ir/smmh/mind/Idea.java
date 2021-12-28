@@ -103,7 +103,7 @@ public interface Idea extends Named {
     }
 
     @Nullable
-    Set<Property> getDirectProperties();
+    java.util.Set<Property> getDirectProperties();
 
     @Nullable
     default Set<Property> getAllProperties() {

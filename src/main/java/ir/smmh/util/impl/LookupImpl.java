@@ -5,12 +5,13 @@ import ir.smmh.util.Named;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 public class LookupImpl<T extends Named> implements Lookup.Iterable<T> {
 
-    protected Map<String, T> map;
+    protected final Map<String, T> map = new HashMap<>();
 
     @Override
     public @Nullable T find(@NotNull String name) {
