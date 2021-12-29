@@ -23,22 +23,28 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
 
     private final String name;
     private final @NotNull Lookup.Mutable<MutableIdeaImpl> ideas;
-    private final ir.smmh.util.Mutable mutableAdapter = new MutableImpl(this);
+    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
     private final Storage storage = new StorageImpl("minds");
 
     public MutableMindImpl(String name, @Nullable Iterable<MutableIdeaImpl> ideas) {
         this.name = name;
         this.ideas = new LookupImpl.Mutable<>(ideas);
+        setup();
     }
 
     public MutableMindImpl(JSONObject object) {
         this.name = object.getString("name");
         this.ideas = new LookupImpl.Mutable<>(JSONUtil.arrayOfObjects(object, "ideas", new HashSet<>(), o -> new MutableIdeaImpl(this, o)));
+        setup();
     }
 
     @Override
     public @Nullable MutableIdeaImpl findIdeaByName(String name) {
         return ideas.find(name);
+    }
+
+    private void setup() {
+        setupStored();
     }
 
     @Override
@@ -74,7 +80,7 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
 
     @Override
     public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
-        return mutableAdapter;
+        return injectedMutable;
     }
 
     @Override

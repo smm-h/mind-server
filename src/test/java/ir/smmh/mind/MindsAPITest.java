@@ -14,7 +14,7 @@ class MindsAPITest {
     final String mindName = "test";
 
     @BeforeEach
-    void setUp() {
+    void beforeEach() {
         api = new MindsAPI();
         mind();
         imagine("a");

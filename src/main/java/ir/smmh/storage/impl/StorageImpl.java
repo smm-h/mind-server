@@ -20,6 +20,11 @@ public class StorageImpl implements Storage {
         this.root = root;
         this.out = out;
         this.err = err;
+        try {
+            Files.createDirectory(Path.of(root));
+        } catch (IOException e) {
+            err.log("FAILED TO CREATE DIRECTORY: " + root);
+        }
     }
 
     public StorageImpl(@NotNull String root, @NotNull String out, @NotNull String err) {

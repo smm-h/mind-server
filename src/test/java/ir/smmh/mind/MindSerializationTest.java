@@ -17,12 +17,12 @@ class MindSerializationTest {
     private Mind.Mutable m;
 
     @BeforeEach
-    void setUp() {
+    void beforeEach() {
         m = g.createBlank("test-mind");
     }
 
     @Test
-    public void testSerializeMind() {
+    public void testSerialization() {
         m.imagine("a");
         JSONObject object = JSONUtil.parse(m.serialize());
         assertNotNull(object);
@@ -30,7 +30,8 @@ class MindSerializationTest {
     }
 
     @AfterAll
-    static void cleanEverything() {
+    static void afterAll() {
         MutableImpl.cleanEverything();
+        System.out.println("ALL DONE.");
     }
 }

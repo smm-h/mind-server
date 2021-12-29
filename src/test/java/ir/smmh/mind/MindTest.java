@@ -15,7 +15,7 @@ public class MindTest {
     private String t;
 
     @BeforeEach
-    void setUp() {
+    void beforeEach() {
         m = new MutableMindImpl("test" + RandomUtil.generateRandomHex(6), null);
         a = m.imagine("a");
         b = m.imagine("b");
