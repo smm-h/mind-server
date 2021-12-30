@@ -1,13 +1,12 @@
 package ir.smmh.lingu;
 
-import ir.smmh.lingu.IndividualTokenType.IndividualToken;
 import ir.smmh.tree.jile.Tree;
 import ir.smmh.tree.jile.impl.LinkedTree;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class CollectiveTokenType implements TokenType {
+public abstract class CollectiveTokenType implements Token.Type.Collective {
     public final String title;
     private final String collectiveData;
 
@@ -21,14 +20,14 @@ public abstract class CollectiveTokenType implements TokenType {
         return title;
     }
 
-    public class CollectiveToken implements Token {
+    public class CollectiveToken implements Token.Collective {
 
-        public final IndividualToken opener, closer;
+        public final Token.Individual opener, closer;
 
-        // private final LinkedList<Cell> cells = new LinkedList<Cell>();
-        private final List<Token> children = new LinkedList<Token>();
+        // private final LinkedList<Cell> cells = new LinkedList<>();
+        private final List<Token> children = new LinkedList<>();
 
-        public CollectiveToken(IndividualToken opener, IndividualToken closer) {
+        public CollectiveToken(Token.Individual opener, Token.Individual closer) {
             this.opener = opener;
             this.closer = closer;
         }
@@ -55,27 +54,38 @@ public abstract class CollectiveTokenType implements TokenType {
         }
 
         @Override
-        public Integer getPosition() {
-            return opener == null ? 0 : opener.position;
+        public int getPosition() {
+            return opener == null ? -1 : opener.getPosition();
         }
 
         @Override
         public String getData() {
-            return opener.data + "..." + closer.data;
+            return opener.getData() + "..." + closer.getData();
         }
 
         @Override
-        public IndividualToken getFirstHandle() {
+        public Token.Individual getFirstHandle() {
             return opener;
         }
 
         @Override
-        public IndividualToken getLastHandle() {
+        public Token.Individual getLastHandle() {
             return closer;
         }
 
+        @Override
         public List<Token> getChildren() {
             return children;
+        }
+
+        @Override
+        public Individual getCloser() {
+            return closer;
+        }
+
+        @Override
+        public Individual getOpener() {
+            return opener;
         }
 
         // public Group(LinkedTree<Group> tree) {
