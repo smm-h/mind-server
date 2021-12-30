@@ -1,6 +1,8 @@
 package ir.smmh.lingu;
 
 
+import ir.smmh.lingu.impl.AbstractMishap;
+
 public interface Linter {
 
     abstract class LinterMishap extends AbstractMishap {

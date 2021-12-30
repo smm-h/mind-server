@@ -40,13 +40,13 @@ public class Port<T> {
         }
     }
 
-    public synchronized T read(Code code) {
+    public T read(Code code) {
         if (!map.containsKey(code))
             System.out.println("nothing was written on: " + title + ", for: " + code.toString());
         return map.get(code);
     }
 
-    public synchronized boolean exists(Code code) {
+    public boolean exists(Code code) {
         return map.containsKey(code);
     }
 }

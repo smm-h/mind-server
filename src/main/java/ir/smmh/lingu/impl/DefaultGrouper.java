@@ -269,7 +269,7 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
 
             tokenizer.define(tm.new Kept(d.absoluteName, d.opener, d.closer));
 
-            if (d.separator != "none")
+            if (!d.separator.equals("none"))
                 new MultitudeOpaqueButSeparated(findSourceForDefinition(d));
 
             if (d.ignore)
@@ -352,8 +352,8 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
     }
 
     public class TwoDifferentSeparators extends GrouperMishap {
-        CollectiveToken group;
-        DefaultTokenizer.Verbatim one, another;
+        final CollectiveToken group;
+        final DefaultTokenizer.Verbatim one, another;
 
         public TwoDifferentSeparators(Token.Individual token, CollectiveToken group, DefaultTokenizer.Verbatim first, DefaultTokenizer.Verbatim second) {
             super(token, true);

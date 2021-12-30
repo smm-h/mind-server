@@ -20,7 +20,7 @@ public interface Tree<T> {
 
     boolean hasChildren(T data);
 
-    String getRepresenation();
+    String getRepresentation();
 
     @SuppressWarnings("rawtypes")
     LinkedTree EMPTY_TREE = new LinkedTree<>();
@@ -35,5 +35,6 @@ public interface Tree<T> {
      * from left to right, and make each one; but before that for each node
      * disassociate it from all its children children except the leftmost one.
      */
-    // public void toBinary(); TODO
+    // public void toBinary();
+    // TODO tree business
 }

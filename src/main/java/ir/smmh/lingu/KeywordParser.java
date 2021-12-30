@@ -28,17 +28,17 @@ public abstract class KeywordParser extends SinglePassParser {
     private final String expectation;
 
     public KeywordParser(ParsibleKeywords[] values) {
-        String e = "";
+        StringBuilder e = new StringBuilder();
         for (int i = 0; i < values.length; i++) {
             String keyword = values[i].toString().toLowerCase();
             keywords.add("verbatim <" + keyword + ">");
             if (!keyword.equals("not_a_keyword") && !keyword.equals("no_more_tokens")) {
-                if (!e.equals(""))
-                    e += "|";
-                e += keyword;
+                if (!e.toString().equals(""))
+                    e.append("|");
+                e.append(keyword);
             }
         }
-        expectation = e;
+        expectation = e.toString();
     }
 
     public abstract class KeywordWalker extends CodeWalker {

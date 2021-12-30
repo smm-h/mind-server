@@ -30,7 +30,7 @@ public interface Chronometer {
     void reset();
 
     /**
-     * @return The elapsed time since the last "reset", in miliseconds.
+     * @return The elapsed time since the last "reset", in milliseconds.
      */
     double stop();
 }

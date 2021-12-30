@@ -18,7 +18,7 @@ public class Languages implements Singleton {
         return singleton;
     }
 
-    private final HashMap<String, Language> extToLanguage = new HashMap<String, Language>();
+    private final HashMap<String, Language> extToLanguage = new HashMap<>();
 
     public void associateExtWithLanguage(String ext, Language language) {
         // if (extToLanguage == null) {
@@ -31,11 +31,9 @@ public class Languages implements Singleton {
 
     public Language getLanguageByExt(String ext) {
         Language language = null;
-        if (extToLanguage != null) {
-            ext = ext.toLowerCase();
-            if (extToLanguage.containsKey(ext)) {
-                language = extToLanguage.get(ext);
-            }
+        ext = ext.toLowerCase();
+        if (extToLanguage.containsKey(ext)) {
+            language = extToLanguage.get(ext);
         }
         return language;
     }

@@ -2,7 +2,6 @@ package ir.smmh.lingu.impl;
 
 import ir.smmh.jile.common.Common;
 import ir.smmh.jile.common.Range;
-import ir.smmh.lingu.AbstractMishap;
 import ir.smmh.lingu.CodeProcess;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
 import ir.smmh.lingu.Language;
@@ -224,7 +223,7 @@ public abstract class SettingsFormalizer extends Language {
                         openedAt = i;
                         type = null;
                         name = null;
-                        nameString = "<anonymous ?>";
+                        nameString = "<anonymous ?>"; // TODO assigned but never used
                         i++;
 
                     }
@@ -235,7 +234,7 @@ public abstract class SettingsFormalizer extends Language {
                         type = array[i++];
                         openedAt = i;
                         name = null;
-                        nameString = "<anonymous " + type.getData() + ">";
+                        nameString = "<anonymous " + type.getData() + ">";  // TODO assigned but never used
                         i++;
 
                     }
@@ -245,7 +244,7 @@ public abstract class SettingsFormalizer extends Language {
                         type = array[i++];
                         name = array[i++];
                         openedAt = i;
-                        nameString = name.getData();
+                        nameString = name.getData(); // TODO assigned but never used
                         i++;
 
                     }
@@ -287,6 +286,7 @@ public abstract class SettingsFormalizer extends Language {
 
             Queue<InformalSettings> q = new LinkedList<>();
 
+            // TODO nullplay
             q.add(tree.getRoot());
 
             while (!q.isEmpty()) {
@@ -499,7 +499,7 @@ public abstract class SettingsFormalizer extends Language {
         }
 
         public void add(String key, Length length, Token.Individual... defaultValue) {
-            key = key.toLowerCase().replaceAll("( |_)", "-");
+            key = key.toLowerCase().replaceAll("([ _])", "-");
             indexToKey.put(size, key);
             keyToIndex.put(key, size);
             defaultValues.put(size, defaultValue);
@@ -581,7 +581,7 @@ public abstract class SettingsFormalizer extends Language {
                     max = (int) getNumeric(key, 1);
                     break;
                 default:
-                    min = max = 0;
+                    min = max = 0; // TODO assigned but never used
                     wrapping.issue(new InvalidLength(this, key));
                     return null;
             }

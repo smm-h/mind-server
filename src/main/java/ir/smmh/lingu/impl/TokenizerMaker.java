@@ -267,7 +267,7 @@ public class TokenizerMaker extends Language implements Singleton {
         public Streak(String title, String characters) {
             super(title);
 
-            characters = characters.replaceAll("\\[A-Z\\]", "ABCDEFGHIJKLMNOPQRSTUVWXYZ").replaceAll("\\[a-z\\]", "abcdefghijklmnopqrstuvwxyz").replaceAll("\\[0-9\\]", "0123456789");
+            characters = characters.replaceAll("[A-Z]", "ABCDEFGHIJKLMNOPQRSTUVWXYZ").replaceAll("[a-z]", "abcdefghijklmnopqrstuvwxyz").replaceAll("\\[0-9\\]", "0123456789");
 
             // if (characters.contains(NEGATOR)) {
             // characters.replace(NEGATOR, "");

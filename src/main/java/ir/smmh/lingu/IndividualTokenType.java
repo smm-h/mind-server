@@ -2,7 +2,7 @@ package ir.smmh.lingu;
 
 import java.util.Objects;
 
-public abstract class IndividualTokenType implements Token.Type.Individual {
+public class IndividualTokenType implements Token.Type.Individual {
     public final String title;
 
     public IndividualTokenType(String title) {
@@ -25,12 +25,10 @@ public abstract class IndividualTokenType implements Token.Type.Individual {
 
         @Override
         public boolean equals(Object other) {
-            if (other instanceof IndividualToken) {
-                IndividualToken token = (IndividualToken) other;
-                return IndividualTokenType.this.toString().equals(IndividualTokenType.this.toString()) && this.data.equals(token.data);
+            if (other instanceof Token.Individual) {
+                Token.Individual token = (Token.Individual) other;
+                return getType().equals(token.getType()) && getData().equals(token.getData());
             } else {
-                System.out.print("Cannot compare token with: ");
-                System.out.println(other.toString());
                 return false;
             }
         }
@@ -64,12 +62,12 @@ public abstract class IndividualTokenType implements Token.Type.Individual {
             return this;
         }
 
-        public class BrokenPiece extends IndividualToken {
-            public BrokenPiece(int start, int end) {
+        private class BrokenPiece extends IndividualToken {
+            private BrokenPiece(int start, int end) {
                 super(IndividualToken.this.getData().substring(start, end), IndividualToken.this.getPosition() + start);
             }
 
-            public BrokenPiece(int start) {
+            private BrokenPiece(int start) {
                 super(IndividualToken.this.getData().substring(start), IndividualToken.this.getPosition() + start);
             }
         }

@@ -2,8 +2,11 @@ package ir.smmh.lingu.impl;
 
 import ir.smmh.Backward;
 import ir.smmh.jile.common.Common;
-import ir.smmh.lingu.*;
+import ir.smmh.lingu.CodeProcess;
+import ir.smmh.lingu.IndividualTokenType;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
+import ir.smmh.lingu.Token;
+import ir.smmh.lingu.Tokenizer;
 import ir.smmh.lingu.impl.TokenizerMaker.Definition;
 import ir.smmh.lingu.processors.SingleProcessor;
 
@@ -16,6 +19,8 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
 
     // each character may belong to zero, one, or more streaks
     private final HashMap<Character, TreeSet<Streak>> streaksOfCharacters = new HashMap<>();
+
+    // TODO updated but never queried
     private final HashSet<Character> verbatimCharacters = new HashSet<>();
     private final HashMap<String, TreeSet<Verbatim>> verbatims = new HashMap<>();
     private final HashSet<String> ignorableNames = new HashSet<>();
@@ -378,7 +383,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         // String report = "\t" + "[" + string + "]===";
         string += (char) 0;
         char character;
-        String data = "";
+        StringBuilder data = new StringBuilder();
         TreeSet<Streak> last, curr = new TreeSet<Streak>();
         int index = 0;
         LinkedList<IndividualToken> tokens = new LinkedList<IndividualToken>();
@@ -394,7 +399,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
                 curr = new TreeSet<Streak>(streaksOfCharacters.get(character));
             } else {
                 curr = new TreeSet<Streak>();
-                if (data.equals("")) {
+                if (data.toString().equals("")) {
                     tokens.add(makeToken(new NonStreakCharacter(character), offset + index));
                     // report += "<" + character + ">";
                 }
@@ -406,13 +411,13 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
 
             if (curr.isEmpty()) {
                 if (!last.isEmpty()) {
-                    tokens.add(last.first().new IndividualToken(data, offset + index - data.length()));
+                    tokens.add(last.first().new IndividualToken(data.toString(), offset + index - data.length()));
                     // report += "[" + data + "]";
                     index--;
                 }
-                data = "";
+                data = new StringBuilder();
             } else {
-                data += character;
+                data.append(character);
             }
 
             index++;
@@ -422,9 +427,9 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         return tokens;
     }
 
-    public class NonStreakCharacter extends IndividualTokenType {
+    public static class NonStreakCharacter extends IndividualTokenType {
 
-        char data;
+        final char data;
 
         public NonStreakCharacter(char c) {
             super("unknown_character");
@@ -432,7 +437,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         }
     }
 
-    public class Verbatim extends IndividualTokenType implements Comparable<Verbatim> {
+    public static class Verbatim extends IndividualTokenType implements Comparable<Verbatim> {
 
         public final String data;
         public final LinkedList<IndividualToken> pattern;

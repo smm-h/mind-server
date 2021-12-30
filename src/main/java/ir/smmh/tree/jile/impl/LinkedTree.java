@@ -73,7 +73,7 @@ public class LinkedTree<T> implements MutableTree<T> {
 
     @Override
     public String toString() {
-        return getRepresenation();
+        return getRepresentation();
     }
 
     private Node findByData(T data) {
@@ -195,7 +195,7 @@ public class LinkedTree<T> implements MutableTree<T> {
 
     private class Node {
         final T data;
-        Node parent;
+        final Node parent;
         LinkedList<Node> children = null;
 
         Node(T data, Node parent) {
@@ -253,7 +253,7 @@ public class LinkedTree<T> implements MutableTree<T> {
     }
 
     @Override
-    public String getRepresenation() {
+    public String getRepresentation() {
         return root.getRepresentation(0);
     }
 

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface Token {
 
-    Port<Tree<Token>> tree = new Port<Tree<Token>>("Token:tree");
+    Port<Tree<Token>> tree = new Port<>("Token:tree");
 
     default String getTypeString() {
         return getType().toString();
@@ -18,8 +18,8 @@ public interface Token {
     }
 
     default boolean is(String... types) {
-        for (int i = 0; i < types.length; i++) {
-            if (is(types[i])) {
+        for (String type : types) {
+            if (is(type)) {
                 return true;
             }
         }

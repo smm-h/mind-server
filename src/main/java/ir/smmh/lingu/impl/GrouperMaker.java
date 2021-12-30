@@ -121,6 +121,7 @@ public class GrouperMaker extends Language {
 
         public class Streak extends Definition {
 
+            // TODO updated but never queried
             private final Set<Character> sta, mid, end;
 
             public final Range.Integer length;
@@ -165,10 +166,10 @@ public class GrouperMaker extends Language {
             }
 
             public String getMid() {
-                String string = "";
+                StringBuilder string = new StringBuilder();
                 for (Character c : mid)
-                    string += c;
-                return string;
+                    string.append(c);
+                return string.toString();
             }
 
             @Override

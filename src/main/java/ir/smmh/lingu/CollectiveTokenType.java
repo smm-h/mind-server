@@ -6,7 +6,7 @@ import ir.smmh.tree.jile.impl.LinkedTree;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class CollectiveTokenType implements Token.Type.Collective {
+public class CollectiveTokenType implements Token.Type.Collective {
     public final String title;
     private final String collectiveData;
 
@@ -60,6 +60,8 @@ public abstract class CollectiveTokenType implements Token.Type.Collective {
 
         @Override
         public String getData() {
+            // TODO nullplay
+            assert opener != null && closer != null;
             return opener.getData() + "..." + closer.getData();
         }
 

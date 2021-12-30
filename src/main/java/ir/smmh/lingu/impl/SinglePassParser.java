@@ -1,7 +1,6 @@
 package ir.smmh.lingu.impl;
 
 import ir.smmh.jile.common.Common;
-import ir.smmh.lingu.AbstractMishap;
 import ir.smmh.lingu.CodeProcess;
 import ir.smmh.lingu.CollectiveTokenType.CollectiveToken;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;

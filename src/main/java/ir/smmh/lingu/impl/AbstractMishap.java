@@ -1,4 +1,8 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
+
+import ir.smmh.lingu.CodeProcess;
+import ir.smmh.lingu.Mishap;
+import ir.smmh.lingu.Token;
 
 import java.util.Objects;
 
@@ -44,8 +48,13 @@ public abstract class AbstractMishap implements Mishap {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return Objects.equals(toString(), other.toString());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractMishap)) return false;
+
+        AbstractMishap that = (AbstractMishap) o;
+
+        return Objects.equals(this.toString(), that.toString());
     }
 
     @Override

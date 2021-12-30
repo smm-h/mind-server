@@ -67,7 +67,7 @@ public class CodeImpl implements Code {
     public boolean saveAs(Resource resource, boolean overwrite) {
         if (resource != null) {
             // preparing to change resource
-            if (!resource.equals(resource)) {
+            if (!resource.equals(this.resource)) {
                 // if there is nothing on disk, or
                 if (this.resource == null
                         // if the contents on disk are the same as in memory
