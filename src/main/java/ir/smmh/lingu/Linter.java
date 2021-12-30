@@ -1,12 +1,11 @@
 package ir.smmh.lingu;
 
-import ir.smmh.lingu.IndividualTokenType.IndividualToken;
 
 public interface Linter {
 
-    abstract class LinterMishap extends Mishap {
+    abstract class LinterMishap extends AbstractMishap {
 
-        public LinterMishap(IndividualToken token, boolean fatal) {
+        public LinterMishap(Token.Individual token, boolean fatal) {
             super(token, fatal);
         }
     }

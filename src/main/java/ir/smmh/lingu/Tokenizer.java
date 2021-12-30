@@ -1,12 +1,13 @@
 package ir.smmh.lingu;
 
-import ir.smmh.lingu.IndividualTokenType.IndividualToken;
+import ir.smmh.lingu.impl.CodeImpl;
+import ir.smmh.lingu.impl.Port;
 import ir.smmh.lingu.processors.Processor;
 
 import java.util.List;
 
 public interface Tokenizer extends Processor {
-    List<IndividualToken> tokenize(Code code);
+    List<Token.Individual> tokenize(CodeImpl code);
 
     // public void ignore(String name)
 
@@ -14,5 +15,5 @@ public interface Tokenizer extends Processor {
 
     // private boolean canMake(List<Token> tokens, int index, List<Token> pattern)
 
-    Port<List<IndividualToken>> tokenized = new Port<List<IndividualToken>>("Tokenizer:tokenized");
+    Port<List<Token.Individual>> tokenized = new Port<>("Tokenizer:tokenized");
 }

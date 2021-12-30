@@ -2,4 +2,4 @@
 
 [_Go up one level_](readme.md)
 
-- [SettingsFormalizer](SettingsFormalizer.java)
+- [SettingsFormalizer](../SettingsFormalizer.java)

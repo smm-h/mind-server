@@ -2,8 +2,8 @@
 
 [_Go up one level_](readme.md)
 
-- [Tokenizer](Tokenizer.java)
-- [TokenizerMaker](TokenizerMaker.java)
+- [Tokenizer](../Tokenizer.java)
+- [TokenizerMaker](../TokenizerMaker.java)
 - Grammars
     - [tree-language](../../res/nlx/tree-language.nlx)
     - [settings-formalizer](../../res/nlx/settings-formalizer.nlx)

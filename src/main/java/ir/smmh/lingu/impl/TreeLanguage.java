@@ -1,10 +1,12 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
 
 import ir.smmh.jile.common.Singleton;
-import ir.smmh.lingu.IndividualTokenType.IndividualToken;
+import ir.smmh.lingu.CodeProcess;
+import ir.smmh.lingu.Language;
+import ir.smmh.lingu.Linter;
+import ir.smmh.lingu.Token;
 import ir.smmh.tree.jile.impl.LinkedTree;
 
-import java.util.Iterator;
 import java.util.List;
 
 public class TreeLanguage extends Language implements Singleton, Linter {
@@ -26,17 +28,16 @@ public class TreeLanguage extends Language implements Singleton, Linter {
 
     public final Maker<LinkedTree<String>> treeMaker = new Maker<LinkedTree<String>>() {
         @Override
-        public LinkedTree<String> make(Code code) {
-            Code.Process process = code.new Process("making a tree");
+        public LinkedTree<String> make(CodeImpl code) {
+            CodeProcess process = code.new Process("making a tree");
             LinkedTree<String> tree = new LinkedTree<String>();
-            IndividualToken token;
+            Token.Individual token;
             // Token valueToken;
             // String last;
-            List<IndividualToken> tokens = DefaultTokenizer.tokenized.read(code);
+            List<Token.Individual> tokens = DefaultTokenizer.tokenized.read(code);
             // System.out.println(tokens.toString().replaceAll(", ", ""));
-            Iterator<IndividualToken> iterator = tokens.iterator();
-            while (iterator.hasNext()) {
-                token = iterator.next();
+            for (Token.Individual individual : tokens) {
+                token = individual;
                 switch (token.getTypeString()) {
                     case "verbatim <{>":
                         tree.goToLastAdded();
@@ -45,7 +46,7 @@ public class TreeLanguage extends Language implements Singleton, Linter {
                         tree.goBack();
                         break;
                     case "node":
-                        tree.add(token.data);
+                        tree.add(token.getData());
                         break;
                     // case "verbatim <hide>":
                     // tree.setSelectedNodeVisibility(false);

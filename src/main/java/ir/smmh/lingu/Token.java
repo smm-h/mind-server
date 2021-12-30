@@ -1,9 +1,13 @@
 package ir.smmh.lingu;
 
-import ir.smmh.lingu.IndividualTokenType.IndividualToken;
+import ir.smmh.lingu.impl.Port;
 import ir.smmh.tree.jile.Tree;
 
+import java.util.List;
+
 public interface Token {
+
+    Port<Tree<Token>> tree = new Port<Tree<Token>>("Token:tree");
 
     default String getTypeString() {
         return getType().toString();
@@ -31,15 +35,33 @@ public interface Token {
         return false;
     }
 
-    IndividualToken getFirstHandle();
+    Individual getFirstHandle();
 
-    IndividualToken getLastHandle();
+    Individual getLastHandle();
 
-    Port<Tree<Token>> tree = new Port<Tree<Token>>("Token:tree");
+    Type getType();
 
-    TokenType getType();
-
-    Integer getPosition();
+    int getPosition();
 
     String getData();
+
+    interface Individual extends Token {
+    }
+
+    interface Collective extends Token {
+        List<Token> getChildren();
+
+        Individual getOpener();
+
+        Individual getCloser();
+    }
+
+    interface Type {
+
+        interface Individual extends Type {
+        }
+
+        interface Collective extends Type {
+        }
+    }
 }

@@ -1,10 +1,15 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
 
 import ir.smmh.jile.common.Common;
-import ir.smmh.lingu.Code.Process;
+import ir.smmh.lingu.AbstractMishap;
+import ir.smmh.lingu.CodeProcess;
 import ir.smmh.lingu.CollectiveTokenType.CollectiveToken;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
+import ir.smmh.lingu.Token;
+import ir.smmh.lingu.VirtualTokenType;
+import ir.smmh.lingu.VirtualTokenType.NullToken;
 import ir.smmh.lingu.processors.SingleProcessor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -44,9 +49,9 @@ public abstract class SinglePassParser extends SingleProcessor {
 
     public abstract class CodeWalker {
 
-        private final Code.Process process;
+        private final CodeProcess process;
 
-        public CodeWalker(Process process) {
+        public CodeWalker(CodeProcess process) {
             this.process = process;
         }
 
@@ -57,10 +62,10 @@ public abstract class SinglePassParser extends SingleProcessor {
 
         private int index;
 
-        private final Stack<CollectiveToken> blocks = new Stack<CollectiveToken>();
+        private final Stack<Token.Collective> blocks = new Stack<>();
         private final Stack<Integer> blockIndices = new Stack<Integer>();
 
-        public Code.Process getProcess() {
+        public CodeProcess getProcess() {
             return process;
         }
 
@@ -68,7 +73,7 @@ public abstract class SinglePassParser extends SingleProcessor {
             return blocks.size();
         }
 
-        public void enter(CollectiveToken node) {
+        public void enter(Token.Collective node) {
 
             Objects.requireNonNull(node, "cannot enter null group");
 
@@ -251,6 +256,7 @@ public abstract class SinglePassParser extends SingleProcessor {
          * Use when expecting an identifier. Provide the appropriate {@link Resolver}
          * object to assert it must resolve it.
          */
+        @Nullable
         public String parseIdentifier(Resolver resolver) {
             if (peekMustBe("identifier", "identifier")) {
                 Token token = poll();
@@ -276,20 +282,26 @@ public abstract class SinglePassParser extends SingleProcessor {
             return false;
         }
 
+        @Nullable
         public Integer parseSignedInteger() {
             boolean negative = parseSign();
-            return parseUnsignedInteger() * (negative ? -1 : +1);
+            Integer i = parseUnsignedInteger();
+            return i == null ? null : i * (negative ? -1 : +1);
         }
 
+        @Nullable
         public Float parseSignedFloat() {
             boolean negative = parseSign();
-            return parseUnsignedFloat() * (negative ? -1 : +1);
+            Float f = parseUnsignedFloat();
+            return f == null ? null : f * (negative ? -1 : +1);
         }
 
+        @Nullable
         public Integer parseUnsignedInteger() {
             return peekMustBe("digits", "digits") ? (int) Common.valueOfString(poll().getData()) : null;
         }
 
+        @Nullable
         public Float parseUnsignedFloat() {
 
             // there must be digits
@@ -317,7 +329,7 @@ public abstract class SinglePassParser extends SingleProcessor {
             private final String expectation;
 
             public UnexpectedEndOfBlock(String expectation) {
-                super(blocks.peek().closer, true);
+                super(blocks.peek().getCloser(), true);
                 this.expectation = expectation;
             }
 
@@ -327,16 +339,16 @@ public abstract class SinglePassParser extends SingleProcessor {
         }
     }
 
-    public abstract class SinglePassParserMishap extends Mishap {
+    public static abstract class SinglePassParserMishap extends AbstractMishap {
 
-        public SinglePassParserMishap(IndividualToken token, boolean fatal) {
+        public SinglePassParserMishap(Token.Individual token, boolean fatal) {
             super(token, fatal);
         }
     }
 
-    public class IdentifierNotResolved extends SinglePassParserMishap {
+    public static class IdentifierNotResolved extends SinglePassParserMishap {
 
-        public IdentifierNotResolved(IndividualToken token) {
+        public IdentifierNotResolved(Token.Individual token) {
             super(token, true);
         }
 

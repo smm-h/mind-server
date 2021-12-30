@@ -1,4 +1,4 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
 
 public abstract class Settings {
 

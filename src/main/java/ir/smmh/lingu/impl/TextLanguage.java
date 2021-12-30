@@ -1,4 +1,6 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
+
+import ir.smmh.lingu.Language;
 
 public class TextLanguage extends Language {
 

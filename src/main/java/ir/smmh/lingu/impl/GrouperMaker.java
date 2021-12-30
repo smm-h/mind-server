@@ -1,8 +1,9 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
 
 import ir.smmh.jile.common.Range;
 import ir.smmh.jile.common.Singleton;
-import ir.smmh.lingu.IndividualTokenType.IndividualToken;
+import ir.smmh.lingu.Language;
+import ir.smmh.lingu.Token;
 import ir.smmh.lingu.processors.Multiprocessor;
 
 import java.util.HashSet;
@@ -32,7 +33,7 @@ public class GrouperMaker extends Language {
 
     public final Maker<DefaultGrouper> maker = new Maker<DefaultGrouper>() {
 
-        public DefaultGrouper make(Code code) {
+        public DefaultGrouper make(CodeImpl code) {
 
             return new DefaultGrouper(formalizer.maker.make(code));
 
@@ -58,7 +59,7 @@ public class GrouperMaker extends Language {
         public final Maker<Map<Definition, FormalSettings>> maker = new Maker<Map<Definition, FormalSettings>>() {
             @Override
             @SuppressWarnings("unchecked")
-            public Map<Definition, FormalSettings> make(Code code) {
+            public Map<Definition, FormalSettings> make(CodeImpl code) {
                 return (Map<Definition, FormalSettings>) Formalizer.super.mapMaker.make(code);
             }
         };
@@ -89,7 +90,7 @@ public class GrouperMaker extends Language {
 
         @Override
         public Settings wrap(FormalSettings src) {
-            switch (src.src.type.data) {
+            switch (src.src.type.getData()) {
                 case "streak":
                     return new Streak(src);
                 case "pattern":
@@ -206,8 +207,8 @@ public class GrouperMaker extends Language {
                 isVerbatim = new boolean[length];
 
                 for (int i = 0; i < length; i++) {
-                    IndividualToken token = src.getTokenAt("pattern", i);
-                    pattern[i] = token.data;
+                    Token.Individual token = src.getTokenAt("pattern", i);
+                    pattern[i] = token.getData();
                     isVerbatim[i] = token.getType() instanceof DefaultTokenizer.Kept;
                 }
             }
@@ -316,10 +317,10 @@ public class GrouperMaker extends Language {
                 super(src.name);
 
                 // exts
-                IndividualToken[] exts = src.getTokens("ext");
+                Token.Individual[] exts = src.getTokens("ext");
                 this.exts = new String[exts.length];
                 for (int i = 0; i < exts.length; i++)
-                    this.exts[i] = exts[i].data;
+                    this.exts[i] = exts[i].getData();
 
                 // root
                 this.root = src.getSoleString("root", false);

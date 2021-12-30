@@ -1,10 +1,11 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
 
+import ir.smmh.lingu.*;
 import ir.smmh.lingu.CollectiveTokenType.CollectiveToken;
-import ir.smmh.lingu.GrouperMaker.Definition;
-import ir.smmh.lingu.GrouperMaker.Formalizer.*;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
-import ir.smmh.lingu.SettingsFormalizer.FormalSettings;
+import ir.smmh.lingu.impl.GrouperMaker.Definition;
+import ir.smmh.lingu.impl.GrouperMaker.Formalizer.*;
+import ir.smmh.lingu.impl.SettingsFormalizer.FormalSettings;
 import ir.smmh.lingu.processors.SingleProcessor;
 import ir.smmh.tree.jile.Tree;
 
@@ -37,13 +38,13 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
     }
 
     @Override
-    public void process(Code code) {
+    public void process(CodeImpl code) {
 
         tokenizer.process(code);
 
-        Code.Process planning = code.new Process("planning-to-group");
+        CodeProcess planning = code.new Process("planning-to-group");
 
-        List<IndividualToken> tokens = DefaultTokenizer.tokenized.read(code);
+        List<Token.Individual> tokens = DefaultTokenizer.tokenized.read(code);
 
         if (groupTypes.isEmpty())
             planning.issue(new NoGroupTypeDefined(null));
@@ -51,19 +52,19 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         if (rootGroupType == null)
             planning.issue(new NoRootGroupType(null));
 
-        Map<Integer, Deepening> deepeningDuties = new HashMap<Integer, Deepening>();
+        Map<Integer, Deepening> deepeningDuties = new HashMap<>();
 
-        Map<Integer, CollectiveToken> groupingDuties = new HashMap<Integer, CollectiveToken>();
+        Map<Integer, CollectiveToken> groupingDuties = new HashMap<>();
 
-        Stack<Integer> opened = new Stack<Integer>();
+        Stack<Integer> opened = new Stack<>();
 
         outer:
         for (GroupType type : groupTypes.values()) {
             int separatorCount = 0;
-            Stack<IndividualToken> openerStack = new Stack<IndividualToken>();
+            Stack<Token.Individual> openerStack = new Stack<>();
             DefaultTokenizer.Verbatim separator = null;
             for (int index = 0; index < tokens.size(); index++) {
-                IndividualToken token = tokens.get(index);
+                Token.Individual token = tokens.get(index);
                 if (token.getType() instanceof DefaultTokenizer.Verbatim) {
                     DefaultTokenizer.Verbatim verbatim = (DefaultTokenizer.Verbatim) token.getType();
                     if (verbatim.equals(type.opener)) {
@@ -100,7 +101,7 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
 
         if (planning.finish()) {
 
-            Code.Process grouping = code.new Process("grouping");
+            CodeProcess grouping = code.new Process("grouping");
 
             // System.out.println(groupingDuties);
             // System.out.println(deepeningDuties);
@@ -118,7 +119,7 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
 
             for (int index = 0; index < tokens.size(); index++) {
                 // System.out.println(index);
-                IndividualToken token = tokens.get(index);
+                Token.Individual token = tokens.get(index);
                 if (groupingDuties.containsKey(index)) {
                     CollectiveToken duty = groupingDuties.get(index);
                     if (duty == null) {
@@ -308,16 +309,16 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         OPEN, CLOSE // , OPEN_AND_SPLIT, STITCH_AND_CLOSE, STITCH_AND_SPLIT
     }
 
-    public abstract class GrouperMishap extends Mishap {
+    public abstract static class GrouperMishap extends AbstractMishap {
 
-        public GrouperMishap(IndividualToken token, boolean fatal) {
+        public GrouperMishap(Token.Individual token, boolean fatal) {
             super(token, fatal);
         }
     }
 
     public class Unbalanced extends GrouperMishap {
 
-        public Unbalanced(IndividualToken opener) {
+        public Unbalanced(Token.Individual opener) {
             super(opener, true);
             assert opener.getType() instanceof DefaultTokenizer.Verbatim;
         }
@@ -354,7 +355,7 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         CollectiveToken group;
         DefaultTokenizer.Verbatim one, another;
 
-        public TwoDifferentSeparators(IndividualToken token, CollectiveToken group, DefaultTokenizer.Verbatim first, DefaultTokenizer.Verbatim second) {
+        public TwoDifferentSeparators(Token.Individual token, CollectiveToken group, DefaultTokenizer.Verbatim first, DefaultTokenizer.Verbatim second) {
             super(token, true);
             this.group = group;
             this.one = first;

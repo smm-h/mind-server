@@ -2,7 +2,7 @@ package ir.smmh.lingu;
 
 import java.util.Objects;
 
-public abstract class IndividualTokenType implements TokenType {
+public abstract class IndividualTokenType implements Token.Type.Individual {
     public final String title;
 
     public IndividualTokenType(String title) {
@@ -14,7 +14,7 @@ public abstract class IndividualTokenType implements TokenType {
         return title;
     }
 
-    public class IndividualToken implements Token {
+    public class IndividualToken implements Token.Individual {
         public final String data;
         public final int position;
 
@@ -45,7 +45,7 @@ public abstract class IndividualTokenType implements TokenType {
         }
 
         @Override
-        public Integer getPosition() {
+        public int getPosition() {
             return position;
         }
 
@@ -55,12 +55,12 @@ public abstract class IndividualTokenType implements TokenType {
         }
 
         @Override
-        public IndividualToken getFirstHandle() {
+        public Token.Individual getFirstHandle() {
             return this;
         }
 
         @Override
-        public IndividualToken getLastHandle() {
+        public Token.Individual getLastHandle() {
             return this;
         }
 

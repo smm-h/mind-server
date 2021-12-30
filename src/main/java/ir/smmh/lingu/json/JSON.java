@@ -1,7 +1,7 @@
 package ir.smmh.lingu.json;
 
-import ir.smmh.lingu.Code;
 import ir.smmh.lingu.Encodeable;
+import ir.smmh.lingu.impl.CodeImpl;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -14,8 +14,8 @@ public class JSON {
         java.lang.String serialize();
 
         @Override
-        default Code encode() {
-            return new Code(serialize(), "json");
+        default CodeImpl encode() {
+            return new CodeImpl(serialize(), "json");
         }
     }
 

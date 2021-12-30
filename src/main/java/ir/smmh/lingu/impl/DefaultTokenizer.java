@@ -1,9 +1,10 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
 
 import ir.smmh.Backward;
 import ir.smmh.jile.common.Common;
+import ir.smmh.lingu.*;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
-import ir.smmh.lingu.TokenizerMaker.Definition;
+import ir.smmh.lingu.impl.TokenizerMaker.Definition;
 import ir.smmh.lingu.processors.SingleProcessor;
 
 import java.util.*;
@@ -30,18 +31,18 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         }
     }
 
-    public void process(Code code) {
+    public void process(CodeImpl code) {
 
-        List<IndividualToken> stripped = new LinkedList<IndividualToken>();
-        List<IndividualToken> drawable = new LinkedList<IndividualToken>();
+        List<Token.Individual> stripped = new LinkedList<>();
+        List<Token.Individual> drawable = new LinkedList<>();
 
-        for (IndividualToken token : tokenize(code)) {
+        for (Token.Individual token : tokenize(code)) {
             drawable.add(token);
             if (!shouldBeIgnored(token))
                 stripped.add(token);
         }
 
-        Code.syntax.write(code, drawable);
+        CodeImpl.syntax.write(code, drawable);
 
         DefaultTokenizer.tokenized.write(code, stripped);
     }
@@ -82,7 +83,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         return true;
     }
 
-    public boolean shouldBeIgnored(IndividualToken token) {
+    public boolean shouldBeIgnored(Token.Individual token) {
         return namesToIgnore.contains(token.getTypeString());
     }
 
@@ -148,16 +149,16 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
     }
 
     @Override
-    public List<IndividualToken> tokenize(Code code) {
+    public List<Token.Individual> tokenize(CodeImpl code) {
 
         // start the process
-        Code.Process tokenizing = code.new Process("tokenizing");
+        CodeProcess tokenizing = code.new Process("tokenizing");
 
         // get the contents of the code as a string
         String string = code.getString();
 
         // create a new list to put the tokens in
-        List<IndividualToken> tokens = new LinkedList<IndividualToken>();
+        List<Token.Individual> tokens = new LinkedList<>();
 
         // keep track of where (in which kept, if any) we are in the code
         Kept where = null;
@@ -502,15 +503,15 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         }
     }
 
-    public abstract class TokenizerMishap extends Mishap {
-        public TokenizerMishap(IndividualToken token, boolean fatal) {
+    public abstract static class TokenizerMishap extends AbstractMishap {
+        public TokenizerMishap(Token.Individual token, boolean fatal) {
             super(token, fatal);
         }
     }
 
     public class UnknownCharacter extends TokenizerMishap {
 
-        public UnknownCharacter(IndividualToken token) {
+        public UnknownCharacter(Token.Individual token) {
             super(token, true);
             assert token.getType() instanceof NonStreakCharacter;
         }
@@ -525,7 +526,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
     }
 
     public class UnclosedKept extends TokenizerMishap {
-        public UnclosedKept(IndividualToken token) {
+        public UnclosedKept(Token.Individual token) {
             super(token, true);
             assert token.getType() instanceof Kept.Keeper;
         }

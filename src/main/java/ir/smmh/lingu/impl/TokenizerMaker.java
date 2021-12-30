@@ -1,9 +1,11 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
 
 import ir.smmh.jile.common.Common;
 import ir.smmh.jile.common.Resource;
 import ir.smmh.jile.common.Singleton;
-import ir.smmh.lingu.IndividualTokenType.IndividualToken;
+import ir.smmh.lingu.CodeProcess;
+import ir.smmh.lingu.Language;
+import ir.smmh.lingu.Token;
 import ir.smmh.lingu.processors.Multiprocessor;
 import ir.smmh.lingu.processors.SingleProcessor;
 
@@ -56,20 +58,20 @@ public class TokenizerMaker extends Language implements Singleton {
         processor.extend(new SingleProcessor() {
 
             @Override
-            public void process(Code code) {
+            public void process(CodeImpl code) {
 
-                Map<IndividualToken, Resource> links = new HashMap<>();
-                Iterator<IndividualToken> iterator = DefaultTokenizer.tokenized.read(code).iterator();
+                Map<Token.Individual, Resource> links = new HashMap<>();
+                Iterator<Token.Individual> iterator = DefaultTokenizer.tokenized.read(code).iterator();
 
                 while (iterator.hasNext()) {
-                    IndividualToken token = iterator.next();
+                    Token.Individual token = iterator.next();
                     if (token.is("verbatim <import>")) {
                         token = iterator.next();
-                        links.put(token, TokenizerMaker.singleton.find(token.data));
+                        links.put(token, TokenizerMaker.singleton.find(token.getData()));
                     }
                 }
 
-                Code.links.write(code, links);
+                CodeImpl.links.write(code, links);
                 // TODO update instead of over-writing
             }
         });
@@ -78,16 +80,16 @@ public class TokenizerMaker extends Language implements Singleton {
     // public static final Port<Tokenizer> port = new Port<Tokenizer>();
 
     public final Maker<DefaultTokenizer> maker = new Maker<DefaultTokenizer>() {
-        public DefaultTokenizer make(Code code) {
+        public DefaultTokenizer make(CodeImpl code) {
             // Tokenizer tokenizer = augment(new Tokenizer(), code);
             // port.write(code, tokenizer);
             // return tokenizer;
             return augment(new DefaultTokenizer(), code);
         }
 
-        private DefaultTokenizer augment(DefaultTokenizer beingMade, Code code) {
+        private DefaultTokenizer augment(DefaultTokenizer beingMade, CodeImpl code) {
 
-            Code.Process making = code.new Process("making a tokenizer");
+            CodeProcess making = code.new Process("making a tokenizer");
 
             Objects.requireNonNull(beingMade);
 
@@ -95,10 +97,10 @@ public class TokenizerMaker extends Language implements Singleton {
 
             String[] _string = {"single_quotes", "double_quotes"};
             // System.out.println(tokens.toString().replaceAll(", ", ""));
-            List<IndividualToken> tokens = DefaultTokenizer.tokenized.read(code);
+            List<Token.Individual> tokens = DefaultTokenizer.tokenized.read(code);
             // System.out.println(tokens);
-            Iterator<IndividualToken> iterator = tokens.iterator();
-            IndividualToken head, tail;
+            Iterator<Token.Individual> iterator = tokens.iterator();
+            Token.Individual head, tail;
             while (iterator.hasNext()) {
                 head = iterator.next();
                 String opener, closer, title, characters;
@@ -109,7 +111,7 @@ public class TokenizerMaker extends Language implements Singleton {
                             case "single_quotes":
                             case "double_quotes":
                                 try {
-                                    augment(beingMade, new Code(Resource.of("nlx/" + tail.data + ".nlx")));
+                                    augment(beingMade, new CodeImpl(Resource.of("nlx/" + tail.getData() + ".nlx")));
                                 } catch (Exception e) {
                                     // process.add(meta.new ImportFailed());
                                     System.out.println("import failed");
@@ -137,7 +139,7 @@ public class TokenizerMaker extends Language implements Singleton {
                             making.issue(new UnexpectedToken(tail, "identifier"));
                             break;
                         }
-                        beingMade.ignore(tail.data);
+                        beingMade.ignore(tail.getData());
                         break;
                     case "verbatim <keep>":
                         tail = iterator.next();
@@ -145,7 +147,7 @@ public class TokenizerMaker extends Language implements Singleton {
                             making.issue(new UnexpectedToken(tail, "string"));
                             break;
                         }
-                        opener = Common.escape(tail.data);
+                        opener = Common.escape(tail.getData());
                         tail = iterator.next();
                         if (!tail.is("verbatim <...>")) {
                             making.issue(new UnexpectedToken(tail, "<...>"));
@@ -156,7 +158,7 @@ public class TokenizerMaker extends Language implements Singleton {
                             making.issue(new UnexpectedToken(tail, "string"));
                             break;
                         }
-                        closer = Common.escape(tail.data);
+                        closer = Common.escape(tail.getData());
                         tail = iterator.next();
                         if (!tail.is("verbatim <as>")) {
                             making.issue(new UnexpectedToken(tail, "<as>"));
@@ -167,7 +169,7 @@ public class TokenizerMaker extends Language implements Singleton {
                             making.issue(new UnexpectedToken(tail, "identifier"));
                             break;
                         }
-                        title = tail.data;
+                        title = tail.getData();
                         beingMade.define(new Kept(title, opener, closer));
                         break;
                     case "verbatim <streak>":
@@ -175,7 +177,7 @@ public class TokenizerMaker extends Language implements Singleton {
                         switch (tail.getTypeString()) {
                             case "single_quotes":
                             case "double_quotes":
-                                characters = tail.data;
+                                characters = tail.getData();
                                 if (!tail.is(_string)) {
                                     making.issue(new UnexpectedToken(tail, "string"));
                                     break;
@@ -190,7 +192,7 @@ public class TokenizerMaker extends Language implements Singleton {
                                     making.issue(new UnexpectedToken(tail, "identifier"));
                                     break;
                                 }
-                                title = tail.data;
+                                title = tail.getData();
                                 beingMade.define(new Streak(title, Common.escape(characters)));
                                 break;
                             default:
@@ -202,7 +204,7 @@ public class TokenizerMaker extends Language implements Singleton {
                         switch (tail.getTypeString()) {
                             case "single_quotes":
                             case "double_quotes":
-                                beingMade.define(new Verbatim(Common.escape(tail.data)));
+                                beingMade.define(new Verbatim(Common.escape(tail.getData())));
                                 break;
                             default:
                                 making.issue(new UnexpectedToken(head, tail, "string"));

@@ -1,8 +1,12 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
 
 import ir.smmh.jile.common.Common;
 import ir.smmh.jile.common.Range;
+import ir.smmh.lingu.AbstractMishap;
+import ir.smmh.lingu.CodeProcess;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
+import ir.smmh.lingu.Language;
+import ir.smmh.lingu.Token;
 import ir.smmh.lingu.processors.Multiprocessor;
 import ir.smmh.tree.jile.impl.LinkedTree;
 
@@ -48,9 +52,9 @@ public abstract class SettingsFormalizer extends Language {
      * and its fallback.
      */
 
-    public FormalSettings absolve(InformalSettings subj, FormalSettings parentForName, FormalSettings parentForValues, Code.Process process) {
+    public FormalSettings absolve(InformalSettings subj, FormalSettings parentForName, FormalSettings parentForValues, CodeProcess process) {
 
-        FormalizationBlueprint foundType = subj.type == null ? null : findType(subj.type.data);
+        FormalizationBlueprint foundType = subj.type == null ? null : findType(subj.type.getData());
 
         // absolve name
         String absolvedName;
@@ -59,7 +63,7 @@ public abstract class SettingsFormalizer extends Language {
             absolvedName = "";
 
         } else {
-            absolvedName = subj.name.data;
+            absolvedName = subj.name.getData();
 
             boolean postfix = absolvedName.charAt(0) == '-';
             boolean suffix = absolvedName.charAt(absolvedName.length() - 1) == '-';
@@ -79,11 +83,11 @@ public abstract class SettingsFormalizer extends Language {
         } else {
             // absolve values
             boolean complete = true;
-            IndividualToken[][] absolvedValues = new IndividualToken[foundType.size()][];
+            Token.Individual[][] absolvedValues = new IndividualToken[foundType.size()][];
             for (int index = 0; index < foundType.size(); index++) {
                 String key = foundType.getKey(index);
 
-                IndividualToken[] absoluteValue = subj.get(key);
+                Token.Individual[] absoluteValue = subj.get(key);
 
                 if (absoluteValue == null || absoluteValue.length == 0)
                     if (parentForValues != null)
@@ -105,9 +109,9 @@ public abstract class SettingsFormalizer extends Language {
         }
     }
 
-    public abstract class SettingsFormalizerMishap extends Mishap {
+    public static abstract class SettingsFormalizerMishap extends AbstractMishap {
 
-        public SettingsFormalizerMishap(IndividualToken token, boolean fatal) {
+        public SettingsFormalizerMishap(Token.Individual token, boolean fatal) {
             super(token, fatal);
         }
     }
@@ -130,16 +134,16 @@ public abstract class SettingsFormalizer extends Language {
     public final Maker<LinkedTree<InformalSettings>> treeMaker = new Maker<LinkedTree<InformalSettings>>() {
 
         @Override
-        public LinkedTree<InformalSettings> make(Code code) {
+        public LinkedTree<InformalSettings> make(CodeImpl code) {
 
-            Code.Process making = code.new Process("making a settings tree");
+            CodeProcess making = code.new Process("making a settings tree");
 
-            List<IndividualToken> tokens = DefaultTokenizer.tokenized.read(code);
+            List<Token.Individual> tokens = DefaultTokenizer.tokenized.read(code);
 
-            IndividualToken[] array = new IndividualToken[tokens.size()];
+            Token.Individual[] array = new IndividualToken[tokens.size()];
 
             int index = 0;
-            for (IndividualToken token : tokens)
+            for (Token.Individual token : tokens)
                 array[index++] = token;
 
             LinkedTree<InformalSettings> tree = new LinkedTree<InformalSettings>();
@@ -161,7 +165,7 @@ public abstract class SettingsFormalizer extends Language {
                 // value
                 else if (array[i + 1].is("verbatim <:>")) {
 
-                    IndividualToken key = array[i];
+                    Token.Individual key = array[i];
                     i++;
 
                     if (!key.is("identifier")) {
@@ -188,17 +192,17 @@ public abstract class SettingsFormalizer extends Language {
 
                         j--;
 
-                        IndividualToken[] a = new IndividualToken[j - i];
+                        Token.Individual[] a = new IndividualToken[j - i];
 
                         while (i < j) {
                             a[j - i - 1] = array[i++];
                         }
 
-                        r.set(key.data, a);
+                        r.set(key.getData(), a);
 
                     } else {
 
-                        r.set(key.data, array[i]);
+                        r.set(key.getData(), array[i]);
 
                     }
 
@@ -210,7 +214,7 @@ public abstract class SettingsFormalizer extends Language {
                 // opening
                 else {
 
-                    IndividualToken type, name;
+                    Token.Individual type, name;
                     String nameString;
                     int openedAt;
 
@@ -231,7 +235,7 @@ public abstract class SettingsFormalizer extends Language {
                         type = array[i++];
                         openedAt = i;
                         name = null;
-                        nameString = "<anonymous " + type.data + ">";
+                        nameString = "<anonymous " + type.getData() + ">";
                         i++;
 
                     }
@@ -241,7 +245,7 @@ public abstract class SettingsFormalizer extends Language {
                         type = array[i++];
                         name = array[i++];
                         openedAt = i;
-                        nameString = name.data;
+                        nameString = name.getData();
                         i++;
 
                     }
@@ -267,21 +271,21 @@ public abstract class SettingsFormalizer extends Language {
     public final Maker<Map<? extends Settings, FormalSettings>> mapMaker = new Maker<Map<? extends Settings, FormalSettings>>() {
 
         @Override
-        public synchronized Map<? extends Settings, FormalSettings> make(Code code) {
+        public synchronized Map<? extends Settings, FormalSettings> make(CodeImpl code) {
 
             LinkedTree<InformalSettings> tree = treeMaker.make(code);
 
-            Code.Process formalizing = code.new Process("formalizing those settings");
+            CodeProcess formalizing = code.new Process("formalizing those settings");
 
-            Map<String, FormalSettings> namedToFormal = new HashMap<String, FormalSettings>();
+            Map<String, FormalSettings> namedToFormal = new HashMap<>();
 
-            Map<InformalSettings, FormalSettings> informalToFormal = new HashMap<InformalSettings, FormalSettings>();
+            Map<InformalSettings, FormalSettings> informalToFormal = new HashMap<>();
 
-            Map<Settings, FormalSettings> wrappedToFormal = new HashMap<Settings, FormalSettings>();
+            Map<Settings, FormalSettings> wrappedToFormal = new HashMap<>();
 
             FormalSettings nameParent, valuesParent;
 
-            Queue<InformalSettings> q = new LinkedList<InformalSettings>();
+            Queue<InformalSettings> q = new LinkedList<>();
 
             q.add(tree.getRoot());
 
@@ -304,7 +308,7 @@ public abstract class SettingsFormalizer extends Language {
                 if (informal.sets("like")) { // && informal.isReferenceKey("like")) {
 
                     // inherit from semantical parent
-                    String k = informal.get("like")[0].data; // TODO multiple semantical parents
+                    String k = informal.get("like")[0].getData(); // TODO multiple semantical parents
                     if (namedToFormal.containsKey(k)) {
                         valuesParent = namedToFormal.get(k); // namedToFormal.get(k).src;
                     }
@@ -336,7 +340,7 @@ public abstract class SettingsFormalizer extends Language {
 
                 // I am ready to be conceived with my nominal parent and my biological
                 // parent.
-                Code.Process absolving = code.new Process("absolving: " + informal.getIdentity());
+                CodeProcess absolving = code.new Process("absolving: " + informal.getIdentity());
                 FormalSettings formal = absolve(informal, nameParent, valuesParent, absolving);
                 absolving.finish();
                 informalToFormal.put(informal, formal);
@@ -362,16 +366,16 @@ public abstract class SettingsFormalizer extends Language {
 
     class InformalSettings {
 
-        public final IndividualToken type, name;
-        private final Map<String, IndividualToken[]> data = new HashMap<String, IndividualToken[]>();
-        // private final Set<String> referenceKeys = new HashSet<String>();
+        public final Token.Individual type, name;
+        private final Map<String, Token.Individual[]> data = new HashMap<>();
+        // private final Set<String> referenceKeys = new HashSet<>();
 
-        public InformalSettings(IndividualToken type, IndividualToken name) {
+        public InformalSettings(Token.Individual type, Token.Individual name) {
             this.type = type;
             this.name = name;
         }
 
-        public IndividualToken[] get(String key) {
+        public Token.Individual[] get(String key) {
             return data.get(key);
         }
 
@@ -381,12 +385,12 @@ public abstract class SettingsFormalizer extends Language {
             if (type == null)
                 identity += "<untyped>";
             else
-                identity += type.data;
+                identity += type.getData();
 
             if (name == null)
                 identity += "<unnamed>";
             else
-                identity += " '" + name.data + "'";
+                identity += " '" + name.getData() + "'";
 
             return identity;
         }
@@ -417,7 +421,7 @@ public abstract class SettingsFormalizer extends Language {
             return data.containsKey(key);
         }
 
-        public void set(String key, IndividualToken... value) {
+        public void set(String key, Token.Individual... value) {
             data.put(key, value);
         }
 
@@ -435,21 +439,21 @@ public abstract class SettingsFormalizer extends Language {
         ONE, ONE_OR_TWO, ONE_OR_MORE
     }
 
-    public IndividualToken DEFAULT_VALUE_NUMERIC_ZERO;
-    public IndividualToken DEFAULT_VALUE_NUMERIC_ONE;
-    public IndividualToken DEFAULT_VALUE_STRING_DOUBLE_QUOTES;
-    public IndividualToken DEFAULT_VALUE_STRING_SINGLE_QUOTES;
-    public IndividualToken DEFAULT_VALUE_BOOLEAN_FALSE;
-    public IndividualToken DEFAULT_VALUE_BOOLEAN_TRUE;
-    public IndividualToken DEFAULT_VALUE_NONE;
+    public Token.Individual DEFAULT_VALUE_NUMERIC_ZERO;
+    public Token.Individual DEFAULT_VALUE_NUMERIC_ONE;
+    public Token.Individual DEFAULT_VALUE_STRING_DOUBLE_QUOTES;
+    public Token.Individual DEFAULT_VALUE_STRING_SINGLE_QUOTES;
+    public Token.Individual DEFAULT_VALUE_BOOLEAN_FALSE;
+    public Token.Individual DEFAULT_VALUE_BOOLEAN_TRUE;
+    public Token.Individual DEFAULT_VALUE_NONE;
 
     private void setDefaultValues() {
 
-        List<IndividualToken> defaultValues = DefaultTokenizer.tokenized.read(new Code("0\n1\n\"\"\n''\nfalse true\nnone", this));
+        List<Token.Individual> defaultValues = DefaultTokenizer.tokenized.read(new CodeImpl("0\n1\n\"\"\n''\nfalse true\nnone", this));
 
         // System.out.println(defaultValues);
 
-        Iterator<IndividualToken> iterator = defaultValues.iterator();
+        Iterator<Token.Individual> iterator = defaultValues.iterator();
 
         DEFAULT_VALUE_NUMERIC_ZERO = iterator.next();
         DEFAULT_VALUE_NUMERIC_ONE = iterator.next();
@@ -474,11 +478,11 @@ public abstract class SettingsFormalizer extends Language {
         private int size = 0;
         private final HashMap<String, Integer> keyToIndex = new HashMap<String, Integer>();
         private final HashMap<Integer, String> indexToKey = new HashMap<Integer, String>();
-        private final HashMap<Integer, IndividualToken[]> defaultValues = new HashMap<Integer, IndividualToken[]>();
+        private final HashMap<Integer, Token.Individual[]> defaultValues = new HashMap<>();
         private final HashMap<Integer, Length> validLengths = new HashMap<Integer, Length>();
         protected boolean nameMatters = true;
 
-        public void add(String key, IndividualToken... defaultValue) {
+        public void add(String key, Token.Individual... defaultValue) {
             add(key, Length.ONE, defaultValue);
         }
 
@@ -494,7 +498,7 @@ public abstract class SettingsFormalizer extends Language {
                 add(key, DEFAULT_VALUE_BOOLEAN_FALSE);
         }
 
-        public void add(String key, Length length, IndividualToken... defaultValue) {
+        public void add(String key, Length length, Token.Individual... defaultValue) {
             key = key.toLowerCase().replaceAll("( |_)", "-");
             indexToKey.put(size, key);
             keyToIndex.put(key, size);
@@ -503,7 +507,7 @@ public abstract class SettingsFormalizer extends Language {
             size++;
         }
 
-        public IndividualToken[] getDefaultValue(int index) {
+        public Token.Individual[] getDefaultValue(int index) {
             return defaultValues.get(index);
         }
 
@@ -529,12 +533,12 @@ public abstract class SettingsFormalizer extends Language {
         public final InformalSettings src;
         public final String name;
         public final FormalizationBlueprint type;
-        private final IndividualToken[][] values;
+        private final Token.Individual[][] values;
         public final boolean complete;
 
-        private Code.Process wrapping;
+        private CodeProcess wrapping;
 
-        public FormalSettings(InformalSettings src, String name, FormalizationBlueprint type, IndividualToken[][] absolvedValues, boolean complete) {
+        public FormalSettings(InformalSettings src, String name, FormalizationBlueprint type, Token.Individual[][] absolvedValues, boolean complete) {
             this.src = src;
             this.name = name;
             this.type = type;
@@ -607,18 +611,18 @@ public abstract class SettingsFormalizer extends Language {
         }
 
         public String getStringAt(String key, int index, boolean escape) {
-            String s = getTokens(key)[index].data;
+            String s = getTokens(key)[index].getData();
             if (escape)
                 return Common.escape(s);
             else
                 return s;
         }
 
-        public IndividualToken getTokenAt(String key, int index) {
+        public Token.Individual getTokenAt(String key, int index) {
             return getTokens(key)[index];
         }
 
-        public IndividualToken[] getTokens(String key) {
+        public Token.Individual[] getTokens(String key) {
             return values[type.getIndex(key)];
         }
 
@@ -640,22 +644,22 @@ public abstract class SettingsFormalizer extends Language {
         }
 
         public String getRepresentation() {
-            String string = name;
+            StringBuilder builder = new StringBuilder(name);
             if (type != null) {
-                string += " as " + type.name + " = {";
+                builder.append(" as ").append(type.name).append(" = {");
                 for (int index = 0; index < values.length; index++) {
                     if (index > 0)
-                        string += ", ";
-                    string += type.getKey(index) + ": " + values[index];
+                        builder.append(", ");
+                    builder.append(type.getKey(index)).append(": ").append(Arrays.toString(values[index]));
                 }
-                string += "}";
+                builder.append("}");
             }
-            return string;
+            return builder.toString();
         }
     }
 
-    class Unbalanced extends SettingsFormalizerMishap {
-        public Unbalanced(IndividualToken token) {
+    static class Unbalanced extends SettingsFormalizerMishap {
+        public Unbalanced(Token.Individual token) {
             super(token, true);
         }
 
@@ -686,11 +690,11 @@ public abstract class SettingsFormalizer extends Language {
 
         private final String validValues;
 
-        public InvalidValue(IndividualToken token) {
+        public InvalidValue(Token.Individual token) {
             this(token, null);
         }
 
-        public InvalidValue(IndividualToken token, String validValues) {
+        public InvalidValue(Token.Individual token, String validValues) {
             super(token, true);
             this.validValues = validValues;
         }

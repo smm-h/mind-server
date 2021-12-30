@@ -1,15 +1,15 @@
 package ir.smmh.lingu.processors;
 
-import ir.smmh.lingu.Code;
 import ir.smmh.lingu.Linter;
+import ir.smmh.lingu.impl.CodeImpl;
 
 public interface Processor extends Linter {
 
     /**
      * Only ever call this inside another {@link Processor#process} overriding or
-     * the {@link Code#beProcessed}.
+     * the {@link CodeImpl#beProcessed}.
      */
-    void process(Code code);
+    void process(CodeImpl code);
 
     boolean canBeExtended();
 

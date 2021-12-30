@@ -1,6 +1,7 @@
 package ir.smmh.lingu;
 
 import ir.smmh.jile.common.Resource;
+import ir.smmh.lingu.impl.CodeImpl;
 import ir.smmh.lingu.processors.Processor;
 
 import java.util.Objects;
@@ -44,10 +45,10 @@ public abstract class Language {
 
     public abstract class Maker<T> implements Linter {
 
-        public abstract T make(Code code);
+        public abstract T make(CodeImpl code);
 
         public T makeFrom(String address) {
-            return make(new Code(find(address), Language.this));
+            return make(new CodeImpl(find(address), Language.this));
         }
 
     }

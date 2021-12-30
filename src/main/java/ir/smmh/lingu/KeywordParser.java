@@ -1,6 +1,8 @@
 package ir.smmh.lingu;
 
-import ir.smmh.lingu.Code.Process;
+import ir.smmh.lingu.impl.DefaultTokenizer;
+import ir.smmh.lingu.impl.SinglePassParser;
+import ir.smmh.lingu.impl.TokenizerMaker;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,7 +42,7 @@ public abstract class KeywordParser extends SinglePassParser {
     }
 
     public abstract class KeywordWalker extends CodeWalker {
-        public KeywordWalker(Process process) {
+        public KeywordWalker(CodeProcess process) {
             super(process);
         }
 

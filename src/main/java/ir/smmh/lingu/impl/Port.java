@@ -1,4 +1,6 @@
-package ir.smmh.lingu;
+package ir.smmh.lingu.impl;
+
+import ir.smmh.lingu.Code;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +24,7 @@ import java.util.Map;
  */
 public class Port<T> {
 
-    private final Map<Code, T> map = new HashMap<Code, T>();
+    private final Map<Code, T> map = new HashMap<>();
 
     private final String title;
 
@@ -30,7 +32,7 @@ public class Port<T> {
         this.title = title;
     }
 
-    public synchronized void write(Code code, T thing) {
+    public synchronized void write(CodeImpl code, T thing) {
         if (thing != null) {
             map.put(code, thing);
         } else {

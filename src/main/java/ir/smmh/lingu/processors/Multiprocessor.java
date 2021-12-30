@@ -1,6 +1,6 @@
 package ir.smmh.lingu.processors;
 
-import ir.smmh.lingu.Code;
+import ir.smmh.lingu.impl.CodeImpl;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -25,7 +25,7 @@ public class Multiprocessor implements Processor {
     }
 
     @Override
-    public final void process(Code code) {
+    public final void process(CodeImpl code) {
         for (Processor processor : processors)
             processor.process(code);
     }

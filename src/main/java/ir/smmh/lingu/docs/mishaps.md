@@ -13,25 +13,25 @@ stores which [individual token](tokenization.md#individualtoken) it originated f
 
 ## All mishap subclasses
 
-- `LinterMishap` (defined in [Linter](Linter.java))
+- `LinterMishap` (defined in [Linter](../Linter.java))
     - `UnexpectedToken`
-- `GrouperMishap` (defined in [Grouper](Grouper.java))
+- `GrouperMishap` (defined in [Grouper](../Grouper.java))
     - `Unbalanced`
     - `NoGroupTypeDefined`
     - `NoRootGroupDefined`
     - `TwoDifferentSeparators`
     - `MultitudeOpaqueButSeparated`
     - `MultitudeNotOpaqueButIgnored`
-- `SettingsFormalizerMishap` (defined in [SettingsFormalizer](SettingsFormalizer.java))
+- `SettingsFormalizerMishap` (defined in [SettingsFormalizer](../SettingsFormalizer.java))
     - `BothPrefixAndSuffix`
     - `Unbalanced`
     - `InvalidLength`
     - `InvalidValue`
-- `SinglePassParserMishap` (defined in [SinglePassParser](SinglePassParser.java))
+- `SinglePassParserMishap` (defined in [SinglePassParser](../SinglePassParser.java))
     - `CannotEnterNullGroup`
     - `UnexpectedEndOfBlock`
     - `IdentifierNotResolved`
-- `TokenizerMishap` (defined in [Tokenizer](Tokenizer.java))
+- `TokenizerMishap` (defined in [Tokenizer](../Tokenizer.java))
     - `UnknownCharacter`
     - `UnknownKept`
 - `LindenmayerMishap` (defined in [TurtleGraphicsLanguage](TurtleGraphicsLanguage.java))
