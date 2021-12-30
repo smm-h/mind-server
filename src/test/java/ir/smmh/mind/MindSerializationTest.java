@@ -32,6 +32,5 @@ class MindSerializationTest {
     @AfterAll
     static void afterAll() {
         MutableImpl.cleanEverything();
-        System.out.println("ALL DONE.");
     }
 }
