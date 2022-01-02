@@ -42,7 +42,7 @@ public class CollectiveTokenType implements Token.Type.Collective {
         public String toString() {
             // return getType().openerData + "..." + getType().closerData;
             return getType().collectiveData;
-            // TODO add interactibility to parts of texts
+            // TODO add interactability to parts of texts
         }
 
         public String getTypeString() {
