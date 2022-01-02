@@ -6,16 +6,13 @@ package ir.smmh.util.jile;
  */
 public interface Or<This, That> {
 
-    Or<This, That> makeThis(This a);
-
-    Or<This, That> makeThat(That b);
-
     boolean isThis();
-
-    boolean isThat();
 
     This getThis();
 
     That getThat();
 
+    default boolean sameAs(Or<This, That> other) {
+        return isThis() == other.isThis();
+    }
 }

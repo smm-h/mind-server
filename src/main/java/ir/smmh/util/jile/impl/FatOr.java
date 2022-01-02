@@ -2,6 +2,7 @@ package ir.smmh.util.jile.impl;
 
 /**
  * Takes double the size in memory, but is checked
+ * @see SlimOr
  */
 public class FatOr<This, That> extends AbstractOr<This, That> {
 
@@ -10,7 +11,7 @@ public class FatOr<This, That> extends AbstractOr<This, That> {
     private final boolean isThis;
 
     @SuppressWarnings("unchecked")
-    private FatOr(Object object, boolean isThis) {
+    public FatOr(Object object, boolean isThis) {
         this.isThis = isThis;
         if (isThis) {
             thisObject = (This) object;
@@ -21,24 +22,17 @@ public class FatOr<This, That> extends AbstractOr<This, That> {
         }
     }
 
-    @Override
-    public FatOr<This, That> makeThis(This object) {
+    public static <This, That> FatOr<This, That> makeThis(This object) {
         return new FatOr<>(object, true);
     }
 
-    @Override
-    public FatOr<This, That> makeThat(That object) {
+    public static <This, That> FatOr<This, That> makeThat(That object) {
         return new FatOr<>(object, false);
     }
 
     @Override
     public boolean isThis() {
         return isThis;
-    }
-
-    @Override
-    public boolean isThat() {
-        return !isThis;
     }
 
     @Override
