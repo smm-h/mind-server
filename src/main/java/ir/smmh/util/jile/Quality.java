@@ -6,6 +6,7 @@ package ir.smmh.util.jile;
  * <a href=https://docs.oracle.com/javase/tutorial/java/generics/wildcardGuidelines.html></a>
  */
 public interface Quality<T> {
+
     static <T> boolean is(T o, Quality<? super T> q) {
         return q.holdsFor(o);
     }
@@ -14,16 +15,15 @@ public interface Quality<T> {
         return !q.holdsFor(o);
     }
 
-    static <T> Quality<? super T> not(Quality<? super T> q) {
+    static <T> Quality<T> not(Quality<T> q) {
         return o -> !q.holdsFor(o);
     }
 
-    static <T> Quality<? super T> and(Quality<? super T> q, Quality<? super T> r) {
+    static <T> Quality<T> and(Quality<T> q, Quality<T> r) {
         return o -> q.holdsFor(o) && r.holdsFor(o);
     }
 
-    // TODO TEST
-    static <T> Quality<? super T> or(Quality<? super T> q, Quality<? super T> r) {
+    static <T> Quality<T> or(Quality<T> q, Quality<T> r) {
         return o -> q.holdsFor(o) || r.holdsFor(o);
     }
 

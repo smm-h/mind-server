@@ -4,7 +4,6 @@ import ir.smmh.Backward;
 
 import static ir.smmh.util.jile.Quality.is;
 
-// TODO TEST
 public interface Qualities {
     interface Class {
         Quality<java.lang.Class<?>> ANNOTATION
