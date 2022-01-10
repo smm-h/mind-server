@@ -31,6 +31,8 @@ public class LookupImpl<T extends Named> implements Lookup.Iterable<T> {
 
     public static class Mutable<T extends Named> extends LookupImpl<T> implements Lookup.Mutable<T>, ir.smmh.util.Mutable.Injected {
 
+        private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
+
         public Mutable(@Nullable java.lang.Iterable<T> iterable) {
             addAll(iterable);
         }
@@ -44,8 +46,6 @@ public class LookupImpl<T extends Named> implements Lookup.Iterable<T> {
             map.put(name, element);
             return true;
         }
-
-        private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
         @Override
         public @NotNull ir.smmh.util.Mutable getInjectedMutable() {

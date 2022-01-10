@@ -9,22 +9,7 @@ import java.util.Map;
 
 public class MindsAPI extends StandardAPI {
 
-    public interface Method extends ir.smmh.api.Method.Plain {
-    }
-
     private final Map<String, Mind.Mutable> minds = new HashMap<>();
-
-    private Mind.Mutable getMind(JSONObject p) {
-        return minds.get(p.getString("mind"));
-    }
-
-    private Idea.Mutable getIdea(JSONObject p, String key) {
-        return getMind(p).findIdeaByName(p.getString(key));
-    }
-
-    private Idea.Mutable getIdea(JSONObject p) {
-        return getIdea(p, "idea");
-    }
 
     public MindsAPI() {
         defineMethod("mind", (Method) (p) -> {
@@ -86,5 +71,20 @@ public class MindsAPI extends StandardAPI {
             r.put("has", getIdea(p).has(p.getString("name")));
             return respond(r);
         });
+    }
+
+    private Mind.Mutable getMind(JSONObject p) {
+        return minds.get(p.getString("mind"));
+    }
+
+    private Idea.Mutable getIdea(JSONObject p, String key) {
+        return getMind(p).findIdeaByName(p.getString(key));
+    }
+
+    private Idea.Mutable getIdea(JSONObject p) {
+        return getIdea(p, "idea");
+    }
+
+    public interface Method extends ir.smmh.api.Method.Plain {
     }
 }

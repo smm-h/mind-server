@@ -1,8 +1,9 @@
 package ir.smmh.lingu;
 
-import ir.smmh.lingu.impl.DefaultTokenizer;
 import ir.smmh.lingu.impl.SinglePassParser;
+import ir.smmh.lingu.impl.TokenizerImpl;
 import ir.smmh.lingu.impl.TokenizerMaker;
+import ir.smmh.lingu.impl.UnexpectedToken;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +11,7 @@ import java.util.Set;
 /**
  * Limitations:
  * <ul>
- * <li>Only works with {@link DefaultTokenizer.Verbatim} keywords.*</li>
+ * <li>Only works with {@link TokenizerImpl.Verbatim} keywords.*</li>
  * <li>Keywords have to be entirely made up of lowercase letters.</li>
  * </ul>
  * <p>
@@ -24,13 +25,13 @@ import java.util.Set;
  */
 public abstract class KeywordParser extends SinglePassParser {
 
-    private final Set<String> keywords = new HashSet<String>();
+    private final Set<String> keywords = new HashSet<>();
     private final String expectation;
 
     public KeywordParser(ParsibleKeywords[] values) {
         StringBuilder e = new StringBuilder();
-        for (int i = 0; i < values.length; i++) {
-            String keyword = values[i].toString().toLowerCase();
+        for (ParsibleKeywords value : values) {
+            String keyword = value.toString().toLowerCase();
             keywords.add("verbatim <" + keyword + ">");
             if (!keyword.equals("not_a_keyword") && !keyword.equals("no_more_tokens")) {
                 if (!e.toString().equals(""))
@@ -39,6 +40,16 @@ public abstract class KeywordParser extends SinglePassParser {
             }
         }
         expectation = e.toString();
+    }
+
+    /**
+     * Implement this interface only with enums whose values correspond to your
+     * keywords but are all in caps. Also you must include these two values:
+     * {@code NO_MORE_TOKENS}, {@code NOT_A_KEYWORD}.
+     *
+     * @see KeywordParser
+     */
+    public interface ParsibleKeywords {
     }
 
     public abstract class KeywordWalker extends CodeWalker {
@@ -63,15 +74,5 @@ public abstract class KeywordParser extends SinglePassParser {
                 return "NO_MORE_TOKENS";
             }
         }
-    }
-
-    /**
-     * Implement this interface only with enums whose values correspond to your
-     * keywords but are all in caps. Also you must include these two values:
-     * {@code NO_MORE_TOKENS}, {@code NOT_A_KEYWORD}.
-     *
-     * @see KeywordParser
-     */
-    public interface ParsibleKeywords {
     }
 }

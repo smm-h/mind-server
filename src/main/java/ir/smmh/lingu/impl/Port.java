@@ -2,6 +2,7 @@ package ir.smmh.lingu.impl;
 
 import ir.smmh.lingu.Code;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +23,7 @@ import java.util.Map;
  *
  * </blockquote>
  */
+@ParametersAreNonnullByDefault
 public class Port<T> {
 
     private final Map<Code, T> map = new HashMap<>();
@@ -32,17 +34,13 @@ public class Port<T> {
         this.title = title;
     }
 
-    public synchronized void write(CodeImpl code, T thing) {
-        if (thing != null) {
-            map.put(code, thing);
-        } else {
-            throw new NullPointerException("cannot write null on: " + title);
-        }
+    public synchronized void write(Code code, T thing) {
+        map.put(code, thing);
     }
 
     public T read(Code code) {
         if (!map.containsKey(code))
-            System.out.println("nothing was written on: " + title + ", for: " + code.toString());
+            System.out.println("nothing was written on: " + title + ", for: " + code);
         return map.get(code);
     }
 

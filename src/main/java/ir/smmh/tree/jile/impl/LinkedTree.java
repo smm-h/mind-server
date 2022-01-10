@@ -1,8 +1,8 @@
 package ir.smmh.tree.jile.impl;
 
 import ir.smmh.Backward;
-import ir.smmh.jile.common.Common;
 import ir.smmh.tree.jile.MutableTree;
+import ir.smmh.util.FunctionalUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -12,8 +12,9 @@ import java.util.function.Predicate;
 
 public class LinkedTree<T> implements MutableTree<T> {
 
-    private Node pointer, root;
     private final Map<T, Node> nodes;
+    public Function<Object, String> toText = Object::toString;
+    private Node pointer, root;
 
     public LinkedTree() {
         this.nodes = new HashMap<>();
@@ -31,7 +32,7 @@ public class LinkedTree<T> implements MutableTree<T> {
     @Override
     public <T2> LinkedTree<T2> convert(Function<T, T2> convertor) {
 
-        LinkedTree<T2> converted = new LinkedTree<T2>();
+        LinkedTree<T2> converted = new LinkedTree<>();
 
         converted.addFrom(Objects.requireNonNull(root), convertor);
 
@@ -191,7 +192,152 @@ public class LinkedTree<T> implements MutableTree<T> {
         return key;
     }
 
-    public Function<Object, String> toText = Object::toString;
+    @Override
+    public String getRepresentation() {
+        return root.getRepresentation(0);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return root == null;
+    }
+
+    @Override
+    public T getRoot() {
+        if (root == null)
+            return null;
+        else
+            return root.data;
+    }
+
+    public T getFirstChild(T data) {
+        Node f = findByData(data);
+        if (f.children == null || f.children.isEmpty())
+            return null;
+        else
+            return f.children.get(0).data;
+    }
+
+    public T getLastChild(T data) {
+        Node f = findByData(data);
+        if (f.children == null || f.children.isEmpty())
+            return null;
+        else
+            return f.children.get(f.children.size() - 1).data;
+    }
+
+    public T getMiddleChild(T data) {
+        Node f = findByData(data);
+        if (f.children == null || f.children.isEmpty())
+            return null;
+        else
+            return f.children.get((f.children.size() - 1) / 2).data;
+    }
+
+    @Override
+    public T getParent(T data) {
+        Node f = findByData(data);
+        if (f.parent == null)
+            return null;
+        else
+            return f.parent.data;
+    }
+
+    @Override
+    public Iterable<T> getChildren(T data) {
+        return new ShallowIterable(findByData(data));
+    }
+
+    @Override
+    public List<T> getLeaf() {
+        return filterNodes(new LinkedList<>(), node -> !node.hasChildren());
+    }
+
+    private <C extends Collection<T>> C filterNodes(C collection, Predicate<Node> predicate) {
+        if (root != null)
+            root.filterNode(collection, predicate);
+        return collection;
+    }
+
+    public <C extends Collection<T>> C filter(C collection, Predicate<T> predicate) {
+        if (root != null)
+            root.filterValue(collection, predicate);
+        return collection;
+    }
+
+    @Override
+    public boolean hasChildren(T data) {
+        LinkedList<Node> children = findByData(data).children;
+        return children != null && !children.isEmpty();
+    }
+
+    public Iterator<T> depthFirstIterator() {
+        return depthFirstIterator(root);
+    }
+
+    public Iterator<T> depthFirstIterator(T from) {
+        return depthFirstIterator(findByData(from));
+    }
+
+    private Iterator<T> depthFirstIterator(Node iterationRoot) {
+        return new Iterator<>() {
+            private Stack<Node> stack;
+
+            @Override
+            public boolean hasNext() {
+                if (stack == null) {
+                    stack = new Stack<>();
+                    stack.push(iterationRoot);
+                }
+                return !stack.isEmpty();
+            }
+
+            @Override
+            public T next() {
+                Node next = stack.pop();
+
+                if (next.children != null)
+                    for (Node child : FunctionalUtil.over(next.children.descendingIterator()))
+                        stack.push(child);
+
+                return next.data;
+            }
+        };
+    }
+
+    public Iterator<T> breadthFirstIterator() {
+        return breadthFirstIterator(root);
+    }
+
+    public Iterator<T> breadthFirstIterator(T from) {
+        return breadthFirstIterator(findByData(from));
+    }
+
+    private Iterator<T> breadthFirstIterator(Node iterationRoot) {
+        return new Iterator<>() {
+            private Stack<Node> stack;
+
+            @Override
+            public boolean hasNext() {
+                if (stack == null) {
+                    stack = new Stack<>();
+                    stack.push(iterationRoot);
+                }
+                return !stack.isEmpty();
+            }
+
+            @Override
+            public T next() {
+                Node next = stack.pop();
+
+                if (next.children != null)
+                    for (Node child : FunctionalUtil.over(next.children.descendingIterator()))
+                        stack.push(child);
+
+                return next.data;
+            }
+        };
+    }
 
     private class Node {
         final T data;
@@ -252,57 +398,6 @@ public class LinkedTree<T> implements MutableTree<T> {
         }
     }
 
-    @Override
-    public String getRepresentation() {
-        return root.getRepresentation(0);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return root == null;
-    }
-
-    @Override
-    public T getRoot() {
-        if (root == null)
-            return null;
-        else
-            return root.data;
-    }
-
-    public T getFirstChild(T data) {
-        Node f = findByData(data);
-        if (f.children == null || f.children.isEmpty())
-            return null;
-        else
-            return f.children.get(0).data;
-    }
-
-    public T getLastChild(T data) {
-        Node f = findByData(data);
-        if (f.children == null || f.children.isEmpty())
-            return null;
-        else
-            return f.children.get(f.children.size() - 1).data;
-    }
-
-    public T getMiddleChild(T data) {
-        Node f = findByData(data);
-        if (f.children == null || f.children.isEmpty())
-            return null;
-        else
-            return f.children.get((f.children.size() - 1) / 2).data;
-    }
-
-    @Override
-    public T getParent(T data) {
-        Node f = findByData(data);
-        if (f.parent == null)
-            return null;
-        else
-            return f.parent.data;
-    }
-
     private class ShallowIterable implements Iterable<T> {
         private final Node node;
 
@@ -329,101 +424,5 @@ public class LinkedTree<T> implements MutableTree<T> {
                 }
             };
         }
-    }
-
-    @Override
-    public Iterable<T> getChildren(T data) {
-        return new ShallowIterable(findByData(data));
-    }
-
-    @Override
-    public List<T> getLeaf() {
-        return filterNodes(new LinkedList<>(), node -> !node.hasChildren());
-    }
-
-    private <C extends Collection<T>> C filterNodes(C collection, Predicate<Node> predicate) {
-        if (root != null)
-            root.filterNode(collection, predicate);
-        return collection;
-    }
-
-    public <C extends Collection<T>> C filter(C collection, Predicate<T> predicate) {
-        if (root != null)
-            root.filterValue(collection, predicate);
-        return collection;
-    }
-
-    @Override
-    public boolean hasChildren(T data) {
-        LinkedList<Node> children = findByData(data).children;
-        return children != null && !children.isEmpty();
-    }
-
-    public Iterator<T> depthFirstIterator() {
-        return depthFirstIterator(root);
-    }
-
-    public Iterator<T> depthFirstIterator(T from) {
-        return depthFirstIterator(findByData(from));
-    }
-
-    private Iterator<T> depthFirstIterator(Node iterationRoot) {
-        return new Iterator<T>() {
-            private Stack<Node> stack;
-
-            @Override
-            public boolean hasNext() {
-                if (stack == null) {
-                    stack = new Stack<>();
-                    stack.push(iterationRoot);
-                }
-                return !stack.isEmpty();
-            }
-
-            @Override
-            public T next() {
-                Node next = stack.pop();
-
-                if (next.children != null)
-                    for (Node child : Common.over(next.children.descendingIterator()))
-                        stack.push(child);
-
-                return next.data;
-            }
-        };
-    }
-
-    public Iterator<T> breadthFirstIterator() {
-        return breadthFirstIterator(root);
-    }
-
-    public Iterator<T> breadthFirstIterator(T from) {
-        return breadthFirstIterator(findByData(from));
-    }
-
-    private Iterator<T> breadthFirstIterator(Node iterationRoot) {
-        return new Iterator<>() {
-            private Stack<Node> stack;
-
-            @Override
-            public boolean hasNext() {
-                if (stack == null) {
-                    stack = new Stack<>();
-                    stack.push(iterationRoot);
-                }
-                return !stack.isEmpty();
-            }
-
-            @Override
-            public T next() {
-                Node next = stack.pop();
-
-                if (next.children != null)
-                    for (Node child : Common.over(next.children.descendingIterator()))
-                        stack.push(child);
-
-                return next.data;
-            }
-        };
     }
 }

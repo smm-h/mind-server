@@ -7,6 +7,6 @@ public interface Grouper {
 
     // public Tree<Group> aggroup(Code code);
 
-    Port<CollectiveToken> grouped = new Port<CollectiveToken>("Grouper:grouped");
+    Port<CollectiveToken> grouped = new Port<>("Grouper:grouped");
 
 }

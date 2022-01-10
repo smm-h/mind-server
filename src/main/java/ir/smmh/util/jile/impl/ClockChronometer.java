@@ -12,12 +12,11 @@ import java.time.Instant;
 public class ClockChronometer implements Chronometer {
 
     private final Clock clock;
+    private Instant then = null;
 
     public ClockChronometer(Clock clock) {
         this.clock = clock;
     }
-
-    private Instant then = null;
 
     public void reset() {
         then = clock.instant();

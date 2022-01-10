@@ -23,7 +23,7 @@ public interface JSONUtil {
     }
 
     static <C extends Collection<Boolean>> @NotNull C arrayOfBooleans(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination) {
-        return arrayOfBooleans(object, key, destination, Util::itself);
+        return arrayOfBooleans(object, key, destination, FunctionalUtil::itself);
     }
 
     static <T, C extends Collection<T>> @NotNull C arrayOfBooleans(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination, @NotNull Function<Boolean, T> convertor) {
@@ -37,7 +37,7 @@ public interface JSONUtil {
     }
 
     static <C extends Collection<String>> @NotNull C arrayOfStrings(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination) {
-        return arrayOfStrings(object, key, destination, Util::itself);
+        return arrayOfStrings(object, key, destination, FunctionalUtil::itself);
     }
 
     static <T, C extends Collection<T>> @NotNull C arrayOfStrings(@NotNull final JSONObject object, @NotNull final String key, @NotNull C destination, @NotNull Function<String, T> convertor) {

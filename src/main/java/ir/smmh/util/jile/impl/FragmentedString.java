@@ -115,7 +115,7 @@ public class FragmentedString implements Typeable {
 
         // insert the right half
         if (fragment.getLengthOfFromIndexToEnd(position) != 0)
-            fragments.add(index++, fragment.fromIndexToEnd(position));
+            fragments.add(index, fragment.fromIndexToEnd(position));
     }
 
     @Override
@@ -242,14 +242,14 @@ public class FragmentedString implements Typeable {
     }
 
     @Override
-    public void setCaret(int position) {
-        finishTyping();
-        caret = position;
+    public int getCaret() {
+        return caret;
     }
 
     @Override
-    public int getCaret() {
-        return caret;
+    public void setCaret(int position) {
+        finishTyping();
+        caret = position;
     }
 
     private interface Fragment {

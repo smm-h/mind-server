@@ -1,13 +1,13 @@
 package ir.smmh.lingu.impl;
 
-import ir.smmh.jile.common.Common;
 import ir.smmh.lingu.CodeProcess;
 import ir.smmh.lingu.CollectiveTokenType.CollectiveToken;
+import ir.smmh.lingu.IndividualTokenType;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
 import ir.smmh.lingu.Token;
-import ir.smmh.lingu.VirtualTokenType;
-import ir.smmh.lingu.VirtualTokenType.NullToken;
 import ir.smmh.lingu.processors.SingleProcessor;
+import ir.smmh.util.StringUtil;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * Limitations:
  * <ul>
- * <li>Only works with {@link DefaultTokenizer.Verbatim} keywords.*</li>
+ * <li>Only works with {@link TokenizerImpl.Verbatim} keywords.*</li>
  * <li>Keywords have to be made up entirely of lowercase letters.</li>
  * </ul>
  * <p>
@@ -29,40 +29,54 @@ import java.util.*;
  */
 public abstract class SinglePassParser extends SingleProcessor {
 
-    private final Map<String, CollectiveToken> namedGroups = new HashMap<String, CollectiveToken>();
+    private final Map<String, CollectiveToken> namedGroups = new HashMap<>();
 
     public void nameGroup(String name, CollectiveToken block) {
         namedGroups.put(name, Objects.requireNonNull(block));
     }
 
     public CollectiveToken findGroup(String name) {
-        if (name == null)
-            return null;
-        else
-            return namedGroups.get(name);
+        return namedGroups.get(name);
     }
 
     public interface Resolver {
         boolean canBeResolved(String identifier);
     }
 
+    public static abstract class SinglePassParserMishap extends MishapImpl.Caused {
+
+        public SinglePassParserMishap(Token.Individual token, boolean fatal) {
+            super(token, fatal);
+        }
+    }
+
+    public static class IdentifierNotResolved extends SinglePassParserMishap {
+
+        public IdentifierNotResolved(Token.Individual token) {
+            super(token, true);
+        }
+
+        @Override
+        public String getReport() {
+            return "Identifier `" + token.getData() + "` could not be resolved.";
+        }
+    }
+
     public abstract class CodeWalker {
 
         private final CodeProcess process;
-
-        public CodeWalker(CodeProcess process) {
-            this.process = process;
-        }
-
+        private final Stack<Token.Collective> blocks = new Stack<>();
+        private final Stack<Integer> blockIndices = new Stack<>();
+        IndividualToken DUMMY_TOKEN = new IndividualTokenType("DUMMY").new IndividualToken("", 0);
         /**
          * must never be null
          */
         private Token[] array = new Token[0];
-
         private int index;
 
-        private final Stack<Token.Collective> blocks = new Stack<>();
-        private final Stack<Integer> blockIndices = new Stack<Integer>();
+        public CodeWalker(CodeProcess process) {
+            this.process = process;
+        }
 
         public CodeProcess getProcess() {
             return process;
@@ -71,6 +85,18 @@ public abstract class SinglePassParser extends SingleProcessor {
         public int getDepth() {
             return blocks.size();
         }
+
+        // public class CannotEnterNullGroup extends SinglePassParserMishap {
+
+        // public CannotEnterNullGroup(IndividualToken token) {
+        // super(token, true);
+        // }
+
+        // @Override
+        // public String getReport() {
+        // return "Cannot enter null group";
+        // }
+        // }
 
         public void enter(Token.Collective node) {
 
@@ -88,18 +114,6 @@ public abstract class SinglePassParser extends SingleProcessor {
             // remake the array
             remakeArray();
         }
-
-        // public class CannotEnterNullGroup extends SinglePassParserMishap {
-
-        // public CannotEnterNullGroup(IndividualToken token) {
-        // super(token, true);
-        // }
-
-        // @Override
-        // public String getReport() {
-        // return "Cannot enter null group";
-        // }
-        // }
 
         public void reenter() {
             index = 0;
@@ -140,14 +154,16 @@ public abstract class SinglePassParser extends SingleProcessor {
         /**
          * Returns the next available token. However, if the end of the block has been
          * reached, if {@code optional} is false a {@code null} is returned, and if it
-         * is true a {@link NullToken} will be returned, to avoid unnecessary
+         * is true a dummy token will be returned, to avoid unnecessary
          * {@code NullPointerException}s. So either set optional to true, or prepare for
          * getting a {@code null}.
          */
+        @Nullable
+        @Contract("_, true -> !null")
         public Token peek(String peekingFor, boolean optional) {
             if (array.length == 0 || index >= array.length) {
                 if (optional) {
-                    return VirtualTokenType.singleton().nullToken;
+                    return DUMMY_TOKEN;
                 } else {
                     process.issue(new UnexpectedEndOfBlock(peekingFor));
                     // index++;
@@ -212,7 +228,7 @@ public abstract class SinglePassParser extends SingleProcessor {
          * it is safe to ignore null outcomes. You can also name the block.
          */
 
-        public CollectiveToken parseGroup(String type, String name) {
+        public CollectiveToken parseGroup(String type, @Nullable String name) {
             if (peekMustBe(type, "group_type <" + type + ">")) {
                 CollectiveToken group = (CollectiveToken) poll();
                 if (name != null)
@@ -243,12 +259,7 @@ public abstract class SinglePassParser extends SingleProcessor {
          * to assert it must contain it.
          */
         public String parseIdentifier(Map<String, ?> map) {
-            return parseIdentifier(map == null ? null : new Resolver() {
-                @Override
-                public boolean canBeResolved(String identifier) {
-                    return map.containsKey(identifier);
-                }
-            });
+            return parseIdentifier(map::containsKey);
         }
 
         /**
@@ -256,16 +267,15 @@ public abstract class SinglePassParser extends SingleProcessor {
          * object to assert it must resolve it.
          */
         @Nullable
-        public String parseIdentifier(Resolver resolver) {
+        public String parseIdentifier(@Nullable Resolver resolver) {
             if (peekMustBe("identifier", "identifier")) {
                 Token token = poll();
                 String identifier = token.getData();
                 if (resolver != null && !resolver.canBeResolved(identifier)) {
                     getProcess().issue(new IdentifierNotResolved((IndividualToken) token));
                     return null;
-                } else {
-                    return identifier;
                 }
+                return identifier;
             } else {
                 return null;
             }
@@ -297,7 +307,7 @@ public abstract class SinglePassParser extends SingleProcessor {
 
         @Nullable
         public Integer parseUnsignedInteger() {
-            return peekMustBe("digits", "digits") ? (int) Common.valueOfString(poll().getData()) : null;
+            return peekMustBe("digits", "digits") ? (int) StringUtil.valueOfString(poll().getData()) : null;
         }
 
         @Nullable
@@ -317,7 +327,7 @@ public abstract class SinglePassParser extends SingleProcessor {
                     }
                 }
 
-                return Common.valueOfString(string).floatValue();
+                return StringUtil.valueOfString(string).floatValue();
             } else {
                 return null;
             }
@@ -335,25 +345,6 @@ public abstract class SinglePassParser extends SingleProcessor {
             public String getReport() {
                 return "Unexpected end of block; instead was expecting: `" + expectation + "`";
             }
-        }
-    }
-
-    public static abstract class SinglePassParserMishap extends AbstractMishap {
-
-        public SinglePassParserMishap(Token.Individual token, boolean fatal) {
-            super(token, fatal);
-        }
-    }
-
-    public static class IdentifierNotResolved extends SinglePassParserMishap {
-
-        public IdentifierNotResolved(Token.Individual token) {
-            super(token, true);
-        }
-
-        @Override
-        public String getReport() {
-            return "Identifier `" + token.getData() + "` could not be resolved.";
         }
     }
 }

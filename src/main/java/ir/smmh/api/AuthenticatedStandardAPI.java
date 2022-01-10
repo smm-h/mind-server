@@ -14,9 +14,9 @@ import org.json.JSONObject;
  */
 public abstract class AuthenticatedStandardAPI<A> extends StandardAPI {
 
-    public abstract A authenticate(JSONObject authentication);
-
     public final int AUTHENTICATION_FAILED = defineError(12, "Authentication failed");
+
+    public abstract A authenticate(JSONObject authentication);
 
     @SuppressWarnings("unchecked")
     public @NotNull JSONObject processAuthenticatedMethod(@NotNull Method.AuthenticatedMethod<?> uncheckedMethod, @Nullable JSONObject authentication, @NotNull JSONObject parameters) {

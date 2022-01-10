@@ -2,55 +2,54 @@ package ir.smmh.lingu.impl;
 
 import ir.smmh.lingu.*;
 import ir.smmh.lingu.CollectiveTokenType.CollectiveToken;
-import ir.smmh.lingu.IndividualTokenType.IndividualToken;
-import ir.smmh.lingu.impl.GrouperMaker.Definition;
-import ir.smmh.lingu.impl.GrouperMaker.Formalizer.*;
-import ir.smmh.lingu.impl.SettingsFormalizer.FormalSettings;
+import ir.smmh.lingu.groupermaker.impl.*;
+import ir.smmh.lingu.impl.GrouperMaker.DefinitionImpl;
 import ir.smmh.lingu.processors.SingleProcessor;
+import ir.smmh.lingu.settings.FormalSettings;
 import ir.smmh.tree.jile.Tree;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 // import ir.smmh.jile.common.Convertor;
 // import ir.smmh.tree.jile.TraversibleTree;
 
-public class DefaultGrouper extends SingleProcessor implements Grouper {
+public class GrouperImpl extends SingleProcessor implements Grouper {
 
-    private final Map<String, GroupType> groupTypes = new HashMap<String, GroupType>();
+    private final Map<String, GroupType> groupTypes = new HashMap<>();
+    private final TokenizerImpl tokenizer = new TokenizerImpl();
 
+    private final Map<GrouperMaker.Definition, FormalSettings> sources;
+    private final PriorityQueue<GrouperMaker.Definition> schedule = new PriorityQueue<>(Comparator.comparingInt(GrouperMaker.Definition::getPriority));
     private GroupType rootGroupType = null;
 
-    private final DefaultTokenizer tokenizer = new DefaultTokenizer();
-
-    private final Map<Definition, FormalSettings> sources;
-
-    private FormalSettings findSourceForDefinition(Definition definition) {
-        return sources.get(definition);
-    }
-
-    public DefaultGrouper(Map<Definition, FormalSettings> sources) {
+    public GrouperImpl(Map<GrouperMaker.Definition, FormalSettings> sources) {
 
         this.sources = sources;
 
-        for (Definition key : sources.keySet())
+        for (GrouperMaker.Definition key : sources.keySet())
             schedule(key);
 
         defineAsScheduled();
     }
 
+    private FormalSettings findSourceForDefinition(DefinitionImpl definition) {
+        return sources.get(definition);
+    }
+
     @Override
-    public void process(CodeImpl code) {
+    public void process(@NotNull Code code) {
 
         tokenizer.process(code);
 
-        CodeProcess planning = code.new Process("planning-to-group");
+        CodeProcess planning = new CodeProcessImpl(code, "planning-to-group");
 
-        List<Token.Individual> tokens = DefaultTokenizer.tokenized.read(code);
+        List<Token.Individual> tokens = TokenizerImpl.tokenized.read(code);
 
         if (groupTypes.isEmpty())
-            planning.issue(new NoGroupTypeDefined(null));
+            planning.issue(new NoGroupTypeDefined());
 
         if (rootGroupType == null)
-            planning.issue(new NoRootGroupType(null));
+            planning.issue(new NoRootGroupType());
 
         Map<Integer, Deepening> deepeningDuties = new HashMap<>();
 
@@ -62,11 +61,11 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         for (GroupType type : groupTypes.values()) {
             int separatorCount = 0;
             Stack<Token.Individual> openerStack = new Stack<>();
-            DefaultTokenizer.Verbatim separator = null;
+            TokenizerImpl.Verbatim separator = null;
             for (int index = 0; index < tokens.size(); index++) {
                 Token.Individual token = tokens.get(index);
-                if (token.getType() instanceof DefaultTokenizer.Verbatim) {
-                    DefaultTokenizer.Verbatim verbatim = (DefaultTokenizer.Verbatim) token.getType();
+                if (token.getType() instanceof TokenizerImpl.Verbatim) {
+                    TokenizerImpl.Verbatim verbatim = (TokenizerImpl.Verbatim) token.getType();
                     if (verbatim.equals(type.opener)) {
                         openerStack.push(token);
                         opened.push(index);
@@ -99,9 +98,9 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
 
         // TokenType cellType; TODO
 
-        if (planning.finish()) {
+        if (planning.finishSilently()) {
 
-            CodeProcess grouping = code.new Process("grouping");
+            CodeProcess grouping = new CodeProcessImpl(code, "grouping");
 
             // System.out.println(groupingDuties);
             // System.out.println(deepeningDuties);
@@ -109,13 +108,13 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
             // LinkedTree<CollectiveToken> tree = new LinkedTree<CollectiveToken>();
             // tree.addAndGoTo(rootGroupType.new CollectiveToken(0, code.getSize() - 1));
 
-            Stack<CollectiveToken> roots = new Stack<CollectiveToken>();
+            Stack<CollectiveToken> roots = new Stack<>();
             roots.push(rootGroupType.new CollectiveToken());
 
             // LinkedTree<Token> vtree = new LinkedTree<Token>();
             // vtree.addAndGoTo(new VirtualToken("<ROOT>"));
 
-            Stack<CollectiveToken> groups = new Stack<CollectiveToken>();
+            Stack<CollectiveToken> groups = new Stack<>();
 
             for (int index = 0; index < tokens.size(); index++) {
                 // System.out.println(index);
@@ -156,11 +155,11 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
                 }
             }
 
-            if (grouping.finish()) {
+            if (grouping.finishSilently()) {
 
                 CollectiveToken root = Objects.requireNonNull(roots.pop());
 
-                DefaultGrouper.grouped.write(code, root);
+                GrouperImpl.grouped.write(code, root);
 
                 Tree<Token> t = root.toTree();
 
@@ -177,52 +176,19 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         }
     }
 
-    public class GroupType extends CollectiveTokenType implements Comparable<GroupType> {
-
-        public final DefaultTokenizer.Verbatim opener, closer, separator;
-
-        public final IndividualTokenType cellType;
-
-        public GroupType(String name, DefaultTokenizer.Verbatim opener, DefaultTokenizer.Verbatim closer, DefaultTokenizer.Verbatim separator, IndividualTokenType cellType) {
-            super("group_type <" + name + ">", opener.data + "..." + closer.data);
-            this.opener = opener;
-            this.closer = closer;
-            this.separator = separator;
-            this.cellType = cellType;
-        }
-
-        @Override
-        public int compareTo(GroupType other) {
-            int comparison = -((Integer) this.opener.data.length()).compareTo(other.opener.data.length());
-            if (comparison == 0)
-                comparison = this.opener.compareTo(other.opener);
-            return comparison;
-        }
-    }
-
-    private final PriorityQueue<Definition> schedule = new PriorityQueue<Definition>(new Comparator<Definition>() {
-
-        @Override
-        public int compare(Definition one, Definition other) {
-            return ((Integer) one.getPriority()).compareTo(other.getPriority());
-        }
-
-    });
-
-    public void schedule(Definition definition) {
+    public void schedule(GrouperMaker.Definition definition) {
         schedule.add(definition);
     }
 
     public void defineAsScheduled() {
         while (!schedule.isEmpty()) {
-            Definition definition = schedule.poll();
-            // System.out.println("::: " + definition.getPriority() + "\t" +
-            // definition.src.name);
+            GrouperMaker.Definition definition = schedule.poll();
+            // System.out.println("::: " + definition.getPriority() + "\t" + definition.src.name);
             define(definition);
         }
     }
 
-    public void define(Definition definition) {
+    public void define(GrouperMaker.Definition definition) {
 
         if (definition instanceof Metadata)
             define((Metadata) definition);
@@ -239,50 +205,46 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         else if (definition instanceof RelativePattern)
             define((RelativePattern) definition);
 
-        else {
-            // no more define-ables
-        }
+        else throw new RuntimeException("undefined");
     }
 
     public void define(Metadata d) {
         rootGroupType = Objects.requireNonNull(groupTypes.get(d.root));
         System.out.println("Root group type was set");
         // for (int i = 0; i < m.exts.length; i++)
-        // Languages.singleton().associateExtWithLanguage(m.exts[i], language);
+        // Languages.getInstance().associateExtWithLanguage(m.exts[i], language);
     }
-
-    private static final TokenizerMaker tm = TokenizerMaker.singleton();
 
     public void define(Streak d) {
 
-        tokenizer.define(tm.new Streak(d.absoluteName, d.getMid()));
+        tokenizer.define(new TokenizerMaker.Streak(d.getAbsoluteName(), d.getMid()));
 
         if (d.ignore)
-            if (!tokenizer.ignore(d.absoluteName))
+            if (!tokenizer.ignore(d.getAbsoluteName()))
                 // TODO turn this into a mishap
-                System.out.println("Could not ignore: " + d.absoluteName);
+                System.out.println("Could not ignore: " + d.getAbsoluteName());
     }
 
     public void define(Multitude d) {
 
         if (d.opaque) {
 
-            tokenizer.define(tm.new Kept(d.absoluteName, d.opener, d.closer));
+            tokenizer.define(new TokenizerMaker.Kept(d.getAbsoluteName(), d.opener, d.closer));
 
             if (!d.separator.equals("none"))
                 new MultitudeOpaqueButSeparated(findSourceForDefinition(d));
 
             if (d.ignore)
-                if (!tokenizer.ignore(d.absoluteName))
+                if (!tokenizer.ignore(d.getAbsoluteName()))
                     // TODO turn this into a mishap
-                    System.out.println("Could not ignore: " + d.absoluteName);
+                    System.out.println("Could not ignore: " + d.getAbsoluteName());
 
         } else {
 
-            DefaultTokenizer.Verbatim opener = tokenizer.define(tm.new Verbatim(d.opener));
-            DefaultTokenizer.Verbatim closer = tokenizer.define(tm.new Verbatim(d.closer));
-            DefaultTokenizer.Verbatim separator = tokenizer.define(tm.new Verbatim(d.separator));
-            groupTypes.put(d.absoluteName, new GroupType(d.absoluteName, opener, closer, separator, null));
+            TokenizerImpl.Verbatim opener = tokenizer.define(new TokenizerMaker.Verbatim(d.opener));
+            TokenizerImpl.Verbatim closer = tokenizer.define(new TokenizerMaker.Verbatim(d.closer));
+            TokenizerImpl.Verbatim separator = tokenizer.define(new TokenizerMaker.Verbatim(d.separator));
+            groupTypes.put(d.getAbsoluteName(), new GroupType(d.getAbsoluteName(), opener, closer, separator, null));
 
             if (d.ignore)
                 new MultitudeNotOpaqueButIgnored(findSourceForDefinition(d));
@@ -296,7 +258,7 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
 
         for (int i = 0; i < d.pattern.length; i++) {
             if (d.isVerbatim[i]) {
-                tokenizer.define(tm.new Verbatim(d.pattern[i]));
+                tokenizer.define(new TokenizerMaker.Verbatim(d.pattern[i]));
             }
         }
     }
@@ -309,18 +271,34 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         OPEN, CLOSE // , OPEN_AND_SPLIT, STITCH_AND_CLOSE, STITCH_AND_SPLIT
     }
 
-    public abstract static class GrouperMishap extends AbstractMishap {
+    public static class GroupType extends CollectiveTokenType implements Comparable<GroupType> {
 
-        public GrouperMishap(Token.Individual token, boolean fatal) {
-            super(token, fatal);
+        public final TokenizerImpl.Verbatim opener, closer, separator;
+
+        public final IndividualTokenType cellType;
+
+        public GroupType(String name, TokenizerImpl.Verbatim opener, TokenizerImpl.Verbatim closer, TokenizerImpl.Verbatim separator, IndividualTokenType cellType) {
+            super("group_type <" + name + ">", opener.data + "..." + closer.data);
+            this.opener = opener;
+            this.closer = closer;
+            this.separator = separator;
+            this.cellType = cellType;
+        }
+
+        @Override
+        public int compareTo(GroupType other) {
+            int comparison = -Integer.compare(this.opener.data.length(), other.opener.data.length());
+            if (comparison == 0)
+                comparison = this.opener.compareTo(other.opener);
+            return comparison;
         }
     }
 
-    public class Unbalanced extends GrouperMishap {
+    public static class Unbalanced extends MishapImpl.Caused {
 
         public Unbalanced(Token.Individual opener) {
             super(opener, true);
-            assert opener.getType() instanceof DefaultTokenizer.Verbatim;
+            assert opener.getType() instanceof TokenizerImpl.Verbatim;
         }
 
         @Override
@@ -329,46 +307,7 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         }
     }
 
-    public class NoGroupTypeDefined extends GrouperMishap {
-        public NoGroupTypeDefined(IndividualToken token) {
-            super(token, true);
-        }
-
-        @Override
-        public String getReport() {
-            return "No group types are defined";
-        }
-    }
-
-    public class NoRootGroupType extends GrouperMishap {
-        public NoRootGroupType(IndividualToken token) {
-            super(token, true);
-        }
-
-        @Override
-        public String getReport() {
-            return "Root group type is not set";
-        }
-    }
-
-    public class TwoDifferentSeparators extends GrouperMishap {
-        final CollectiveToken group;
-        final DefaultTokenizer.Verbatim one, another;
-
-        public TwoDifferentSeparators(Token.Individual token, CollectiveToken group, DefaultTokenizer.Verbatim first, DefaultTokenizer.Verbatim second) {
-            super(token, true);
-            this.group = group;
-            this.one = first;
-            this.another = second;
-        }
-
-        @Override
-        public String getReport() {
-            return "The group `" + group.toString() + "` was separated by more than one separators";
-        }
-    }
-
-    public class MultitudeOpaqueButSeparated extends GrouperMishap {
+    public static class MultitudeOpaqueButSeparated extends MishapImpl.Caused {
 
         private final FormalSettings src;
 
@@ -383,7 +322,7 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         }
     }
 
-    public class MultitudeNotOpaqueButIgnored extends GrouperMishap {
+    public static class MultitudeNotOpaqueButIgnored extends MishapImpl.Caused {
 
         private final FormalSettings src;
 
@@ -395,6 +334,45 @@ public class DefaultGrouper extends SingleProcessor implements Grouper {
         @Override
         public String getReport() {
             return src.getIdentity() + " cannot both be non-opaque and ignored. Change this to `false`, or delete it, or change `opaque` to `true`.";
+        }
+    }
+
+    public static class NoGroupTypeDefined extends MishapImpl {
+        public NoGroupTypeDefined() {
+            super(true);
+        }
+
+        @Override
+        public String getReport() {
+            return "No group types are defined";
+        }
+    }
+
+    public static class NoRootGroupType extends MishapImpl {
+        public NoRootGroupType() {
+            super(true);
+        }
+
+        @Override
+        public String getReport() {
+            return "Root group type is not set";
+        }
+    }
+
+    public class TwoDifferentSeparators extends MishapImpl.Caused {
+        final CollectiveToken group;
+        final TokenizerImpl.Verbatim one, another;
+
+        public TwoDifferentSeparators(Token.Individual token, CollectiveToken group, TokenizerImpl.Verbatim first, TokenizerImpl.Verbatim second) {
+            super(token, true);
+            this.group = group;
+            this.one = first;
+            this.another = second;
+        }
+
+        @Override
+        public String getReport() {
+            return "The group `" + group.toString() + "` was separated by more than one separators";
         }
     }
 }

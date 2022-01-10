@@ -1,5 +1,8 @@
 package ir.smmh.lingu.processors;
 
+import ir.smmh.lingu.Processor;
+import org.jetbrains.annotations.NotNull;
+
 public abstract class SingleProcessor implements Processor {
 
     @Override
@@ -8,7 +11,7 @@ public abstract class SingleProcessor implements Processor {
     }
 
     @Override
-    public void extend(Processor processor) {
+    public void extend(@NotNull Processor processor) {
         throw new UnsupportedOperationException("cannot extend SingleProcessor");
     }
 

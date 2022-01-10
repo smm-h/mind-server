@@ -2,6 +2,7 @@ package ir.smmh.util.jile.impl;
 
 /**
  * Takes half the size in memory, but does one unchecked cast per get.
+ *
  * @see FatOr
  */
 public class SlimOr<This, That> extends AbstractOr<This, That> {

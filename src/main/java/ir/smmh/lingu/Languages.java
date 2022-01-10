@@ -1,40 +1,18 @@
 package ir.smmh.lingu;
 
-import ir.smmh.jile.common.Singleton;
+import ir.smmh.lingu.impl.LanguagesImpl;
+import ir.smmh.util.Log;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-
-public class Languages implements Singleton {
-
-    private Languages() {
+public interface Languages {
+    static @NotNull Languages getInstance() {
+        return LanguagesImpl.getInstance();
     }
 
-    private static Languages singleton;
+    @NotNull Log getErr();
 
-    public static Languages singleton() {
-        if (singleton == null) {
-            singleton = new Languages();
-        }
-        return singleton;
-    }
+    void associateExtWithLanguage(@NotNull String ext, @NotNull Language language);
 
-    private final HashMap<String, Language> extToLanguage = new HashMap<>();
-
-    public void associateExtWithLanguage(String ext, Language language) {
-        // if (extToLanguage == null) {
-        // extToLanguage = new HashMap<String, Language>();
-        // }
-        ext = ext.toLowerCase();
-        extToLanguage.put(ext, language);
-        // System.out.println("*." + ext + " <- " + language.name);
-    }
-
-    public Language getLanguageByExt(String ext) {
-        Language language = null;
-        ext = ext.toLowerCase();
-        if (extToLanguage.containsKey(ext)) {
-            language = extToLanguage.get(ext);
-        }
-        return language;
-    }
+    @Nullable Language getLanguageByExt(@NotNull String ext);
 }

@@ -6,6 +6,10 @@ package ir.smmh.util.jile;
  */
 public interface Or<This, That> {
 
+    static <T> T generalize(Or<? extends T, ? extends T> or) {
+        return or.isThis() ? or.getThis() : or.getThat();
+    }
+
     boolean isThis();
 
     This getThis();

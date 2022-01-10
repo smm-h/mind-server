@@ -2,6 +2,7 @@ package ir.smmh.util.jile.impl;
 
 /**
  * Takes double the size in memory, but is checked
+ *
  * @see SlimOr
  */
 public class FatOr<This, That> extends AbstractOr<This, That> {

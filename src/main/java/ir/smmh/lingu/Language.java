@@ -1,55 +1,18 @@
 package ir.smmh.lingu;
 
-import ir.smmh.jile.common.Resource;
-import ir.smmh.lingu.impl.CodeImpl;
-import ir.smmh.lingu.processors.Processor;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.io.FileNotFoundException;
 
-public abstract class Language {
+public interface Language {
+    @NotNull String getName();
 
-    public final String name, langPath, primaryExt;
+    @NotNull String getLangPath();
 
-    public final Processor processor;
+    @Nullable String getPrimaryExt();
 
-    public Language(String name, String langPath, String primaryExt, Processor processor) {
-        this.name = name;
-        this.langPath = langPath;
-        this.primaryExt = primaryExt;
-        this.processor = processor;
+    @NotNull Processor getProcessor();
 
-        // if (processor instanceof Tokenizer)
-        // setMainTokenizer((Tokenizer) processor);
-
-        if (primaryExt != null)
-            Languages.singleton().associateExtWithLanguage(primaryExt, this);
-    }
-
-    public Language(String name, String primaryExt, Processor processor) {
-        this(name, primaryExt, primaryExt, processor);
-    }
-
-    public Resource find(String address) {
-        return Objects.requireNonNull(Resource.of(langPath + "/" + address + "." + primaryExt));
-    }
-
-    private Maker<?> mainMaker;
-
-    public void setMainMaker(Maker<?> maker) {
-        this.mainMaker = maker;
-    }
-
-    public Maker<?> getMainMaker() {
-        return mainMaker;
-    }
-
-    public abstract class Maker<T> implements Linter {
-
-        public abstract T make(CodeImpl code);
-
-        public T makeFrom(String address) {
-            return make(new CodeImpl(find(address), Language.this));
-        }
-
-    }
+    @NotNull Code openTestFile(@NotNull String filename) throws FileNotFoundException;
 }

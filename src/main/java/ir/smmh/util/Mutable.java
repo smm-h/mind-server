@@ -1,5 +1,6 @@
 package ir.smmh.util;
 
+import ir.smmh.util.jile.Quality;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -12,6 +13,9 @@ import org.jetbrains.annotations.NotNull;
  * @see ir.smmh.api.API
  */
 public interface Mutable {
+
+    Quality<Object> MUTABLE = o -> o instanceof Mutable;
+    Quality<Mutable> DIRTY = Mutable::isDirty;
 
     /**
      * @return Whether or not it is dirty.

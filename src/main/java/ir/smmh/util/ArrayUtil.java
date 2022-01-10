@@ -1,5 +1,7 @@
 package ir.smmh.util;
 
+import java.util.Iterator;
+
 public interface ArrayUtil {
 
     /**
@@ -32,5 +34,21 @@ public interface ArrayUtil {
             if (array[i].equals(value))
                 return i;
         return -1;
+    }
+
+    static <T> Iterator<T> makeArrayIterator(T[] array) {
+        return new Iterator<>() {
+            private int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return index < array.length;
+            }
+
+            @Override
+            public T next() {
+                return array[index++];
+            }
+        };
     }
 }

@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SuppressWarnings("SameParameterValue")
 class MindsAPITest {
 
-    MindsAPI api;
     final String mindName = "test";
+    MindsAPI api;
 
     @BeforeEach
     void beforeEach() {

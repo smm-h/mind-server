@@ -1,33 +1,25 @@
 package ir.smmh.lingu.impl;
 
-import ir.smmh.jile.common.Common;
-import ir.smmh.jile.common.Resource;
-import ir.smmh.jile.common.Singleton;
+import ir.smmh.lingu.Code;
 import ir.smmh.lingu.CodeProcess;
-import ir.smmh.lingu.Language;
+import ir.smmh.lingu.Maker;
 import ir.smmh.lingu.Token;
-import ir.smmh.lingu.processors.Multiprocessor;
 import ir.smmh.lingu.processors.SingleProcessor;
+import ir.smmh.lingu.processors.impl.MultiprocessorImpl;
+import ir.smmh.nile.adj.Sequential;
+import ir.smmh.util.jile.OpenFile;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class TokenizerMaker extends Language implements Singleton {
+public class TokenizerMaker extends LanguageImpl implements Maker.LanguageSpecific<TokenizerImpl> {
 
     private static TokenizerMaker singleton;
 
-    public static TokenizerMaker singleton() {
-        if (singleton == null) {
-            singleton = new TokenizerMaker();
-        }
-        return singleton;
-    }
-
-    private final DefaultTokenizer meta;
-
     private TokenizerMaker() {
-        super("Tokenizer Maker", "nlx", new Multiprocessor());
+        super("Tokenizer Maker", "nlx", new MultiprocessorImpl());
 
-        meta = new DefaultTokenizer();
+        TokenizerImpl meta = new TokenizerImpl();
 
         meta.define(new Kept("single_quotes", "'", "'"));
         meta.define(new Kept("double_quotes", "\"", "\""));
@@ -53,173 +45,185 @@ public class TokenizerMaker extends Language implements Singleton {
         meta.define(new Verbatim("..."));
         meta.define(new Verbatim("as"));
 
-        processor.extend(meta);
+        getProcessor().extend(meta);
 
-        processor.extend(new SingleProcessor() {
+        getProcessor().extend(new SingleProcessor() {
 
             @Override
-            public void process(CodeImpl code) {
+            public void process(@NotNull Code code) {
 
-                Map<Token.Individual, Resource> links = new HashMap<>();
-                Iterator<Token.Individual> iterator = DefaultTokenizer.tokenized.read(code).iterator();
+                Map<Token.Individual, OpenFile> links = new HashMap<>();
+                Iterator<Token.Individual> iterator = TokenizerImpl.tokenized.read(code).iterator();
 
                 while (iterator.hasNext()) {
                     Token.Individual token = iterator.next();
                     if (token.is("verbatim <import>")) {
                         token = iterator.next();
-                        links.put(token, TokenizerMaker.singleton.find(token.getData()));
+                        links.put(token, OpenFile.of(token.getData()));
                     }
                 }
 
-                CodeImpl.links.write(code, links);
                 // TODO update instead of over-writing
+                CodeImpl.links.write(code, links);
             }
         });
     }
 
+    public static TokenizerMaker singleton() {
+        if (singleton == null) {
+            singleton = new TokenizerMaker();
+        }
+        return singleton;
+    }
+
+    // TODO get rid of this
+    public static String escape(String unescaped) {
+        return unescaped.replaceAll("\\\\n", "\n").replaceAll("\\\\t", "\t").replaceAll("\\\\r", "\r").replaceAll("\\\\f", "\f");
+    }
+
+    @Override
+
+    public @NotNull TokenizerImpl makeFromCode(Code code) {
+        // Tokenizer tokenizer = augment(new Tokenizer(), code);
+        // port.write(code, tokenizer);
+        // return tokenizer;
+        return augment(new TokenizerImpl(), code);
+    }
+
     // public static final Port<Tokenizer> port = new Port<Tokenizer>();
 
-    public final Maker<DefaultTokenizer> maker = new Maker<DefaultTokenizer>() {
-        public DefaultTokenizer make(CodeImpl code) {
-            // Tokenizer tokenizer = augment(new Tokenizer(), code);
-            // port.write(code, tokenizer);
-            // return tokenizer;
-            return augment(new DefaultTokenizer(), code);
-        }
+    private TokenizerImpl augment(TokenizerImpl beingMade, Code code) {
 
-        private DefaultTokenizer augment(DefaultTokenizer beingMade, CodeImpl code) {
+        CodeProcess making = new CodeProcessImpl(code, "making a tokenizer");
 
-            CodeProcess making = code.new Process("making a tokenizer");
+        Objects.requireNonNull(beingMade);
 
-            Objects.requireNonNull(beingMade);
+        // System.out.println(language.name + " <+ " + code.getTitle());
 
-            // System.out.println(language.name + " <+ " + code.getIdentity());
-
-            String[] _string = {"single_quotes", "double_quotes"};
-            // System.out.println(tokens.toString().replaceAll(", ", ""));
-            List<Token.Individual> tokens = DefaultTokenizer.tokenized.read(code);
-            // System.out.println(tokens);
-            Iterator<Token.Individual> iterator = tokens.iterator();
-            Token.Individual head, tail;
-            while (iterator.hasNext()) {
-                head = iterator.next();
-                String opener, closer, title, characters;
-                switch (head.getTypeString()) {
-                    case "verbatim <import>":
-                        tail = iterator.next();
-                        switch (tail.getTypeString()) {
-                            case "single_quotes":
-                            case "double_quotes":
-                                try {
-                                    augment(beingMade, new CodeImpl(Resource.of("nlx/" + tail.getData() + ".nlx")));
-                                } catch (Exception e) {
-                                    // process.add(meta.new ImportFailed());
-                                    System.out.println("import failed");
-                                }
+        String[] _string = {"single_quotes", "double_quotes"};
+        // System.out.println(tokens.toString().replaceAll(", ", ""));
+        List<Token.Individual> tokens = TokenizerImpl.tokenized.read(code);
+        // System.out.println(tokens);
+        Iterator<Token.Individual> iterator = tokens.iterator();
+        Token.Individual head, tail;
+        while (iterator.hasNext()) {
+            head = iterator.next();
+            String opener, closer, title, characters;
+            switch (head.getTypeString()) {
+                case "verbatim <import>":
+                    tail = iterator.next();
+                    switch (tail.getTypeString()) {
+                        case "single_quotes":
+                        case "double_quotes":
+                            try {
+                                augment(beingMade, new CodeImpl(OpenFile.of("nlx/" + tail.getData() + ".nlx")));
+                            } catch (Exception e) {
+                                // process.add(meta.new ImportFailed());
+                                System.out.println("import failed");
+                            }
+                            break;
+                        default:
+                            making.issue(new UnexpectedToken(head, tail, "string"));
+                    }
+                    break;
+                // case "verbatim <ext>":
+                // tail = iterator.next();
+                // switch (tail.type.toString()) {
+                // case "single_quotes":
+                // case "double_quotes":
+                // if (!isImporting())
+                // Languages.getInstance().associateExtWithLanguage(tail.data, language);
+                // break;
+                // default:
+                // process.add(meta.new UnexpectedToken(head, tail, "string"));
+                // }
+                // break;
+                case "verbatim <ignore>":
+                    tail = iterator.next();
+                    if (!tail.is("identifier")) {
+                        making.issue(new UnexpectedToken(tail, "identifier"));
+                        break;
+                    }
+                    beingMade.ignore(tail.getData());
+                    break;
+                case "verbatim <keep>":
+                    tail = iterator.next();
+                    if (!tail.is(_string)) {
+                        making.issue(new UnexpectedToken(tail, "string"));
+                        break;
+                    }
+                    opener = escape(tail.getData());
+                    tail = iterator.next();
+                    if (!tail.is("verbatim <...>")) {
+                        making.issue(new UnexpectedToken(tail, "<...>"));
+                        break;
+                    }
+                    tail = iterator.next();
+                    if (!tail.is(_string)) {
+                        making.issue(new UnexpectedToken(tail, "string"));
+                        break;
+                    }
+                    closer = escape(tail.getData());
+                    tail = iterator.next();
+                    if (!tail.is("verbatim <as>")) {
+                        making.issue(new UnexpectedToken(tail, "<as>"));
+                        break;
+                    }
+                    tail = iterator.next();
+                    if (!tail.is("identifier")) {
+                        making.issue(new UnexpectedToken(tail, "identifier"));
+                        break;
+                    }
+                    title = tail.getData();
+                    beingMade.define(new Kept(title, opener, closer));
+                    break;
+                case "verbatim <streak>":
+                    tail = iterator.next();
+                    switch (tail.getTypeString()) {
+                        case "single_quotes":
+                        case "double_quotes":
+                            characters = tail.getData();
+                            if (!tail.is(_string)) {
+                                making.issue(new UnexpectedToken(tail, "string"));
                                 break;
-                            default:
-                                making.issue(new UnexpectedToken(head, tail, "string"));
-                        }
-                        break;
-                    // case "verbatim <ext>":
-                    // tail = iterator.next();
-                    // switch (tail.type.toString()) {
-                    // case "single_quotes":
-                    // case "double_quotes":
-                    // if (!isImporting())
-                    // Languages.singleton().associateExtWithLanguage(tail.data, language);
-                    // break;
-                    // default:
-                    // process.add(meta.new UnexpectedToken(head, tail, "string"));
-                    // }
-                    // break;
-                    case "verbatim <ignore>":
-                        tail = iterator.next();
-                        if (!tail.is("identifier")) {
-                            making.issue(new UnexpectedToken(tail, "identifier"));
-                            break;
-                        }
-                        beingMade.ignore(tail.getData());
-                        break;
-                    case "verbatim <keep>":
-                        tail = iterator.next();
-                        if (!tail.is(_string)) {
-                            making.issue(new UnexpectedToken(tail, "string"));
-                            break;
-                        }
-                        opener = Common.escape(tail.getData());
-                        tail = iterator.next();
-                        if (!tail.is("verbatim <...>")) {
-                            making.issue(new UnexpectedToken(tail, "<...>"));
-                            break;
-                        }
-                        tail = iterator.next();
-                        if (!tail.is(_string)) {
-                            making.issue(new UnexpectedToken(tail, "string"));
-                            break;
-                        }
-                        closer = Common.escape(tail.getData());
-                        tail = iterator.next();
-                        if (!tail.is("verbatim <as>")) {
-                            making.issue(new UnexpectedToken(tail, "<as>"));
-                            break;
-                        }
-                        tail = iterator.next();
-                        if (!tail.is("identifier")) {
-                            making.issue(new UnexpectedToken(tail, "identifier"));
-                            break;
-                        }
-                        title = tail.getData();
-                        beingMade.define(new Kept(title, opener, closer));
-                        break;
-                    case "verbatim <streak>":
-                        tail = iterator.next();
-                        switch (tail.getTypeString()) {
-                            case "single_quotes":
-                            case "double_quotes":
-                                characters = tail.getData();
-                                if (!tail.is(_string)) {
-                                    making.issue(new UnexpectedToken(tail, "string"));
-                                    break;
-                                }
-                                tail = iterator.next();
-                                if (!tail.is("verbatim <as>")) {
-                                    making.issue(new UnexpectedToken(tail, "<as>"));
-                                    break;
-                                }
-                                tail = iterator.next();
-                                if (!tail.is("identifier")) {
-                                    making.issue(new UnexpectedToken(tail, "identifier"));
-                                    break;
-                                }
-                                title = tail.getData();
-                                beingMade.define(new Streak(title, Common.escape(characters)));
+                            }
+                            tail = iterator.next();
+                            if (!tail.is("verbatim <as>")) {
+                                making.issue(new UnexpectedToken(tail, "<as>"));
                                 break;
-                            default:
-                                making.issue(new UnexpectedToken(head, tail, "string|identifier"));
-                        }
-                        break;
-                    case "verbatim <verbatim>":
-                        tail = iterator.next();
-                        switch (tail.getTypeString()) {
-                            case "single_quotes":
-                            case "double_quotes":
-                                beingMade.define(new Verbatim(Common.escape(tail.getData())));
+                            }
+                            tail = iterator.next();
+                            if (!tail.is("identifier")) {
+                                making.issue(new UnexpectedToken(tail, "identifier"));
                                 break;
-                            default:
-                                making.issue(new UnexpectedToken(head, tail, "string"));
-                        }
-                        break;
-                    default:
-                        making.issue(new UnexpectedToken(head));
-                }
+                            }
+                            title = tail.getData();
+                            beingMade.define(new Streak(title, escape(characters)));
+                            break;
+                        default:
+                            making.issue(new UnexpectedToken(head, tail, "string|identifier"));
+                    }
+                    break;
+                case "verbatim <verbatim>":
+                    tail = iterator.next();
+                    switch (tail.getTypeString()) {
+                        case "single_quotes":
+                        case "double_quotes":
+                            beingMade.define(new Verbatim(escape(tail.getData())));
+                            break;
+                        default:
+                            making.issue(new UnexpectedToken(head, tail, "string"));
+                    }
+                    break;
+                default:
+                    making.issue(new UnexpectedToken(head));
             }
-            making.finish();
-            return beingMade;
         }
-    };
+        making.finishSilently();
+        return beingMade;
+    }
 
-    public abstract class Definition {
+    public abstract static class Definition {
         public final String title;
 
         public Definition(String title) {
@@ -234,7 +238,9 @@ public class TokenizerMaker extends Language implements Singleton {
         public abstract int getPriority();
     }
 
-    public class Verbatim extends Definition implements Comparable<Verbatim> {
+    // private static final String NEGATOR = "(anything-except)";
+
+    public static class Verbatim extends Definition implements Comparable<Verbatim> {
         public final String data;
 
         public Verbatim(String data) {
@@ -243,10 +249,7 @@ public class TokenizerMaker extends Language implements Singleton {
         }
 
         public int compareTo(Verbatim other) {
-            int comparison = -((Integer) (this.data.length())).compareTo(other.data.length());
-            if (comparison == 0)
-                comparison = this.data.compareTo(other.data);
-            return comparison;
+            return this.data.compareTo(other.data);
         }
 
         public boolean equals(Verbatim other) {
@@ -259,32 +262,26 @@ public class TokenizerMaker extends Language implements Singleton {
         }
     }
 
-    // private static final String NEGATOR = "(anything-except)";
-
-    public class Streak extends Definition implements Comparable<Streak> {
-        public final HashSet<Character> characters = new HashSet<Character>();
+    public static class Streak extends Definition implements Comparable<Streak> {
+        public final Set<Character> characters;
 
         public Streak(String title, String characters) {
+            this(title, characters.toCharArray());
+        }
+
+        public Streak(String title, char[] characters) {
+            this(title, new HashSet<>(Sequential.of(characters).asList()));
+        }
+
+        public Streak(String title, Set<Character> characters) {
             super(title);
-
-            characters = characters.replaceAll("[A-Z]", "ABCDEFGHIJKLMNOPQRSTUVWXYZ").replaceAll("[a-z]", "abcdefghijklmnopqrstuvwxyz").replaceAll("\\[0-9\\]", "0123456789");
-
-            // if (characters.contains(NEGATOR)) {
-            // characters.replace(NEGATOR, "");
-            // for (int i = 0; i < 256; i++)
-            // this.characters.add((char) i);
-            // for (int i = 0; i < characters.length(); i++)
-            // this.characters.remove(characters.charAt(i));
-            // } else {
-            for (int i = 0; i < characters.length(); i++)
-                this.characters.add(characters.charAt(i));
-            // }
+            this.characters = characters;
         }
 
         public int compareTo(Streak other) {
-            int comparison = ((Integer) (this.characters.size())).compareTo(other.characters.size());
+            int comparison = Integer.compare(this.characters.size(), other.characters.size());
             if (comparison == 0)
-                comparison = ((Integer) this.characters.hashCode()).compareTo(other.characters.hashCode());
+                comparison = Integer.compare(this.characters.hashCode(), other.characters.hashCode());
             return comparison;
         }
 
@@ -294,7 +291,7 @@ public class TokenizerMaker extends Language implements Singleton {
         }
     }
 
-    public class Kept extends Definition implements Comparable<Kept> {
+    public static class Kept extends Definition implements Comparable<Kept> {
         public final String opener, closer;
 
         public Kept(String title, String opener, String closer) {
@@ -304,7 +301,7 @@ public class TokenizerMaker extends Language implements Singleton {
         }
 
         public int compareTo(Kept other) {
-            int comparison = -((Integer) this.opener.length()).compareTo(other.opener.length());
+            int comparison = -Integer.compare(this.opener.length(), other.opener.length());
             if (comparison == 0)
                 comparison = this.opener.compareTo(other.opener);
             return comparison;

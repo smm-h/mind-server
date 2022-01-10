@@ -16,6 +16,11 @@ class MindSerializationTest {
     private static final MindStorageGate g = new MindStorageGate("test");
     private Mind.Mutable m;
 
+    @AfterAll
+    static void afterAll() {
+        MutableImpl.cleanEverything();
+    }
+
     @BeforeEach
     void beforeEach() {
         m = g.createBlank("test-mind");
@@ -27,10 +32,5 @@ class MindSerializationTest {
         JSONObject object = JSONUtil.parse(m.serialize());
         assertNotNull(object);
         assertEquals(1, object.getJSONArray("ideas").length());
-    }
-
-    @AfterAll
-    static void afterAll() {
-        MutableImpl.cleanEverything();
     }
 }

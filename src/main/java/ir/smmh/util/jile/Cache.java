@@ -12,6 +12,9 @@ import java.util.Objects;
 @FunctionalInterface
 public interface Cache<Wrapper, Contents> {
 
+    @NotNull
+    Wrapper get(Contents contents);
+
     interface Extended<Wrapper, Contents> extends Cache<Wrapper, Contents> {
 
         @Nullable
@@ -32,7 +35,4 @@ public interface Cache<Wrapper, Contents> {
             return Objects.requireNonNull(find(contents));
         }
     }
-
-    @NotNull
-    Wrapper get(Contents contents);
 }

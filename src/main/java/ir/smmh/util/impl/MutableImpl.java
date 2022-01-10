@@ -9,11 +9,15 @@ import java.util.Stack;
 
 public class MutableImpl implements Mutable {
 
-    private boolean dirty = true;
-    private final List<OnCleanListener> listeners = new LinkedList<>();
-
     private static final Stack<MutableImpl> stack = new Stack<>();
+    private final List<OnCleanListener> listeners = new LinkedList<>();
     private final Object injected;
+    private boolean dirty = true;
+
+    public MutableImpl(Mutable.Injected injected) {
+        this.injected = injected;
+        stack.push(this);
+    }
 
     public static void cleanEverything() {
         while (!stack.isEmpty()) {
@@ -26,11 +30,6 @@ public class MutableImpl implements Mutable {
                 System.err.println("FAILED TO CLEAN: " + name);
             }
         }
-    }
-
-    public MutableImpl(Mutable.Injected injected) {
-        this.injected = injected;
-        stack.push(this);
     }
 
     @Override

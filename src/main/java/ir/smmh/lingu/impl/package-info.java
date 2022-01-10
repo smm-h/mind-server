@@ -1,4 +1,4 @@
 @ParametersAreNonnullByDefault
-package ir.smmh;
+package ir.smmh.lingu.impl;
 
 import javax.annotation.ParametersAreNonnullByDefault;

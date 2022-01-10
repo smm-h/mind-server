@@ -1,15 +1,22 @@
 package ir.smmh.lingu;
 
+import ir.smmh.util.jile.Quality;
+
 public interface Mishap {
-    // TODO remove this method
-    void setProcess(CodeProcess e);
+    Quality<Mishap> FATAL = Mishap::isFatal;
 
     CodeProcess getProcess();
 
+    // TODO remove this method
+    void setProcess(CodeProcess e);
+
+    // String TODO getSolution();
+
     String getReport();
 
-    // String getSolution();
     boolean isFatal();
 
-    Token.Individual getToken();
+    interface Caused extends Mishap {
+        Token.Individual getCause();
+    }
 }

@@ -1,19 +1,17 @@
 package ir.smmh.lingu.impl;
 
 import ir.smmh.Backward;
-import ir.smmh.jile.common.Common;
-import ir.smmh.lingu.CodeProcess;
-import ir.smmh.lingu.IndividualTokenType;
+import ir.smmh.lingu.*;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
-import ir.smmh.lingu.Token;
-import ir.smmh.lingu.Tokenizer;
 import ir.smmh.lingu.impl.TokenizerMaker.Definition;
 import ir.smmh.lingu.processors.SingleProcessor;
+import ir.smmh.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 // TODO normalizations e.g. − to - and → to ->
-public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
+public class TokenizerImpl extends SingleProcessor implements Tokenizer {
 
     private final HashMap<Character, TreeSet<Kept>> kepts = new HashMap<>();
 
@@ -24,6 +22,8 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
     private final HashSet<Character> verbatimCharacters = new HashSet<>();
     private final HashMap<String, TreeSet<Verbatim>> verbatims = new HashMap<>();
     private final HashSet<String> ignorableNames = new HashSet<>();
+    private final PriorityQueue<Definition> schedule = new PriorityQueue<>(Comparator.comparingInt(Definition::getPriority));
+    private final LinkedList<String> namesToIgnore = new LinkedList<>();
 
     public boolean ignore(String name) {
         if (ignorableNames.contains(name)) {
@@ -36,7 +36,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         }
     }
 
-    public void process(CodeImpl code) {
+    public void process(@NotNull Code code) {
 
         List<Token.Individual> stripped = new LinkedList<>();
         List<Token.Individual> drawable = new LinkedList<>();
@@ -49,17 +49,8 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
 
         CodeImpl.syntax.write(code, drawable);
 
-        DefaultTokenizer.tokenized.write(code, stripped);
+        TokenizerImpl.tokenized.write(code, stripped);
     }
-
-    private final PriorityQueue<Definition> schedule = new PriorityQueue<Definition>(new Comparator<Definition>() {
-
-        @Override
-        public int compare(Definition one, Definition other) {
-            return ((Integer) one.getPriority()).compareTo(other.getPriority());
-        }
-
-    });
 
     public void schedule(Definition definition) {
         schedule.add(definition);
@@ -75,8 +66,6 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
     private void addIgnorableName(String name) {
         ignorableNames.add(name);
     }
-
-    private final LinkedList<String> namesToIgnore = new LinkedList<String>();
 
     private boolean canMake(List<IndividualToken> tokens, int index, List<IndividualToken> pattern) {
         for (int i = 0; i < pattern.size(); i++) {
@@ -105,9 +94,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         else if (definition instanceof TokenizerMaker.Verbatim)
             return define((TokenizerMaker.Verbatim) definition);
 
-            // no more define-ables
-        else
-            return null;
+        else throw new RuntimeException("undefined");
     }
 
     public Streak define(TokenizerMaker.Streak definition) {
@@ -115,7 +102,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         addIgnorableName(definition.toString());
         for (char c : definition.characters) {
             if (!streaksOfCharacters.containsKey(c)) {
-                streaksOfCharacters.put(c, new TreeSet<Streak>());
+                streaksOfCharacters.put(c, new TreeSet<>());
             }
             streaksOfCharacters.get(c).add(type);
         }
@@ -136,7 +123,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
 
         String key = type.pattern.getFirst().data;
         if (!verbatims.containsKey(key)) {
-            verbatims.put(key, new TreeSet<Verbatim>());
+            verbatims.put(key, new TreeSet<>());
         }
         verbatims.get(key).add(type);
         return type;
@@ -147,20 +134,20 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         addIgnorableName(definition.toString());
         Character key = definition.opener.charAt(0);
         if (!kepts.containsKey(key)) {
-            kepts.put(key, new TreeSet<Kept>());
+            kepts.put(key, new TreeSet<>());
         }
         kepts.get(key).add(type);
         return type;
     }
 
     @Override
-    public List<Token.Individual> tokenize(CodeImpl code) {
+    public List<Token.Individual> tokenize(Code code) {
 
         // start the process
-        CodeProcess tokenizing = code.new Process("tokenizing");
+        CodeProcess tokenizing = new CodeProcessImpl(code, "tokenizing");
 
         // get the contents of the code as a string
-        String string = code.getString();
+        String string = code.getOpenFile().read();
 
         // create a new list to put the tokens in
         List<Token.Individual> tokens = new LinkedList<>();
@@ -291,8 +278,8 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
             }
         }
 
-        // finish the process
-        tokenizing.finish();
+        // finishSilently the process
+        tokenizing.finishSilently();
 
         // and return the tokens
         return tokens;
@@ -316,7 +303,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
 
             // V = all verbatims that start with t[i], sorted by length
             if (verbatims.containsKey(token.data)) {
-                possibles = new PriorityQueue<Verbatim>(verbatims.get(token.data));
+                possibles = new PriorityQueue<>(verbatims.get(token.data));
                 // System.out.println(possibles);
 
                 // if (reporting)
@@ -371,11 +358,11 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         return tokens;
     }
 
-    private IndividualToken makeToken(DefaultTokenizer.Verbatim verbatim, int position) {
+    private IndividualToken makeToken(TokenizerImpl.Verbatim verbatim, int position) {
         return verbatim.new IndividualToken(verbatim.data, position);
     }
 
-    private IndividualToken makeToken(DefaultTokenizer.NonStreakCharacter nsc, int position) {
+    private IndividualToken makeToken(TokenizerImpl.NonStreakCharacter nsc, int position) {
         return nsc.new IndividualToken(Character.toString(nsc.data), position);
     }
 
@@ -384,9 +371,9 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         string += (char) 0;
         char character;
         StringBuilder data = new StringBuilder();
-        TreeSet<Streak> last, curr = new TreeSet<Streak>();
+        TreeSet<Streak> last, curr = new TreeSet<>();
         int index = 0;
-        LinkedList<IndividualToken> tokens = new LinkedList<IndividualToken>();
+        LinkedList<IndividualToken> tokens = new LinkedList<>();
         while (index < string.length()) {
             character = string.charAt(index);
 
@@ -396,9 +383,9 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
             last = curr;
 
             if (streaksOfCharacters.containsKey(character)) {
-                curr = new TreeSet<Streak>(streaksOfCharacters.get(character));
+                curr = new TreeSet<>(streaksOfCharacters.get(character));
             } else {
-                curr = new TreeSet<Streak>();
+                curr = new TreeSet<>();
                 if (data.toString().equals("")) {
                     tokens.add(makeToken(new NonStreakCharacter(character), offset + index));
                     // report += "<" + character + ">";
@@ -449,7 +436,7 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         }
 
         public int compareTo(Verbatim other) {
-            int comparison = -((Integer) (this.data.length())).compareTo(other.data.length());
+            int comparison = -Integer.compare((this.data.length()), other.data.length());
             if (comparison == 0)
                 comparison = this.data.compareTo(other.data);
             return comparison;
@@ -460,9 +447,9 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         }
     }
 
-    public class Streak extends IndividualTokenType implements Comparable<Streak> {
+    public static class Streak extends IndividualTokenType implements Comparable<Streak> {
 
-        public final Set<Character> characters = new HashSet<Character>();
+        public final Set<Character> characters = new HashSet<>();
 
         public Streak(TokenizerMaker.Streak definition) {
             super(definition.title);
@@ -470,51 +457,20 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
         }
 
         public int compareTo(Streak other) {
-            int comparison = ((Integer) (this.characters.size())).compareTo(other.characters.size());
+            int comparison = Integer.compare((this.characters.size()), other.characters.size());
             if (comparison == 0)
-                comparison = ((Integer) this.characters.hashCode()).compareTo(other.characters.hashCode());
+                comparison = Integer.compare(this.characters.hashCode(), other.characters.hashCode());
             return comparison;
         }
     }
 
-    public class Kept extends IndividualTokenType implements Comparable<Kept> {
-
-        public final String opener, closer;
-
-        public Kept(TokenizerMaker.Kept definition) {
-            super(definition.title);
-            this.closer = definition.closer;
-            this.opener = definition.opener;
-            keeper = new Keeper(definition.title + "_keeper");
-        }
-
-        // public String (IndividualToken token)
-        // return opener + token.data + closer;
-
-        public int compareTo(Kept other) {
-            int comparison = -((Integer) this.opener.length()).compareTo(other.opener.length());
-            if (comparison == 0)
-                comparison = this.opener.compareTo(other.opener);
-            return comparison;
-        }
-
-        private final Keeper keeper;
-
-        public class Keeper extends IndividualTokenType {
-            public Keeper(String title) {
-                super(title);
-                namesToIgnore.add(title);
-            }
-        }
-    }
-
-    public abstract static class TokenizerMishap extends AbstractMishap {
+    public abstract static class TokenizerMishap extends MishapImpl.Caused {
         public TokenizerMishap(Token.Individual token, boolean fatal) {
             super(token, fatal);
         }
     }
 
-    public class UnknownCharacter extends TokenizerMishap {
+    public static class UnknownCharacter extends TokenizerMishap {
 
         public UnknownCharacter(Token.Individual token) {
             super(token, true);
@@ -526,7 +482,37 @@ public class DefaultTokenizer extends SingleProcessor implements Tokenizer {
             if (cp > 32)
                 return "Unknown character `" + token.getData() + "`";
             else
-                return "Unknown non-printable character `" + Common.codepointToText(token.getData().codePointAt(0)) + "`";
+                return "Unknown non-printable character `" + StringUtil.codepointToText(token.getData().codePointAt(0)) + "`";
+        }
+    }
+
+    public class Kept extends IndividualTokenType implements Comparable<Kept> {
+
+        public final String opener, closer;
+        private final Keeper keeper;
+
+        // public String (IndividualToken token)
+        // return opener + token.data + closer;
+
+        public Kept(TokenizerMaker.Kept definition) {
+            super(definition.title);
+            this.closer = definition.closer;
+            this.opener = definition.opener;
+            keeper = new Keeper(definition.title + "_keeper");
+        }
+
+        public int compareTo(Kept other) {
+            int comparison = -Integer.compare(this.opener.length(), other.opener.length());
+            if (comparison == 0)
+                comparison = this.opener.compareTo(other.opener);
+            return comparison;
+        }
+
+        public class Keeper extends IndividualTokenType {
+            public Keeper(String title) {
+                super(title);
+                namesToIgnore.add(title);
+            }
         }
     }
 

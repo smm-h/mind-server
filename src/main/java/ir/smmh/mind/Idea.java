@@ -175,26 +175,6 @@ public interface Idea extends Named {
         }
     }
 
-    interface Mutable extends Idea, Stored {
-
-        default void become(Idea idea) {
-            become(idea.getName());
-        }
-
-        void become(String ideaName);
-
-        default Property possess(String name, String type) {
-            return possess(name, type, null);
-        }
-
-        Property possess(String name, String type, Supplier<Value> defaultValue);
-
-        StaticProperty reify(String name, String type, Value value);
-    }
-
-    interface Immutable extends Idea {
-    }
-
     default String encode() {
         final StringBuilder builder = new StringBuilder();
         builder.append(getName());
@@ -219,5 +199,25 @@ public interface Idea extends Named {
             builder.append('}');
         }
         return builder.toString();
+    }
+
+    interface Mutable extends Idea, Stored {
+
+        default void become(Idea idea) {
+            become(idea.getName());
+        }
+
+        void become(String ideaName);
+
+        default Property possess(String name, String type) {
+            return possess(name, type, null);
+        }
+
+        Property possess(String name, String type, Supplier<Value> defaultValue);
+
+        StaticProperty reify(String name, String type, Value value);
+    }
+
+    interface Immutable extends Idea {
     }
 }

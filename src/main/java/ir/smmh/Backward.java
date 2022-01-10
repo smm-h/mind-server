@@ -8,6 +8,7 @@ import java.util.Iterator;
  * compile this codebase. This is particularly useful when trying
  * to export an Intellij IDEA project to Android Studio.
  */
+@SuppressWarnings("ALL")
 public class Backward {
     private Backward() {
     }
