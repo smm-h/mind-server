@@ -1,14 +1,14 @@
 package ir.smmh.lingu.groupermaker.impl;
 
 import ir.smmh.jile.common.Range;
-import ir.smmh.lingu.impl.GrouperMaker;
+import ir.smmh.lingu.groupermaker.GrouperMakerImpl;
 import ir.smmh.lingu.settings.FormalSettings;
 import ir.smmh.lingu.settings.FormalizationBlueprint;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class Streak extends GrouperMaker.DefinitionImpl {
+public class Streak extends GrouperMakerImpl.DefinitionImpl {
 
     public final Range.Integer length;
     public final Boolean ignore;

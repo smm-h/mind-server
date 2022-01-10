@@ -2,7 +2,7 @@ package ir.smmh.lingu;
 
 import ir.smmh.lingu.impl.SinglePassParser;
 import ir.smmh.lingu.impl.TokenizerImpl;
-import ir.smmh.lingu.impl.TokenizerMaker;
+import ir.smmh.lingu.impl.TokenizerMakerImpl;
 import ir.smmh.lingu.impl.UnexpectedToken;
 
 import java.util.HashSet;
@@ -17,7 +17,7 @@ import java.util.Set;
  * <p>
  * Footnote:
  * <ul>
- * <li>*: These tokens are defined via {@link TokenizerMaker.Verbatim} objects,
+ * <li>*: These tokens are defined via {@link TokenizerMakerImpl.Verbatim} objects,
  * which in turn are generated, usually from either
  * {@code verbatim 'somekeyword'} statements in {@code *.nlx} files or
  * single-quoted literal values in patterns of {@code *.ncx} files.</li>

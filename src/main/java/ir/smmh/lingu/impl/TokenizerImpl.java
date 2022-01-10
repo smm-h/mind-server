@@ -3,7 +3,7 @@ package ir.smmh.lingu.impl;
 import ir.smmh.Backward;
 import ir.smmh.lingu.*;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
-import ir.smmh.lingu.impl.TokenizerMaker.Definition;
+import ir.smmh.lingu.impl.TokenizerMakerImpl.Definition;
 import ir.smmh.lingu.processors.SingleProcessor;
 import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -85,19 +85,19 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
 
     public IndividualTokenType define(Definition definition) {
 
-        if (definition instanceof TokenizerMaker.Streak)
-            return define((TokenizerMaker.Streak) definition);
+        if (definition instanceof TokenizerMakerImpl.Streak)
+            return define((TokenizerMakerImpl.Streak) definition);
 
-        else if (definition instanceof TokenizerMaker.Kept)
-            return define((TokenizerMaker.Kept) definition);
+        else if (definition instanceof TokenizerMakerImpl.Kept)
+            return define((TokenizerMakerImpl.Kept) definition);
 
-        else if (definition instanceof TokenizerMaker.Verbatim)
-            return define((TokenizerMaker.Verbatim) definition);
+        else if (definition instanceof TokenizerMakerImpl.Verbatim)
+            return define((TokenizerMakerImpl.Verbatim) definition);
 
         else throw new RuntimeException("undefined");
     }
 
-    public Streak define(TokenizerMaker.Streak definition) {
+    public Streak define(TokenizerMakerImpl.Streak definition) {
         Streak type = new Streak(definition);
         addIgnorableName(definition.toString());
         for (char c : definition.characters) {
@@ -109,7 +109,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         return type;
     }
 
-    public Verbatim define(TokenizerMaker.Verbatim definition) {
+    public Verbatim define(TokenizerMakerImpl.Verbatim definition) {
         // addIgnorableName(verbatim.toString());
         // VERBATIMS SHOULD NOT BE IGNORED
         // TODO repeated verbatims should not go through
@@ -129,7 +129,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         return type;
     }
 
-    public Kept define(TokenizerMaker.Kept definition) {
+    public Kept define(TokenizerMakerImpl.Kept definition) {
         Kept type = new Kept(definition);
         addIgnorableName(definition.toString());
         Character key = definition.opener.charAt(0);
@@ -429,7 +429,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         public final String data;
         public final LinkedList<IndividualToken> pattern;
 
-        public Verbatim(TokenizerMaker.Verbatim definition, LinkedList<IndividualToken> pattern) {
+        public Verbatim(TokenizerMakerImpl.Verbatim definition, LinkedList<IndividualToken> pattern) {
             super(definition.title);
             this.data = definition.data;
             this.pattern = pattern;
@@ -451,7 +451,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
 
         public final Set<Character> characters = new HashSet<>();
 
-        public Streak(TokenizerMaker.Streak definition) {
+        public Streak(TokenizerMakerImpl.Streak definition) {
             super(definition.title);
             characters.addAll(definition.characters);
         }
@@ -494,7 +494,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         // public String (IndividualToken token)
         // return opener + token.data + closer;
 
-        public Kept(TokenizerMaker.Kept definition) {
+        public Kept(TokenizerMakerImpl.Kept definition) {
             super(definition.title);
             this.closer = definition.closer;
             this.opener = definition.opener;

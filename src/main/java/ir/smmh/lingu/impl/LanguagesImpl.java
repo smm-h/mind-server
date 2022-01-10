@@ -3,6 +3,9 @@ package ir.smmh.lingu.impl;
 
 import ir.smmh.lingu.Language;
 import ir.smmh.lingu.Languages;
+import ir.smmh.lingu.TokenizerMaker;
+import ir.smmh.lingu.groupermaker.GrouperMakerImpl;
+import ir.smmh.lingu.json.JSONLanguage;
 import ir.smmh.util.Log;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,22 +13,45 @@ import java.util.HashMap;
 
 public class LanguagesImpl implements Languages {
 
-    private static Languages instance;
+    public static final Languages singleton;
+
+    static {
+        try {
+            singleton = new LanguagesImpl();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("FAILED TO INITIALIZE LANGUAGES");
+        }
+    }
+
     private final Log
             out = Log.fromFile("log/ir/smmh/lingu/OUT.LOG", System.out),
             err = Log.fromFile("log/ir/smmh/lingu/ERR.LOG", System.err);
     private final HashMap<String, Language> extToLanguage = new HashMap<>();
 
-    private LanguagesImpl() {
+    private final TokenizerMaker tm;
+
+    private LanguagesImpl() throws Exception {
+        new TextLanguage(); // txt
+        tm = new TokenizerMakerImpl(); // nlx
+        new GrouperMakerImpl(); // ncx
+        new TreeLanguage(); // tlg
+        new JSONLanguage(); // json
     }
 
-    public static Languages getInstance() {
-        return instance == null ? (LanguagesImpl.instance = new LanguagesImpl()) : LanguagesImpl.instance;
+    @Override
+    public TokenizerMaker getTokenizerMaker() {
+        return tm;
+    }
+
+    @Override
+    public @NotNull Log getOut() {
+        return out;
     }
 
     @Override
     public @NotNull Log getErr() {
-        return null;
+        return err;
     }
 
     @Override

@@ -1,11 +1,11 @@
 package ir.smmh.lingu.groupermaker.impl;
 
 import ir.smmh.lingu.Token;
-import ir.smmh.lingu.impl.GrouperMaker;
+import ir.smmh.lingu.groupermaker.GrouperMakerImpl;
 import ir.smmh.lingu.impl.TokenizerImpl;
 import ir.smmh.lingu.settings.FormalSettings;
 
-public class Pattern extends GrouperMaker.DefinitionImpl {
+public class Pattern extends GrouperMakerImpl.DefinitionImpl {
 
     public final Boolean precedence;
 

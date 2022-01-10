@@ -1,9 +1,6 @@
 package ir.smmh.lingu.impl;
 
-import ir.smmh.lingu.Code;
-import ir.smmh.lingu.CodeProcess;
-import ir.smmh.lingu.Maker;
-import ir.smmh.lingu.Token;
+import ir.smmh.lingu.*;
 import ir.smmh.lingu.processors.SingleProcessor;
 import ir.smmh.lingu.processors.impl.MultiprocessorImpl;
 import ir.smmh.nile.adj.Sequential;
@@ -12,11 +9,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class TokenizerMaker extends LanguageImpl implements Maker.LanguageSpecific<TokenizerImpl> {
+public class TokenizerMakerImpl extends LanguageImpl implements TokenizerMaker {
 
-    private static TokenizerMaker singleton;
 
-    private TokenizerMaker() {
+    public TokenizerMakerImpl() {
         super("Tokenizer Maker", "nlx", new MultiprocessorImpl());
 
         TokenizerImpl meta = new TokenizerImpl();
@@ -69,13 +65,6 @@ public class TokenizerMaker extends LanguageImpl implements Maker.LanguageSpecif
         });
     }
 
-    public static TokenizerMaker singleton() {
-        if (singleton == null) {
-            singleton = new TokenizerMaker();
-        }
-        return singleton;
-    }
-
     // TODO get rid of this
     public static String escape(String unescaped) {
         return unescaped.replaceAll("\\\\n", "\n").replaceAll("\\\\t", "\t").replaceAll("\\\\r", "\r").replaceAll("\\\\f", "\f");
@@ -90,13 +79,10 @@ public class TokenizerMaker extends LanguageImpl implements Maker.LanguageSpecif
         return augment(new TokenizerImpl(), code);
     }
 
-    // public static final Port<Tokenizer> port = new Port<Tokenizer>();
-
-    private TokenizerImpl augment(TokenizerImpl beingMade, Code code) {
+    private TokenizerImpl augment(@NotNull TokenizerImpl beingMade, Code code) {
 
         CodeProcess making = new CodeProcessImpl(code, "making a tokenizer");
 
-        Objects.requireNonNull(beingMade);
 
         // System.out.println(language.name + " <+ " + code.getTitle());
 

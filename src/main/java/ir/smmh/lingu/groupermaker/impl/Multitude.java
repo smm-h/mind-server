@@ -1,10 +1,10 @@
 package ir.smmh.lingu.groupermaker.impl;
 
 import ir.smmh.jile.common.Range;
-import ir.smmh.lingu.impl.GrouperMaker;
+import ir.smmh.lingu.groupermaker.GrouperMakerImpl;
 import ir.smmh.lingu.settings.FormalSettings;
 
-public class Multitude extends GrouperMaker.DefinitionImpl {
+public class Multitude extends GrouperMakerImpl.DefinitionImpl {
 
     public final Range.Integer count;
 

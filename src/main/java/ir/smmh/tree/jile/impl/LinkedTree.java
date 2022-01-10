@@ -26,7 +26,7 @@ public class LinkedTree<T> implements MutableTree<T> {
 
     public <T2> LinkedTree(LinkedTree<T2> src, Function<T2, T> converter) {
         this();
-        addFrom(Objects.requireNonNull(src.root), converter);
+        addFrom(src.root, converter);
     }
 
     @Override
@@ -34,7 +34,7 @@ public class LinkedTree<T> implements MutableTree<T> {
 
         LinkedTree<T2> converted = new LinkedTree<>();
 
-        converted.addFrom(Objects.requireNonNull(root), convertor);
+        converted.addFrom(root, convertor);
 
         return converted;
     }
@@ -44,7 +44,7 @@ public class LinkedTree<T> implements MutableTree<T> {
 
         LinkedTree<T2> cast = new LinkedTree<>();
 
-        cast.addFrom(Objects.requireNonNull(root));
+        cast.addFrom(root);
 
         return cast;
     }
@@ -78,7 +78,7 @@ public class LinkedTree<T> implements MutableTree<T> {
     }
 
     private Node findByData(T data) {
-        return Objects.requireNonNull(nodes.get(data));
+        return nodes.get(data);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class LinkedTree<T> implements MutableTree<T> {
     }
 
     private void goTo(Node node) {
-        pointer = Objects.requireNonNull(node);
+        pointer = node;
     }
 
     @Override
@@ -115,7 +115,7 @@ public class LinkedTree<T> implements MutableTree<T> {
 
     @Override
     public void goToRoot() {
-        pointer = Objects.requireNonNull(root);
+        pointer = root;
     }
 
     @Override

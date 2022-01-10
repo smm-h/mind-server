@@ -1,10 +1,10 @@
 package ir.smmh.lingu.groupermaker.impl;
 
 import ir.smmh.lingu.Token;
-import ir.smmh.lingu.impl.GrouperMaker;
+import ir.smmh.lingu.groupermaker.GrouperMakerImpl;
 import ir.smmh.lingu.settings.FormalSettings;
 
-public class Metadata extends GrouperMaker.DefinitionImpl {
+public class Metadata extends GrouperMakerImpl.DefinitionImpl {
 
     public final String[] exts;
 

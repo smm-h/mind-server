@@ -1,7 +1,5 @@
 package ir.smmh.lingu;
 
-import java.util.Objects;
-
 public class IndividualTokenType implements Token.Type.Individual {
     public final String title;
 
@@ -19,7 +17,7 @@ public class IndividualTokenType implements Token.Type.Individual {
         public final int position;
 
         public IndividualToken(String data, int position) {
-            this.data = Objects.requireNonNull(data);
+            this.data = data;
             this.position = position;
         }
 

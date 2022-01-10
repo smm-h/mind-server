@@ -1,27 +1,22 @@
 package ir.smmh.lingu.json;
 
 
+import ir.smmh.lingu.Code;
 import ir.smmh.lingu.Maker;
 import ir.smmh.lingu.impl.LanguageImpl;
 import ir.smmh.lingu.processors.impl.MultiprocessorImpl;
-import ir.smmh.tree.jile.Tree;
+import org.jetbrains.annotations.NotNull;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
-public class JSONLanguage extends LanguageImpl {
-
-    private static JSONLanguage singleton;
-    public final Maker<Tree<JSON.Element>> maker = code -> {
-        // TODO Auto-generated method stub
-        return null;
-    };
+public class JSONLanguage extends LanguageImpl implements Maker<JSONObject> {
 
     public JSONLanguage() {
         super("JSON", "json", new MultiprocessorImpl());
     }
 
-    public static JSONLanguage singleton() {
-        if (singleton == null) {
-            singleton = new JSONLanguage();
-        }
-        return singleton;
+    @Override
+    public @NotNull JSONObject makeFromCode(@NotNull Code code) throws MakingException {
+        return new JSONObject(new JSONTokener(code.getOpenFile().read()));
     }
 }

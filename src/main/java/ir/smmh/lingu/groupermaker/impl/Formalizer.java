@@ -1,7 +1,7 @@
 package ir.smmh.lingu.groupermaker.impl;
 
 import ir.smmh.lingu.Maker;
-import ir.smmh.lingu.impl.GrouperMaker;
+import ir.smmh.lingu.groupermaker.GrouperMakerImpl;
 import ir.smmh.lingu.processors.Multiprocessor;
 import ir.smmh.lingu.settings.FormalSettings;
 import ir.smmh.lingu.settings.FormalizationBlueprint;
@@ -12,9 +12,9 @@ import ir.smmh.lingu.settings.impl.SettingsFormalizerImpl;
 import java.io.FileNotFoundException;
 import java.util.Map;
 
-public class Formalizer extends SettingsFormalizerImpl<GrouperMaker.Definition> {
+public class Formalizer extends SettingsFormalizerImpl<GrouperMakerImpl.Definition> {
 
-    public final Maker<Map<GrouperMaker.Definition, FormalSettings>> maker = code -> Formalizer.super.getMapMaker().makeFromCode(code);
+    public final Maker<Map<GrouperMakerImpl.Definition, FormalSettings>> maker = code -> Formalizer.super.getMapMaker().makeFromCode(code);
     final FormalizationBlueprint blueprintOfStreak = new FormalizationBlueprintImpl(this, "streak", true) {
         @Override
         public void defineBlueprint() {
@@ -98,7 +98,7 @@ public class Formalizer extends SettingsFormalizerImpl<GrouperMaker.Definition> 
     }
 
     @Override
-    public GrouperMaker.DefinitionImpl wrap(FormalSettings src) {
+    public GrouperMakerImpl.DefinitionImpl wrap(FormalSettings src) {
         switch (src.getSrc().getType().getData()) {
             case "streak":
                 return new Streak(this, src);

@@ -8,9 +8,13 @@ import ir.smmh.lingu.Token;
 import ir.smmh.lingu.processors.SingleProcessor;
 import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  * Limitations:
@@ -21,7 +25,7 @@ import java.util.*;
  * <p>
  * Footnote:
  * <ul>
- * <li>*: These tokens are defined via {@link TokenizerMaker.Verbatim} objects,
+ * <li>*: These tokens are defined via {@link TokenizerMakerImpl.Verbatim} objects,
  * which in turn are generated, usually from either
  * {@code verbatim 'somekeyword'} statements in {@code *.nlx} files or
  * single-quoted literal values in patterns of {@code *.ncx} files.</li>
@@ -31,8 +35,8 @@ public abstract class SinglePassParser extends SingleProcessor {
 
     private final Map<String, CollectiveToken> namedGroups = new HashMap<>();
 
-    public void nameGroup(String name, CollectiveToken block) {
-        namedGroups.put(name, Objects.requireNonNull(block));
+    public void nameGroup(String name, @NotNull CollectiveToken block) {
+        namedGroups.put(name, block);
     }
 
     public CollectiveToken findGroup(String name) {
@@ -98,9 +102,7 @@ public abstract class SinglePassParser extends SingleProcessor {
         // }
         // }
 
-        public void enter(Token.Collective node) {
-
-            Objects.requireNonNull(node, "cannot enter null group");
+        public void enter(@NotNull Token.Collective node) {
 
             // push the new block on the stack
             blocks.push(node);

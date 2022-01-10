@@ -27,14 +27,14 @@ public class CodeImpl implements Code {
     }
 
     public CodeImpl(@NotNull OpenFile openFile, @NotNull Language language) {
-        this.openFile = Objects.requireNonNull(openFile);
+        this.openFile = openFile;
         this.language = language;
         beProcessed();
     }
 
     private static Language getLanguage(OpenFile openFile) {
         String ext = openFile.getExt();
-        return ext == null ? TextLanguage.singleton() : Languages.getInstance().getLanguageByExt(ext);
+        return Languages.getInstance().getLanguageByExt(ext == null ? "txt" : ext);
     }
 
     private synchronized void beProcessed() {

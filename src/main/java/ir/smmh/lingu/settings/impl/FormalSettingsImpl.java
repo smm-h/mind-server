@@ -3,7 +3,7 @@ package ir.smmh.lingu.settings.impl;
 import ir.smmh.jile.common.Range;
 import ir.smmh.lingu.CodeProcess;
 import ir.smmh.lingu.Token;
-import ir.smmh.lingu.impl.TokenizerMaker;
+import ir.smmh.lingu.impl.TokenizerMakerImpl;
 import ir.smmh.lingu.settings.FormalSettings;
 import ir.smmh.lingu.settings.FormalizationBlueprint;
 import ir.smmh.lingu.settings.InformalSettings;
@@ -129,7 +129,7 @@ public class FormalSettingsImpl implements FormalSettings {
     public String getStringAt(String key, int index, boolean escape) {
         String s = getTokens(key)[index].getData();
         if (escape)
-            return TokenizerMaker.escape(s);
+            return TokenizerMakerImpl.escape(s);
         else
             return s;
     }

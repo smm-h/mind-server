@@ -1,19 +1,27 @@
 package ir.smmh.lingu.impl;
 
 
-import ir.smmh.lingu.CodeProcess;
-import ir.smmh.lingu.Maker;
-import ir.smmh.lingu.Token;
+import ir.smmh.lingu.*;
 import ir.smmh.tree.jile.impl.LinkedTree;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Objects;
 
-public class TreeLanguage extends LanguageImpl {
+import static ir.smmh.lingu.settings.impl.SettingsFormalizerImpl.treeMaker;
 
-    private static TreeLanguage singleton;
-    public final Maker<LinkedTree<String>> treeMaker = code -> {
+public class TreeLanguage extends LanguageImpl implements Maker<LinkedTree<String>> {
+
+    public TreeLanguage() throws FileNotFoundException, Maker.MakingException {
+        super("Tree Language", "tlg", Languages.getInstance().getTokenizerMaker().makeFromTestFile("tree-language"));
+
+        setMainMaker(treeMaker);
+    }
+
+    @Override
+    public @NotNull LinkedTree<String> makeFromCode(@NotNull Code code) throws MakingException {
+
         CodeProcess process = new CodeProcessImpl(code, "making a tree");
         LinkedTree<String> tree = new LinkedTree<>();
         Token.Individual token;
@@ -58,19 +66,6 @@ public class TreeLanguage extends LanguageImpl {
             }
         }
         process.finishMaking();
-            return tree;
-    };
-
-    private TreeLanguage() throws FileNotFoundException, Maker.MakingException {
-        super("Tree Language", "tlg", Objects.requireNonNull(TokenizerMaker.singleton().makeFromTestFile("tree-language")));
-
-        setMainMaker(treeMaker);
-    }
-
-    public static TreeLanguage singleton() throws FileNotFoundException, Maker.MakingException {
-        if (singleton == null) {
-            singleton = new TreeLanguage();
-        }
-        return singleton;
+        return tree;
     }
 }

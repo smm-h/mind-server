@@ -2,6 +2,7 @@ package ir.smmh.lingu.settings.impl;
 
 import ir.smmh.lingu.CodeProcess;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
+import ir.smmh.lingu.Languages;
 import ir.smmh.lingu.Maker;
 import ir.smmh.lingu.Token;
 import ir.smmh.lingu.impl.*;
@@ -165,7 +166,7 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
     public SettingsFormalizerImpl(String name, String langPath, String primaryExt) throws FileNotFoundException, Maker.MakingException {
         super(name, langPath, primaryExt, new MultiprocessorImpl());
 
-        TokenizerImpl tokenizer = TokenizerMaker.singleton().makeFromTestFile("settings-formalizer");
+        TokenizerImpl tokenizer = Languages.getInstance().getTokenizerMaker().makeFromTestFile("settings-formalizer");
         getProcessor().extend(tokenizer);
 
         setDefaultValues();
