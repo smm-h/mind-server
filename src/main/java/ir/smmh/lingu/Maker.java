@@ -1,7 +1,6 @@
 package ir.smmh.lingu;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
 
@@ -17,5 +16,16 @@ public interface Maker<T> {
     }
 
     class MakingException extends Exception {
+        public MakingException() {
+            super();
+        }
+
+        public MakingException(String message) {
+            super(message);
+        }
+
+        public MakingException(Throwable throwable) {
+            super(throwable);
+        }
     }
 }

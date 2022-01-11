@@ -45,6 +45,8 @@ public interface Log {
     }
 
     default void log(@NotNull final Throwable error) {
-        log(error.getMessage());
+        String message = error.getMessage();
+        if (message != null)
+            log(message);
     }
 }

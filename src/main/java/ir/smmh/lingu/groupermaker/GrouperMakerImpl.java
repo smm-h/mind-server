@@ -13,7 +13,6 @@ import ir.smmh.lingu.settings.impl.SettingsImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
-import java.util.Objects;
 
 public class GrouperMakerImpl extends LanguageImpl implements GrouperMaker {
 

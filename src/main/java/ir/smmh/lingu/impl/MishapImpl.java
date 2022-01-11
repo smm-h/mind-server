@@ -21,22 +21,6 @@ public abstract class MishapImpl implements Mishap {
         this.fatal = fatal;
     }
 
-    public static abstract class Caused extends MishapImpl implements Mishap.Caused {
-
-        public final @NotNull Token.Individual token;
-
-        public Caused(Token.Individual token, boolean fatal) {
-            super(fatal);
-            this.token = token;
-        }
-
-        @Override
-        public @Nullable Token.Individual getCause() {
-            return token;
-        }
-
-    }
-
     @Override
     public boolean isFatal() {
         return fatal;
@@ -53,6 +37,7 @@ public abstract class MishapImpl implements Mishap {
             process = e;
     }
 
+    @NotNull
     @Override
     public final String toString() {
         return getReport();
@@ -60,8 +45,10 @@ public abstract class MishapImpl implements Mishap {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof MishapImpl)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof MishapImpl))
+            return false;
 
         MishapImpl that = (MishapImpl) o;
 
@@ -71,5 +58,21 @@ public abstract class MishapImpl implements Mishap {
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    public static abstract class Caused extends MishapImpl implements Mishap.Caused {
+
+        public final @NotNull Token.Individual token;
+
+        public Caused(Token.Individual token, boolean fatal) {
+            super(fatal);
+            this.token = token;
+        }
+
+        @Override
+        public @Nullable Token.Individual getCause() {
+            return token;
+        }
+
     }
 }

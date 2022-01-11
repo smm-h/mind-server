@@ -73,7 +73,8 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
                     i++;
 
                     int j = i;
-                    while (!array[j].is("verbatim <]>")) j++;
+                    while (!array[j].is("verbatim <]>"))
+                        j++;
 
                     Token.Individual[] a = new IndividualToken[j - i];
 
@@ -150,14 +151,7 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
         return tree;
 
     };
-    public Token.Individual
-            DEFAULT_VALUE_NUMERIC_ZERO,
-            DEFAULT_VALUE_NUMERIC_ONE,
-            DEFAULT_VALUE_STRING_DOUBLE_QUOTES,
-            DEFAULT_VALUE_STRING_SINGLE_QUOTES,
-            DEFAULT_VALUE_BOOLEAN_FALSE,
-            DEFAULT_VALUE_BOOLEAN_TRUE,
-            DEFAULT_VALUE_NONE;
+    public Token.Individual DEFAULT_VALUE_NUMERIC_ZERO, DEFAULT_VALUE_NUMERIC_ONE, DEFAULT_VALUE_STRING_DOUBLE_QUOTES, DEFAULT_VALUE_STRING_SINGLE_QUOTES, DEFAULT_VALUE_BOOLEAN_FALSE, DEFAULT_VALUE_BOOLEAN_TRUE, DEFAULT_VALUE_NONE;
 
     public SettingsFormalizerImpl(String name, String primaryExt) throws FileNotFoundException, Maker.MakingException {
         this(name, primaryExt, primaryExt);
@@ -196,6 +190,9 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
 
                 // I am dequeued
                 InformalSettings informal = q.poll();
+
+                if (informal == null)
+                    continue;
 
                 // Enqueue my children so they may also be born
                 for (InformalSettings child : tree.getChildren(informal))

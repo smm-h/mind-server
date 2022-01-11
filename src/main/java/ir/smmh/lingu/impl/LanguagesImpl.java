@@ -1,6 +1,5 @@
 package ir.smmh.lingu.impl;
 
-
 import ir.smmh.lingu.Language;
 import ir.smmh.lingu.Languages;
 import ir.smmh.lingu.TokenizerMaker;
@@ -24,9 +23,7 @@ public class LanguagesImpl implements Languages {
         }
     }
 
-    private final Log
-            out = Log.fromFile("log/ir/smmh/lingu/OUT.LOG", System.out),
-            err = Log.fromFile("log/ir/smmh/lingu/ERR.LOG", System.err);
+    private final Log out = Log.fromFile("log/ir/smmh/lingu/OUT.LOG", System.out), err = Log.fromFile("log/ir/smmh/lingu/ERR.LOG", System.err);
     private final HashMap<String, Language> extToLanguage = new HashMap<>();
 
     private final TokenizerMaker tm;

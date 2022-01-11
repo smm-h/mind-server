@@ -14,6 +14,7 @@ import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
@@ -32,9 +33,17 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
         setup();
     }
 
-    public MutableMindImpl(JSONObject object) {
+    public MutableMindImpl(JSONObject object) throws JSONException {
         this.name = object.getString("name");
-        this.ideas = new LookupImpl.Mutable<>(JSONUtil.arrayOfObjects(object, "ideas", new HashSet<>(), o -> new MutableIdeaImpl(this, o)));
+        this.ideas = new LookupImpl.Mutable<>(JSONUtil.arrayOfObjects(object, "ideas", new HashSet<>(), o -> {
+            try {
+                return new MutableIdeaImpl(this, o);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                // TODO FIXME
+                return null;
+            }
+        }));
         setup();
     }
 
@@ -84,11 +93,11 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
     }
 
     @Override
-    public @NotNull JSONObject serializeJSON() {
+    public @NotNull JSONObject serializeJSON() throws JSONException {
         clean();
         JSONArray ideas = new JSONArray();
         for (String ideaName : this.ideas) {
-            var idea = this.ideas.find(ideaName);
+            MutableIdeaImpl idea = this.ideas.find(ideaName);
             assert idea != null;
             ideas.put(idea.serializeJSON());
         }

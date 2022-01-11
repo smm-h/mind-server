@@ -35,7 +35,7 @@ public interface StringUtil {
     }
 
     static String repeat(char ch, int count) {
-        return Character.toString(ch).repeat(Math.max(0, count));
+        return Backward.repeat(Character.toString(ch), count);
     }
 
     static byte valueOfSymbol(String s) {

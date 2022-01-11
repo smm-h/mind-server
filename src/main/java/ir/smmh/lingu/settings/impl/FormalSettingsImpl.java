@@ -11,6 +11,7 @@ import ir.smmh.lingu.settings.Length;
 import ir.smmh.lingu.settings.err.InvalidLength;
 import ir.smmh.lingu.settings.err.InvalidValue;
 import ir.smmh.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 
@@ -159,6 +160,7 @@ public class FormalSettingsImpl implements FormalSettings {
         return type.getName() + " '" + name + "'";
     }
 
+    @NotNull
     @Override
     public String toString() {
         return getIdentity();

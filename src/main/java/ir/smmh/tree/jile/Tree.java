@@ -30,11 +30,11 @@ public interface Tree<T> {
 
     String getRepresentation();
 
-//    /**
-//     * To convert an n-ary tree to 2-ary, in every node, iterate over the siblings
-//     * from left to right, and make each one; but before that for each node
-//     * disassociate it from all its children children except the leftmost one.
-//     */
+    //    /**
+    //     * To convert an n-ary tree to 2-ary, in every node, iterate over the siblings
+    //     * from left to right, and make each one; but before that for each node
+    //     * disassociate it from all its children children except the leftmost one.
+    //     */
     // public void toBinary();
     // TODO tree business
 }

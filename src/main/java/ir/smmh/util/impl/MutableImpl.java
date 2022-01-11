@@ -45,8 +45,13 @@ public class MutableImpl implements Mutable {
     @Override
     public final void onClean() {
         dirty = false;
-        for (OnCleanListener listener : listeners)
-            listener.onClean();
+        for (OnCleanListener listener : listeners) {
+            try {
+                listener.onClean();
+            } catch (CleaningException e) {
+                dirty = true;
+            }
+        }
     }
 
     @Override

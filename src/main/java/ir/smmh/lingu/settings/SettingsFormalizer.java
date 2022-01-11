@@ -25,7 +25,7 @@ public interface SettingsFormalizer<T extends Settings> extends Language {
 
     FormalSettings absolve(InformalSettings subj, FormalSettings parentForName, FormalSettings parentForValues, CodeProcess process);
 
-//    <T2 extends Settings> Maker<Map<T2, FormalSettings>> getMapMaker();
+    //    <T2 extends Settings> Maker<Map<T2, FormalSettings>> getMapMaker();
 
     void setDefaultValues();
 

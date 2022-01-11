@@ -8,8 +8,7 @@ public interface Client {
 
     int getDefaultPort();
 
-    @Nullable
-    String connectToHost(@NotNull String address, int port, @NotNull String request);
+    @Nullable String connectToHost(@NotNull String address, int port, @NotNull String request);
 
     @Nullable
     default String connectToHost(@NotNull String address, @NotNull String request) {

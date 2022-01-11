@@ -22,12 +22,7 @@ public class StaticPropertyImpl implements StaticProperty, Serializable.JSON {
     }
 
     public StaticPropertyImpl(Idea origin, JSONObject object) {
-        this(
-                origin,
-                object.getString("name"),
-                object.getString("type"),
-                Value.of(object.getJSONObject("value"), origin.getMind()::findIdeaByName)
-        );
+        this(origin, object.getString("name"), object.getString("type"), Value.of(object.getJSONObject("value"), origin.getMind()::findIdeaByName));
     }
 
     @Override
@@ -66,13 +61,17 @@ public class StaticPropertyImpl implements StaticProperty, Serializable.JSON {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof StaticPropertyImpl)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof StaticPropertyImpl))
+            return false;
 
         StaticPropertyImpl property = (StaticPropertyImpl) o;
 
-        if (!origin.equals(property.origin)) return false;
-        if (!name.equals(property.name)) return false;
+        if (!origin.equals(property.origin))
+            return false;
+        if (!name.equals(property.name))
+            return false;
         return type.equals(property.type);
     }
 

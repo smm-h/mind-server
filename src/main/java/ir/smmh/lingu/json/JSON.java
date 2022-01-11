@@ -5,6 +5,7 @@ import ir.smmh.lingu.impl.CodeImpl;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Objects;
 
 public class JSON {
     private JSON() {
@@ -30,7 +31,7 @@ public class JSON {
                 for (String key : keySet()) {
                     builder.append(key.serialize());
                     builder.append(": ");
-                    builder.append(get(key).serialize());
+                    builder.append(Objects.requireNonNull(get(key)).serialize());
                     builder.append(", ");
                 }
                 builder.deleteCharAt(builder.length() - 1);

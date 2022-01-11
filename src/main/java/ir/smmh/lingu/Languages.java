@@ -1,7 +1,6 @@
 package ir.smmh.lingu;
 
 import ir.smmh.lingu.impl.LanguagesImpl;
-import ir.smmh.lingu.impl.TokenizerMakerImpl;
 import ir.smmh.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -44,7 +44,8 @@ public class MutableHashSet<T> extends HashSet<T> implements Mutable.Set<T>, ir.
 
     @Override
     public void clear() {
-        if (!isEmpty()) taint();
+        if (!isEmpty())
+            taint();
         super.clear();
     }
 }

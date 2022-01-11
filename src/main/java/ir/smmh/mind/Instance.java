@@ -2,16 +2,16 @@ package ir.smmh.mind;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Set;
 
 public interface Instance extends Value {
-    @NotNull
-    Idea getType();
+    @NotNull Idea getType();
 
     @NotNull
-    default JSONObject serializeJSON() {
+    default JSONObject serializeJSON() throws JSONException {
         final JSONObject object = new JSONObject();
         Idea type = getType();
         object.put("~", type.getName());
@@ -19,7 +19,7 @@ public interface Instance extends Value {
         if (properties != null) {
             for (Property property : properties) {
                 Value value = get(property);
-                object.put(property.getName(), value == null ? JSONObject.NULL : value.serialize());
+                object.put(property.getName(), value == null ? JSONObject.NULL : value.serializeJSON());
             }
         }
         return object;
@@ -35,6 +35,5 @@ public interface Instance extends Value {
 
     void setLink(Idea idea, Instance instance);
 
-    @Nullable
-    Instance getLink(Idea idea);
+    @Nullable Instance getLink(Idea idea);
 }

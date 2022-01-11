@@ -12,5 +12,6 @@ public interface CodeProcess {
      * and true if it did not and ran safely.
      */
     boolean finishSilently();
+
     void finishMaking() throws Maker.MakingException;
 }

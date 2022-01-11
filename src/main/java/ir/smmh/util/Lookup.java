@@ -7,8 +7,7 @@ import java.util.Set;
 
 @FunctionalInterface
 public interface Lookup<T extends Named> {
-    @Nullable
-    T find(@NotNull String name);
+    @Nullable T find(@NotNull String name);
 
     default boolean contains(@NotNull String name) {
         return find(name) != null;

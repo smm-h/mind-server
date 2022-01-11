@@ -18,7 +18,8 @@ public class ClientImpl implements Client {
             try {
                 System.out.print(">>> ");
                 final String request = input.readLine();
-                if (request.equals(".")) break;
+                if (request.equals("."))
+                    break;
                 final String response = client.connectToLocalHost(request);
                 System.out.print("=== ");
                 System.out.println(response);

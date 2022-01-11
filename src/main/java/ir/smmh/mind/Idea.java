@@ -80,8 +80,7 @@ public interface Idea extends Named {
         return false;
     }
 
-    @Nullable
-    Set<Idea> getDirectIntensions();
+    @Nullable Set<Idea> getDirectIntensions();
 
     @Nullable
     default Set<Idea> getAllIntensions() {
@@ -102,8 +101,7 @@ public interface Idea extends Named {
         return set;
     }
 
-    @Nullable
-    java.util.Set<Property> getDirectProperties();
+    @Nullable java.util.Set<Property> getDirectProperties();
 
     @Nullable
     default Set<Property> getAllProperties() {
@@ -163,8 +161,7 @@ public interface Idea extends Named {
         return instance;
     }
 
-    @NotNull
-    Instance instantiate();
+    @NotNull Instance instantiate();
 
     @Nullable
     default Instance instantiate(JSONObject serialization) {

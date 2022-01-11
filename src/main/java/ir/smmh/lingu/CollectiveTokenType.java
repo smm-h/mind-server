@@ -2,6 +2,7 @@ package ir.smmh.lingu;
 
 import ir.smmh.tree.jile.Tree;
 import ir.smmh.tree.jile.impl.LinkedTree;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,7 @@ public class CollectiveTokenType implements Token.Type.Collective {
         this.collectiveData = collectiveData;
     }
 
+    @NotNull
     @Override
     public final String toString() {
         return title;
@@ -38,6 +40,7 @@ public class CollectiveTokenType implements Token.Type.Collective {
             this.closer = null;
         }
 
+        @NotNull
         @Override
         public String toString() {
             // return getType().openerData + "..." + getType().closerData;

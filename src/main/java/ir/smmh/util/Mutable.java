@@ -46,12 +46,13 @@ public interface Mutable {
      * Calls {@link #onClean} if it {@link #isDirty}; otherwise does nothing.
      */
     default void clean() {
-        if (isDirty()) onClean();
+        if (isDirty())
+            onClean();
     }
 
     @FunctionalInterface
     interface OnCleanListener {
-        void onClean();
+        void onClean() throws CleaningException;
     }
 
     interface Immutablizable<Immutable> extends Mutable {
@@ -65,14 +66,12 @@ public interface Mutable {
          * @implNote Please call clean before implementing this to ensure
          * returning a correct object.
          */
-        @NotNull
-        Immutable freeze();
+        @NotNull Immutable freeze();
     }
 
     interface Injected extends Mutable {
 
-        @NotNull
-        Mutable getInjectedMutable();
+        @NotNull Mutable getInjectedMutable();
 
         @Override
         default boolean isDirty() {
@@ -96,5 +95,11 @@ public interface Mutable {
     }
 
     interface Set<T> extends Mutable, java.util.Set<T> {
+    }
+
+    class CleaningException extends Exception {
+        public CleaningException(Throwable throwable) {
+            super(throwable);
+        }
     }
 }

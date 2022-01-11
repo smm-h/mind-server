@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,14 +62,18 @@ public abstract class StandardAPI implements API {
     @NotNull
     private JSONObject respond(int errorCode, Throwable thrown, JSONObject results) {
         final JSONObject response = new JSONObject();
-        response.put("error_code", errorCode);
-        response.put("description", errorCodes.get(errorCode));
-        if (thrown != null) {
-            response.put("error_message", thrown.getMessage());
-//            response.put("error_stack_trace", Arrays.toString(thrown.getStackTrace()));
-        }
-        if (results != null) {
-            response.put("results", results);
+        try {
+            response.put("error_code", errorCode);
+            response.put("description", errorCodes.get(errorCode));
+            if (thrown != null) {
+                response.put("error_message", thrown.getMessage());
+                //            response.put("error_stack_trace", Arrays.toString(thrown.getStackTrace()));
+            }
+            if (results != null) {
+                response.put("results", results);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         return response;
     }
@@ -82,12 +87,15 @@ public abstract class StandardAPI implements API {
     public JSONObject processJSON(@NotNull String request) {
         System.out.println("\n>>> " + request);
         JSONObject response;
+        PrintStream log;
         try {
             response = processJSON(new JSONObject(new JSONTokener(request)));
+            log = response.getInt("error_code") == 0 ? System.out : System.err;
         } catch (JSONException e) {
             response = respond(COULD_NOT_PARSE_REQUEST, e);
+            log = System.err;
         }
-        (response.getInt("error_code") == 0 ? System.out : System.err).println("=== " + response);
+        log.println("=== " + response);
         return response;
     }
 
@@ -111,8 +119,7 @@ public abstract class StandardAPI implements API {
                     return respond(COULD_NOT_PARSE_REQUEST, e);
                 }
                 if (method instanceof Method.AuthenticatedMethod) {
-                    @SuppressWarnings("rawtypes")
-                    Method.AuthenticatedMethod am = (Method.AuthenticatedMethod) method;
+                    @SuppressWarnings("rawtypes") Method.AuthenticatedMethod am = (Method.AuthenticatedMethod) method;
                     if (this instanceof AuthenticatedStandardAPI) {
                         AuthenticatedStandardAPI<?> me = ((AuthenticatedStandardAPI<?>) this);
                         @Nullable final JSONObject authentication;

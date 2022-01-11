@@ -29,9 +29,9 @@ public class Streak extends GrouperMakerImpl.DefinitionImpl {
         char[] endCnt = src.getSoleString("cannot-end-with", true).toCharArray();
 
         // TODO pseudo-regex character sets
-//                        .replaceAll("\\[A-Z]", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-//                        .replaceAll("\\[a-z]", "abcdefghijklmnopqrstuvwxyz")
-//                        .replaceAll("\\[0-9]", "0123456789")
+        //                        .replaceAll("\\[A-Z]", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+        //                        .replaceAll("\\[a-z]", "abcdefghijklmnopqrstuvwxyz")
+        //                        .replaceAll("\\[0-9]", "0123456789")
 
         // if (characters.contains(NEGATOR)) {
         // characters.replace(NEGATOR, "");
@@ -51,11 +51,15 @@ public class Streak extends GrouperMakerImpl.DefinitionImpl {
             end.add(c);
         }
 
-        for (char c : staCan) sta.add(c);
-        for (char c : staCnt) sta.remove(c);
+        for (char c : staCan)
+            sta.add(c);
+        for (char c : staCnt)
+            sta.remove(c);
 
-        for (char c : endCan) end.add(c);
-        for (char c : endCnt) end.remove(c);
+        for (char c : endCan)
+            end.add(c);
+        for (char c : endCnt)
+            end.remove(c);
 
         ignore = src.getBoolean("ignore");
 

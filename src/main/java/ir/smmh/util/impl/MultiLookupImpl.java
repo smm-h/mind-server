@@ -12,7 +12,13 @@ public class MultiLookupImpl<T extends Named> implements Lookup.Multi.Iterable<T
 
     @Override
     public @NotNull Set<T> find(@NotNull String name) {
-        return map.containsKey(name) ? Collections.unmodifiableSet(map.get(name)) : Collections.emptySet();
+        if (map.containsKey(name)) {
+            Set<T> set = map.get(name);
+            if (set != null) {
+                return Collections.unmodifiableSet(set);
+            }
+        }
+        return Collections.emptySet();
     }
 
     @NotNull
@@ -23,7 +29,13 @@ public class MultiLookupImpl<T extends Named> implements Lookup.Multi.Iterable<T
 
     @Override
     public int count(@NotNull String name) {
-        return map.containsKey(name) ? map.get(name).size() : 0;
+        if (map.containsKey(name)) {
+            Set<T> set = map.get(name);
+            if (set != null) {
+                return set.size();
+            }
+        }
+        return 0;
     }
 
     public static class Mutable<T extends Named> extends MultiLookupImpl<T> implements Lookup.Multi.Mutable<T> {
@@ -34,7 +46,7 @@ public class MultiLookupImpl<T extends Named> implements Lookup.Multi.Iterable<T
             if (!map.containsKey(name)) {
                 map.put(name, new HashSet<>());
             }
-            map.get(name).add(element);
+            Objects.requireNonNull(map.get(name)).add(element);
         }
     }
 }

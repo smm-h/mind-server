@@ -3,8 +3,8 @@ package ir.smmh.lingu.impl;
 import ir.smmh.lingu.*;
 import ir.smmh.lingu.CollectiveTokenType.CollectiveToken;
 import ir.smmh.lingu.groupermaker.GrouperMakerImpl;
-import ir.smmh.lingu.groupermaker.impl.*;
 import ir.smmh.lingu.groupermaker.GrouperMakerImpl.DefinitionImpl;
+import ir.smmh.lingu.groupermaker.impl.*;
 import ir.smmh.lingu.processors.SingleProcessor;
 import ir.smmh.lingu.settings.FormalSettings;
 import ir.smmh.tree.jile.Tree;
@@ -82,7 +82,7 @@ public class GrouperImpl extends SingleProcessor implements Grouper {
                             separator = verbatim;
                         } else {
                             if (!verbatim.equals(separator)) {
-                                planning.issue(new TwoDifferentSeparators(token, groupingDuties.get(opened.peek()), verbatim, separator));
+                                planning.issue(new TwoDifferentSeparators(token, Objects.requireNonNull(groupingDuties.get(opened.peek())), verbatim, separator));
                                 break outer;
                             }
                         }
@@ -129,7 +129,7 @@ public class GrouperImpl extends SingleProcessor implements Grouper {
                     }
                 }
                 if (deepeningDuties.containsKey(index)) {
-                    switch (deepeningDuties.get(index)) {
+                    switch (Objects.requireNonNull(deepeningDuties.get(index))) {
                         case OPEN:
                             // tree.addAndGoTo(groups.peek());
                             roots.peek().add(groups.peek());
@@ -185,6 +185,7 @@ public class GrouperImpl extends SingleProcessor implements Grouper {
         while (!schedule.isEmpty()) {
             GrouperMakerImpl.Definition definition = schedule.poll();
             // System.out.println("::: " + definition.getPriority() + "\t" + definition.src.name);
+            assert definition != null;
             define(definition);
         }
     }
@@ -206,7 +207,8 @@ public class GrouperImpl extends SingleProcessor implements Grouper {
         else if (definition instanceof RelativePattern)
             define((RelativePattern) definition);
 
-        else throw new RuntimeException("undefined");
+        else
+            throw new RuntimeException("undefined");
     }
 
     public void define(Metadata d) {
@@ -245,7 +247,7 @@ public class GrouperImpl extends SingleProcessor implements Grouper {
             TokenizerImpl.Verbatim opener = tokenizer.define(new TokenizerMakerImpl.Verbatim(d.opener));
             TokenizerImpl.Verbatim closer = tokenizer.define(new TokenizerMakerImpl.Verbatim(d.closer));
             TokenizerImpl.Verbatim separator = tokenizer.define(new TokenizerMakerImpl.Verbatim(d.separator));
-            groupTypes.put(d.getAbsoluteName(), new GroupType(d.getAbsoluteName(), opener, closer, separator, null));
+            groupTypes.put(d.getAbsoluteName(), new GroupType(d.getAbsoluteName(), opener, closer, separator, null)); // TODO cell type
 
             if (d.ignore)
                 new MultitudeNotOpaqueButIgnored(findSourceForDefinition(d));
@@ -265,7 +267,7 @@ public class GrouperImpl extends SingleProcessor implements Grouper {
     }
 
     public void define(RelativePattern d) {
-
+        // TODO define relative pattern
     }
 
     enum Deepening {

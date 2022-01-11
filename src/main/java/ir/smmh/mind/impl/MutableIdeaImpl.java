@@ -11,6 +11,7 @@ import ir.smmh.util.impl.MutableHashSet;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashSet;
@@ -42,7 +43,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
         setup();
     }
 
-    public MutableIdeaImpl(Mind mind, JSONObject object) {
+    public MutableIdeaImpl(Mind mind, JSONObject object) throws JSONException {
         this.mind = mind;
         this.name = object.getString("name");
         this.intensions = JSONUtil.arrayOfStrings(object, "intensions", new MutableHashSet<>());
@@ -53,7 +54,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     }
 
     @Override
-    public @NotNull JSONObject serializeJSON() {
+    public @NotNull JSONObject serializeJSON() throws JSONException {
         JSONObject object = new JSONObject();
         object.put("name", name);
         object.put("intensions", intensions);
@@ -99,6 +100,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
         return new InstanceImpl(this);
     }
 
+    @NotNull
     @Override
     public String toString() {
         return name;

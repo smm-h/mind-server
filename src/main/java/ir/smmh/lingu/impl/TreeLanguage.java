@@ -1,13 +1,11 @@
 package ir.smmh.lingu.impl;
 
-
 import ir.smmh.lingu.*;
 import ir.smmh.tree.jile.impl.LinkedTree;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.util.List;
-import java.util.Objects;
 
 import static ir.smmh.lingu.settings.impl.SettingsFormalizerImpl.treeMaker;
 

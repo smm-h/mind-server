@@ -4,9 +4,10 @@ import ir.smmh.mind.Mind;
 import ir.smmh.storage.impl.StorageGateImpl;
 import ir.smmh.storage.impl.StorageImpl;
 import ir.smmh.util.JSONUtil;
+import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.json.JSONObject;
+import org.json.JSONException;
 
 public class MindStorageGate extends StorageGateImpl<Mind.Mutable> {
 
@@ -20,8 +21,11 @@ public class MindStorageGate extends StorageGateImpl<Mind.Mutable> {
     }
 
     @Override
-    public @Nullable Mind.Mutable deserialize(String identifier, String serialization) {
-        JSONObject object = JSONUtil.parse(serialization);
-        return object == null ? null : new MutableMindImpl(object);
+    public @Nullable Mind.Mutable deserialize(String identifier, String serialization) throws Serializable.SerializationException {
+        try {
+            return new MutableMindImpl(JSONUtil.parse(serialization));
+        } catch (JSONException e) {
+            throw new Serializable.SerializationException(e);
+        }
     }
 }

@@ -1,6 +1,7 @@
 package ir.smmh.lingu.impl;
 
 import ir.smmh.lingu.*;
+import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -18,8 +19,7 @@ public class CodeProcessImpl implements CodeProcess {
         this.code = code;
         this.name = name;
         String i = name + ": " + getCode().getOpenFile().getTitle();
-        System.out.println("\n\t" + i + "\n\t" + "<".repeat(i.length()) + "\n");
-
+        System.out.println("\n\t" + i + "\n\t" + StringUtil.repeat('<', i.length()) + "\n");
     }
 
     @Override
@@ -58,7 +58,7 @@ public class CodeProcessImpl implements CodeProcess {
         finished = true;
 
         String i = name + ": " + getCode().getOpenFile().getTitle();
-        System.out.println("\n\t" + i + "\n\t" + ">".repeat(i.length()) + "\n");
+        System.out.println("\n\t" + i + "\n\t" + StringUtil.repeat('>', i.length()) + "\n");
 
         if (!safe) {
             System.out.println("" + myMishaps.size() + " mishap(s) during: '" + name + "' of: " + this);
@@ -73,7 +73,7 @@ public class CodeProcessImpl implements CodeProcess {
                     if (!map.containsKey(key)) {
                         map.put(key, new HashSet<>());
                     }
-                    map.get(key).add(mishap);
+                    Objects.requireNonNull(map.get(key)).add(mishap);
                 }
             }
             throw new Maker.MakingException();

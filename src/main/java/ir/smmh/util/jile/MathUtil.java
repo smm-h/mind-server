@@ -1,6 +1,5 @@
 package ir.smmh.util.jile;
 
-
 public interface MathUtil {
 
     static double factorial(double n) {
@@ -23,7 +22,7 @@ public interface MathUtil {
         return tens(x, 0);
     }
 
-    private static int tens(double x, int depth) {
+    static int tens(double x, int depth) {
         return is_int(x) ? depth : tens(x * 10, depth + 1);
     }
 

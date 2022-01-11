@@ -1,6 +1,9 @@
 package ir.smmh.lingu.impl;
 
-import ir.smmh.lingu.*;
+import ir.smmh.lingu.Code;
+import ir.smmh.lingu.CodeProcess;
+import ir.smmh.lingu.Token;
+import ir.smmh.lingu.TokenizerMaker;
 import ir.smmh.lingu.processors.SingleProcessor;
 import ir.smmh.lingu.processors.impl.MultiprocessorImpl;
 import ir.smmh.nile.adj.Sequential;
@@ -10,7 +13,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class TokenizerMakerImpl extends LanguageImpl implements TokenizerMaker {
-
 
     public TokenizerMakerImpl() {
         super("Tokenizer Maker", "nlx", new MultiprocessorImpl());
@@ -82,7 +84,6 @@ public class TokenizerMakerImpl extends LanguageImpl implements TokenizerMaker {
     private TokenizerImpl augment(@NotNull TokenizerImpl beingMade, Code code) {
 
         CodeProcess making = new CodeProcessImpl(code, "making a tokenizer");
-
 
         // System.out.println(language.name + " <+ " + code.getTitle());
 

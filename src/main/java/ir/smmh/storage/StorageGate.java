@@ -1,5 +1,6 @@
 package ir.smmh.storage;
 
+import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,10 +18,9 @@ public interface StorageGate<T extends Stored> {
 
     @NotNull T createBlank(String identifier);
 
-    @Nullable T deserialize(String identifier, String serialization);
+    @Nullable T deserialize(String identifier, String serialization) throws Serializable.SerializationException;
 
-    @NotNull
-    Storage getStorage();
+    @NotNull Storage getStorage();
 
     default boolean exists(@Nullable String id) {
         return id != null && (existsInMemory(id) || existsOnDisk(id));
@@ -32,7 +32,8 @@ public interface StorageGate<T extends Stored> {
 
     @Nullable
     default T find(@Nullable String id) {
-        if (id == null) return null;
+        if (id == null)
+            return null;
         if (!existsInMemory(id)) {
             T object = findOnDisk(id);
             if (object != null) {
@@ -44,9 +45,7 @@ public interface StorageGate<T extends Stored> {
 
     void addToMemory(@NotNull T object);
 
-    @Nullable
-    T findInMemory(@NotNull String id);
+    @Nullable T findInMemory(@NotNull String id);
 
-    @Nullable
-    T findOnDisk(@NotNull String id);
+    @Nullable T findOnDisk(@NotNull String id);
 }

@@ -1,6 +1,7 @@
 package ir.smmh.util.jile.impl;
 
 import ir.smmh.util.jile.Or;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractOr<This, That> implements Or<This, That> {
 
@@ -28,6 +29,7 @@ public abstract class AbstractOr<This, That> implements Or<This, That> {
         }
     }
 
+    @NotNull
     @Override
     public String toString() {
         if (isThis())

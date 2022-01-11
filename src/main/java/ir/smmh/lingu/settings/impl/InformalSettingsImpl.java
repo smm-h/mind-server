@@ -2,6 +2,7 @@ package ir.smmh.lingu.settings.impl;
 
 import ir.smmh.lingu.Token;
 import ir.smmh.lingu.settings.InformalSettings;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +12,6 @@ public class InformalSettingsImpl implements InformalSettings {
     private final Token.Individual type, name;
     private final Map<String, Token.Individual[]> data = new HashMap<>();
     // private final Set<String> referenceKeys = new HashSet<>();
-
 
     public InformalSettingsImpl(Token.Individual type, Token.Individual name) {
         this.type = type;
@@ -48,6 +48,7 @@ public class InformalSettingsImpl implements InformalSettings {
         return identity;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return getIdentity();

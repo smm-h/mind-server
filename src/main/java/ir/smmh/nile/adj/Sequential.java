@@ -201,10 +201,13 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     default int findNth(T toFind, int n) {
-        if (n == 0) return findFirst(toFind);
-        if (n == -1) return findLast(toFind);
+        if (n == 0)
+            return findFirst(toFind);
+        if (n == -1)
+            return findLast(toFind);
         List<Integer> all = findAll(toFind);
-        if (n < 0) n += all.size();
+        if (n < 0)
+            n += all.size();
         return n < 0 || n >= all.size() ? -1 : all.get(n);
     }
 

@@ -4,7 +4,10 @@ import ir.smmh.lingu.*;
 import ir.smmh.util.jile.OpenFile;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class CodeImpl implements Code {
 
@@ -38,14 +41,14 @@ public class CodeImpl implements Code {
     }
 
     private synchronized void beProcessed() {
-//         String i = getOpenFile().getTitle();
-//        out.log("\n" + i + "\n" + "<".repeat(i.length()) + "\n");
+        //         String i = getOpenFile().getTitle();
+        //        out.log("\n" + i + "\n" + "<".repeat(i.length()) + "\n");
 
         mishaps.write(this, new HashMap<>()); // TODO replace new with clear
 
         language.getProcessor().process(this);
 
-//        out.log("\n" + i + "\n" + ">".repeat(i.length()) + "\n");
+        //        out.log("\n" + i + "\n" + ">".repeat(i.length()) + "\n");
     }
 
     @Override
@@ -53,6 +56,7 @@ public class CodeImpl implements Code {
         return openFile;
     }
 
+    @NotNull
     @Override
     public String toString() {
         return openFile.getTitle();

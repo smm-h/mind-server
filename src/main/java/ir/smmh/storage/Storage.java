@@ -7,8 +7,7 @@ public interface Storage {
 
     boolean exists(@NotNull final String id);
 
-    @Nullable
-    String read(@NotNull final String id);
+    @Nullable String read(@NotNull final String id);
 
     boolean write(@NotNull final String id, @NotNull final String contents);
 

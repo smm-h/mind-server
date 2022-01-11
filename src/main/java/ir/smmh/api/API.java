@@ -17,6 +17,5 @@ public interface API {
         }
     }
 
-    @NotNull
-    String process(@NotNull String request);
+    @NotNull String process(@NotNull String request);
 }

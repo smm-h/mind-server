@@ -12,13 +12,11 @@ import java.util.Objects;
 @FunctionalInterface
 public interface Cache<Wrapper, Contents> {
 
-    @NotNull
-    Wrapper get(Contents contents);
+    @NotNull Wrapper get(Contents contents);
 
     interface Extended<Wrapper, Contents> extends Cache<Wrapper, Contents> {
 
-        @Nullable
-        Wrapper find(Contents contents);
+        @Nullable Wrapper find(Contents contents);
 
         /**
          * It is very important that this process is deterministic

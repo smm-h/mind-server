@@ -2,6 +2,7 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MindStorageGate;
 import ir.smmh.util.JSONUtil;
+import ir.smmh.util.Serializable;
 import ir.smmh.util.impl.MutableImpl;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
@@ -27,7 +28,7 @@ class MindSerializationTest {
     }
 
     @Test
-    public void testSerialization() {
+    public void testSerialization() throws Serializable.SerializationException {
         m.imagine("a");
         JSONObject object = JSONUtil.parse(m.serialize());
         assertNotNull(object);

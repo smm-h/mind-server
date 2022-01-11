@@ -52,13 +52,14 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         TokenizerImpl.tokenized.write(code, stripped);
     }
 
-    public void schedule(Definition definition) {
+    public void schedule(@NotNull Definition definition) {
         schedule.add(definition);
     }
 
     public void defineAsScheduled() {
         while (!schedule.isEmpty()) {
             Definition definition = schedule.poll();
+            assert definition != null;
             define(definition);
         }
     }
@@ -94,7 +95,8 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         else if (definition instanceof TokenizerMakerImpl.Verbatim)
             return define((TokenizerMakerImpl.Verbatim) definition);
 
-        else throw new RuntimeException("undefined");
+        else
+            throw new RuntimeException("undefined");
     }
 
     public Streak define(TokenizerMakerImpl.Streak definition) {
@@ -104,7 +106,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
             if (!streaksOfCharacters.containsKey(c)) {
                 streaksOfCharacters.put(c, new TreeSet<>());
             }
-            streaksOfCharacters.get(c).add(type);
+            Objects.requireNonNull(streaksOfCharacters.get(c)).add(type);
         }
         return type;
     }
@@ -125,7 +127,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         if (!verbatims.containsKey(key)) {
             verbatims.put(key, new TreeSet<>());
         }
-        verbatims.get(key).add(type);
+        Objects.requireNonNull(verbatims.get(key)).add(type);
         return type;
     }
 
@@ -136,7 +138,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         if (!kepts.containsKey(key)) {
             kepts.put(key, new TreeSet<>());
         }
-        kepts.get(key).add(type);
+        Objects.requireNonNull(kepts.get(key)).add(type);
         return type;
     }
 
@@ -177,7 +179,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
                 if (kepts.containsKey(character)) {
 
                     // search all kepts that start with that character
-                    for (Kept kept : kepts.get(character)) {
+                    for (Kept kept : Objects.requireNonNull(kepts.get(character))) {
 
                         // figure out where the opener of that kept would end if it had appeared
                         int endIndex = flag + kept.opener.length();

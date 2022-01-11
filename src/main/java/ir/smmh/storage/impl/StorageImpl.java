@@ -28,15 +28,11 @@ public class StorageImpl implements Storage {
     }
 
     public StorageImpl(@NotNull String root, @NotNull String out, @NotNull String err) {
-        this(root,
-                Log.fromFile(out, System.out),
-                Log.fromFile(err, System.err));
+        this(root, Log.fromFile(out, System.out), Log.fromFile(err, System.err));
     }
 
     public StorageImpl(@NotNull String name) {
-        this("db/" + name,
-                "db/" + name + "/log/OUT.LOG",
-                "db/" + name + "/log/ERR.LOG");
+        this("db/" + name, "db/" + name + "/log/OUT.LOG", "db/" + name + "/log/ERR.LOG");
     }
 
     @Override

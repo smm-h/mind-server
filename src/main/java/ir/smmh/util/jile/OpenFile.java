@@ -127,10 +127,14 @@ public interface OpenFile {
     default boolean synchronize() {
         boolean modifiedInternally = getLastModifiedInternally() > getLastSynchronized();
         boolean modifiedExternally = getLastModifiedExternally() > getLastSynchronized();
-        if (modifiedInternally && modifiedExternally) return synchronizationFailed();
-        else if (modifiedInternally) return forceWrite();
-        else if (modifiedExternally) return forceRead();
-        else return true;
+        if (modifiedInternally && modifiedExternally)
+            return synchronizationFailed();
+        else if (modifiedInternally)
+            return forceWrite();
+        else if (modifiedExternally)
+            return forceRead();
+        else
+            return true;
     }
 
     /**
@@ -143,16 +147,17 @@ public interface OpenFile {
      * @return Success on synchronizing contents
      */
     default boolean synchronizationFailed() {
-        if (forceWrite()) return true;
-        else return forceRead();
+        if (forceWrite())
+            return true;
+        else
+            return forceRead();
     }
 
     /**
      * @return Whether or not the contents in memory match the contents in file
      */
     default boolean isSynchronized() {
-        return getLastSynchronized() >= getLastModifiedInternally() &&
-                getLastSynchronized() >= getLastModifiedExternally();
+        return getLastSynchronized() >= getLastModifiedInternally() && getLastSynchronized() >= getLastModifiedExternally();
     }
 
     /**

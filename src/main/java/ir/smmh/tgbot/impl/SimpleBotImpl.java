@@ -2,26 +2,25 @@ package ir.smmh.tgbot.impl;
 
 import ir.smmh.tgbot.SimpleBot;
 import ir.smmh.util.JSONUtil;
+import okhttp3.*;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.io.IOException;
 
 public abstract class SimpleBotImpl implements SimpleBot {
 
     private static final String BASE = "https://api.telegram.org/bot%s/%s";
-
-    private final HttpClient client;
+    private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+    private final OkHttpClient client;
     private String token;
     private int updateId = 0;
     private boolean running = false;
 
     public SimpleBotImpl() {
-        client = HttpClient.newHttpClient();
+        client = new OkHttpClient();
     }
 
     @Override
@@ -32,23 +31,24 @@ public abstract class SimpleBotImpl implements SimpleBot {
     @Override
     public void sendMessage(long chatId, String text, @Nullable Integer replyToMessageId) {
         final JSONObject p = new JSONObject();
-        p.put("chat_id", chatId);
-        p.put("text", text);
-        p.put("parse_mode", "HTML");
-        if (replyToMessageId != null) {
-            p.put("reply_to_message_id", replyToMessageId);
-            p.put("allow_sending_without_reply", true);
+        try {
+            p.put("chat_id", chatId);
+            p.put("text", text);
+            p.put("parse_mode", "HTML");
+            if (replyToMessageId != null) {
+                p.put("reply_to_message_id", replyToMessageId);
+                p.put("allow_sending_without_reply", true);
+            }
+            RequestBody body = RequestBody.create(p.toString(), JSON);
+            Request request = new Request.Builder().url(makeURL("sendMessage")).addHeader("Content-Type", "application/json").post(body).build();
+            client.newCall(request).execute();
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
         }
-        client.sendAsync(HttpRequest.newBuilder()
-                .uri(makeURI("sendMessage"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(p.toString()))
-                .build(), HttpResponse.BodyHandlers.ofString()
-        );
     }
 
-    private URI makeURI(String method) {
-        return URI.create(String.format(BASE, token, method));
+    private String makeURL(String method) {
+        return String.format(BASE, token, method);
     }
 
     @Override
@@ -69,16 +69,11 @@ public abstract class SimpleBotImpl implements SimpleBot {
 
         while (running) {
             try {
-                client.sendAsync(HttpRequest.newBuilder()
-                        .uri(makeURI("getUpdates"))
-                        .header("Content-Type", "application/json")
-                        .POST(HttpRequest.BodyPublishers.ofString(String.format(params, updateId)))
-                        .build(), HttpResponse.BodyHandlers.ofString()
-                )
-                        .thenApply(HttpResponse::body)
-                        .thenApply(JSONUtil::parse)
-                        .thenAccept(this::handle)
-                        .join();
+
+                RequestBody body = RequestBody.create(String.format(params, updateId), JSON);
+                Request request = new Request.Builder().url(makeURL("getUpdates")).addHeader("Content-Type", "application/json").post(body).build();
+                Response response = client.newCall(request).execute();
+                handle(JSONUtil.parse(response.body().string()));
             } catch (Throwable throwable) {
                 System.err.println(throwable.getMessage());
             }
@@ -91,20 +86,24 @@ public abstract class SimpleBotImpl implements SimpleBot {
     }
 
     private void handle(JSONObject object) {
-        final JSONArray array = object.getJSONArray("result");
-        for (int i = 0; i < array.length(); i++) {
-            final JSONObject update = array.getJSONObject(i);
-            updateId = Math.max(updateId, update.getInt("update_id") + 1);
-            if (update.has("message")) {
-                final JSONObject message = update.getJSONObject("message");
-                final int messageId = message.getInt("message_id");
-                if (message.has("text")) {
-                    final String text = message.getString("text");
-                    final long chatId = message.getJSONObject("chat").getLong("id");
-                    System.out.println("@" + chatId + " #" + messageId + ": " + text);
-                    process(chatId, text, messageId);
+        try {
+            final JSONArray array = object.getJSONArray("result");
+            for (int i = 0; i < array.length(); i++) {
+                final JSONObject update = array.getJSONObject(i);
+                updateId = Math.max(updateId, update.getInt("update_id") + 1);
+                if (update.has("message")) {
+                    final JSONObject message = update.getJSONObject("message");
+                    final int messageId = message.getInt("message_id");
+                    if (message.has("text")) {
+                        final String text = message.getString("text");
+                        final long chatId = message.getJSONObject("chat").getLong("id");
+                        System.out.println("@" + chatId + " #" + messageId + ": " + text);
+                        process(chatId, text, messageId);
+                    }
                 }
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
     }
 }

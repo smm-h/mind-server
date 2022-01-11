@@ -24,12 +24,7 @@ public class PropertyImpl implements Property, Serializable.JSON {
     }
 
     public PropertyImpl(Idea origin, JSONObject object) {
-        this(
-                origin,
-                object.getString("name"),
-                object.getString("type"),
-                () -> Value.of(object.getJSONObject("defaultValue"), origin.getMind()::findIdeaByName)
-        );
+        this(origin, object.getString("name"), object.getString("type"), () -> Value.of(object.getJSONObject("defaultValue"), origin.getMind()::findIdeaByName));
     }
 
     @Override
@@ -68,13 +63,17 @@ public class PropertyImpl implements Property, Serializable.JSON {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PropertyImpl)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof PropertyImpl))
+            return false;
 
         PropertyImpl property = (PropertyImpl) o;
 
-        if (!origin.equals(property.origin)) return false;
-        if (!name.equals(property.name)) return false;
+        if (!origin.equals(property.origin))
+            return false;
+        if (!name.equals(property.name))
+            return false;
         return type.equals(property.type);
     }
 

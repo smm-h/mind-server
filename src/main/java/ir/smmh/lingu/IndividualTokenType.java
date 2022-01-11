@@ -1,5 +1,8 @@
 package ir.smmh.lingu;
 
+
+import org.jetbrains.annotations.NotNull;
+
 public class IndividualTokenType implements Token.Type.Individual {
     public final String title;
 
@@ -8,6 +11,7 @@ public class IndividualTokenType implements Token.Type.Individual {
     }
 
     @Override
+    @NotNull
     public final String toString() {
         return title;
     }
@@ -32,6 +36,7 @@ public class IndividualTokenType implements Token.Type.Individual {
         }
 
         @Override
+        @NotNull
         public String toString() {
             return "<" + getData() + ">";
         }

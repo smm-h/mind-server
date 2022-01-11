@@ -80,7 +80,8 @@ public abstract class FormalizationBlueprintImpl implements FormalizationBluepri
 
     @Override
     public int getIndex(String key) {
-        return keyToIndex.get(key);
+        final Integer index = keyToIndex.get(key);
+        return index == null ? -1 : index;
     }
 
     @Override

@@ -9,7 +9,6 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-
 public class LinkedTree<T> implements MutableTree<T> {
 
     private final Map<T, Node> nodes;
@@ -27,6 +26,10 @@ public class LinkedTree<T> implements MutableTree<T> {
     public <T2> LinkedTree(LinkedTree<T2> src, Function<T2, T> converter) {
         this();
         addFrom(src.root, converter);
+    }
+
+    public void setToText(final Function<Object, String> toText) {
+        this.toText = toText;
     }
 
     @Override
@@ -72,6 +75,7 @@ public class LinkedTree<T> implements MutableTree<T> {
         goBack();
     }
 
+    @NotNull
     @Override
     public String toString() {
         return getRepresentation();

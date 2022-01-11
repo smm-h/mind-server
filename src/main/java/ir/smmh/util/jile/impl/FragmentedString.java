@@ -1,6 +1,7 @@
 package ir.smmh.util.jile.impl;
 
 import ir.smmh.util.jile.Typeable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
@@ -44,7 +45,8 @@ public class FragmentedString implements Typeable {
 
     public String getString() {
         StringBuilder string = new StringBuilder();
-        for (Fragment fragment : fragments) string.append(fragment.getString());
+        for (Fragment fragment : fragments)
+            string.append(fragment.getString());
         return string.toString();
     }
 
@@ -118,16 +120,19 @@ public class FragmentedString implements Typeable {
             fragments.add(index, fragment.fromIndexToEnd(position));
     }
 
+    @NotNull
     @Override
     public String toString() {
         StringBuilder string = new StringBuilder();
-        for (Fragment fragment : fragments) string.append("[").append(fragment.getString()).append("]");
+        for (Fragment fragment : fragments)
+            string.append("[").append(fragment.getString()).append("]");
         return string.toString();
     }
 
     public int getLength() {
         int length = 0;
-        for (Fragment fragment : fragments) length += fragment.getLength();
+        for (Fragment fragment : fragments)
+            length += fragment.getLength();
         return length;
     }
 

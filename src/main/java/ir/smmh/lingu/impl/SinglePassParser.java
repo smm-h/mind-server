@@ -44,7 +44,7 @@ public abstract class SinglePassParser extends SingleProcessor {
     }
 
     public interface Resolver {
-        boolean canBeResolved(String identifier);
+        boolean canNotBeResolved(String identifier);
     }
 
     public static abstract class SinglePassParserMishap extends MishapImpl.Caused {
@@ -71,7 +71,7 @@ public abstract class SinglePassParser extends SingleProcessor {
         private final CodeProcess process;
         private final Stack<Token.Collective> blocks = new Stack<>();
         private final Stack<Integer> blockIndices = new Stack<>();
-        IndividualToken DUMMY_TOKEN = new IndividualTokenType("DUMMY").new IndividualToken("", 0);
+        private final IndividualToken DUMMY_TOKEN = new IndividualTokenType("DUMMY").new IndividualToken("", 0);
         /**
          * must never be null
          */
@@ -273,7 +273,7 @@ public abstract class SinglePassParser extends SingleProcessor {
             if (peekMustBe("identifier", "identifier")) {
                 Token token = poll();
                 String identifier = token.getData();
-                if (resolver != null && !resolver.canBeResolved(identifier)) {
+                if (resolver != null && resolver.canNotBeResolved(identifier)) {
                     getProcess().issue(new IdentifierNotResolved((IndividualToken) token));
                     return null;
                 }

@@ -3,6 +3,7 @@ package ir.smmh.storage.impl;
 import ir.smmh.storage.Storage;
 import ir.smmh.storage.StorageGate;
 import ir.smmh.storage.Stored;
+import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +38,12 @@ public abstract class StorageGateImpl<T extends Stored> implements StorageGate<T
     @Nullable
     @Override
     public T findOnDisk(@NotNull String id) {
-        return deserialize(id, getStorage().read(id));
+        try {
+            return deserialize(id, getStorage().read(id));
+        } catch (Serializable.SerializationException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override
