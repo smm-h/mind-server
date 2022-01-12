@@ -11,16 +11,20 @@ public interface Instance extends Value {
     @NotNull Idea getType();
 
     @NotNull
-    default JSONObject serializeJSON() throws JSONException {
+    default JSONObject serializeJSON() {
         final JSONObject object = new JSONObject();
-        Idea type = getType();
-        object.put("~", type.getName());
-        Set<Property> properties = type.getAllProperties();
-        if (properties != null) {
-            for (Property property : properties) {
-                Value value = get(property);
-                object.put(property.getName(), value == null ? JSONObject.NULL : value.serializeJSON());
+        try {
+            Idea type = getType();
+            object.put("~", type.getName());
+            Set<Property> properties = type.getAllProperties();
+            if (properties != null) {
+                for (Property property : properties) {
+                    Value value = get(property);
+                    object.put(property.getName(), value == null ? JSONObject.NULL : value.serializeJSON());
+                }
             }
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
         return object;
     }

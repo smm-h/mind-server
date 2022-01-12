@@ -145,6 +145,20 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         };
     }
 
+    static <T> Sequential<T> empty() {
+        return new Sequential<>() {
+            @Override
+            public T getAt(int index) throws IndexOutOfBoundsException {
+                throw new IndexOutOfBoundsException();
+            }
+
+            @Override
+            public int getLength() {
+                return 0;
+            }
+        };
+    }
+
     default @NotNull List<T> asList() {
         return new AbstractList<>() {
             @Override
@@ -253,6 +267,40 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return () -> new ReverseIterator.Mutable<>(this);
         }
 
+        static <T> Sequential.Mutable<T> of(List<T> list) {
+
+            return new Sequential.Mutable<>() {
+                @Override
+                public void removeIndexFrom(int toRemove) {
+                    list.remove(toRemove);
+                }
+
+                @Override
+                public void removeElementFrom(T toRemove) {
+                    list.remove(toRemove);
+                }
+
+                @Override
+                public void append(T toAppend) {
+                    list.add(toAppend);
+                }
+
+                @Override
+                public void set(int index, T toSet) {
+                    list.set(index, toSet);
+                }
+
+                @Override
+                public T getAt(int index) throws IndexOutOfBoundsException {
+                    return list.get(index);
+                }
+
+                @Override
+                public int getLength() {
+                    return list.size();
+                }
+            };
+        }
     }
 
     class ObverseIterator<S extends Sequential<T>, T> implements Iterator<T> {

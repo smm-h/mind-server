@@ -9,7 +9,7 @@ abstract class OrTest {
 
     @NotNull
     DoubleOrString add(DoubleOrString a, DoubleOrString b) {
-        if (a.sameAs(b)) {
+        if (a.sameTypeAs(b)) {
             return (a.isThis())
                     ? newDoubleOrString(a.getThis() + b.getThis())
                     : newDoubleOrString(a.getThat() + b.getThat());

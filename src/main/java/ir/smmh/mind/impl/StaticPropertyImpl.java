@@ -5,6 +5,7 @@ import ir.smmh.mind.StaticProperty;
 import ir.smmh.mind.Value;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class StaticPropertyImpl implements StaticProperty, Serializable.JSON {
@@ -28,9 +29,13 @@ public class StaticPropertyImpl implements StaticProperty, Serializable.JSON {
     @Override
     public @NotNull JSONObject serializeJSON() {
         JSONObject object = new JSONObject();
-        object.put("name", name);
-        object.put("type", type);
-        object.put("value", value.serializeJSON());
+        try {
+            object.put("name", name);
+            object.put("type", type);
+            object.put("value", value.serializeJSON());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return object;
     }
 

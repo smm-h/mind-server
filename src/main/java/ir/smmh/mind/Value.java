@@ -46,13 +46,23 @@ public interface Value extends Serializable.JSON {
 
     interface Number extends Primitive<java.lang.Number> {
         default @NotNull JSONObject serializeJSON() throws JSONException {
-            return new JSONObject("{\"~\": \"number\", \"value\": \"" + JSONObject.numberToString(getValue()) + "\"}");
+            try {
+                return new JSONObject("{\"~\": \"number\", \"value\": \"" + JSONObject.numberToString(getValue()) + "\"}");
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return new JSONObject();
+            }
         }
     }
 
     interface String extends Primitive<java.lang.String> {
         default @NotNull JSONObject serializeJSON() throws JSONException {
-            return new JSONObject("{\"~\": \"string\", \"value\": \"" + JSONObject.quote(getValue()) + "\"}");
+            try {
+                return new JSONObject("{\"~\": \"string\", \"value\": \"" + JSONObject.quote(getValue()) + "\"}");
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return new JSONObject();
+            }
         }
     }
 }

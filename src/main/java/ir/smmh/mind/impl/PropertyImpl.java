@@ -5,6 +5,7 @@ import ir.smmh.mind.Property;
 import ir.smmh.mind.Value;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.function.Supplier;
@@ -30,9 +31,13 @@ public class PropertyImpl implements Property, Serializable.JSON {
     @Override
     public @NotNull JSONObject serializeJSON() {
         JSONObject object = new JSONObject();
-        object.put("name", name);
-        object.put("type", type);
-        object.put("defaultValue", defaultValue.get().serializeJSON());
+        try {
+            object.put("name", name);
+            object.put("type", type);
+            object.put("defaultValue", defaultValue.get().serializeJSON());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return object;
     }
 

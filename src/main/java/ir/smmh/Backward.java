@@ -28,8 +28,14 @@ public interface Backward {
         //        throw new RuntimeException("TODO");
     }
 
-    static <T> Iterator<T> asIterator(final Enumeration<T> entries) {
-        return entries.asIterator();
-        //        throw new RuntimeException("TODO");
+    static <T> Iterator<T> asIterator(final Enumeration<T> enumeration) {
+        return new Iterator<>() {
+            @Override public boolean hasNext() {
+                return enumeration.hasMoreElements();
+            }
+            @Override public T next() {
+                return enumeration.nextElement();
+            }
+        };
     }
 }

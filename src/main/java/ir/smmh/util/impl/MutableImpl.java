@@ -49,7 +49,7 @@ public class MutableImpl implements Mutable {
             try {
                 listener.onClean();
             } catch (CleaningException e) {
-                dirty = true;
+                taint();
             }
         }
     }

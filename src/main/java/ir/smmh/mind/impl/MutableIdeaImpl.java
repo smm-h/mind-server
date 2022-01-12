@@ -56,10 +56,14 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     @Override
     public @NotNull JSONObject serializeJSON() throws JSONException {
         JSONObject object = new JSONObject();
-        object.put("name", name);
-        object.put("intensions", intensions);
-        object.put("properties", properties.values()); // ((Comprehension.List<String, PropertyImpl>) properties::get).comprehend(properties.keySet()));
-        object.put("static-properties", staticProperties.values()); // ((Comprehension.List<String, PropertyImpl>) staticProperties::get).comprehend(staticProperties.keySet()));
+        try {
+            object.put("name", name);
+            object.put("intensions", intensions);
+            object.put("properties", properties.values()); // ((Comprehension.List<String, PropertyImpl>) properties::get).comprehend(properties.keySet()));
+            object.put("static-properties", staticProperties.values()); // ((Comprehension.List<String, PropertyImpl>) staticProperties::get).comprehend(staticProperties.keySet()));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return object;
     }
 

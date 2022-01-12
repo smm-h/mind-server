@@ -95,15 +95,19 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
     @Override
     public @NotNull JSONObject serializeJSON() throws JSONException {
         clean();
-        JSONArray ideas = new JSONArray();
-        for (String ideaName : this.ideas) {
-            MutableIdeaImpl idea = this.ideas.find(ideaName);
-            assert idea != null;
-            ideas.put(idea.serializeJSON());
-        }
         JSONObject object = new JSONObject();
-        object.put("name", name);
-        object.put("ideas", ideas);
+        try {
+            JSONArray ideas = new JSONArray();
+            for (String ideaName : this.ideas) {
+                MutableIdeaImpl idea = this.ideas.find(ideaName);
+                assert idea != null;
+                ideas.put(idea.serializeJSON());
+            }
+            object.put("name", name);
+            object.put("ideas", ideas);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return object;
     }
 }
