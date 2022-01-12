@@ -28,7 +28,7 @@ class MindSerializationTest {
     }
 
     @Test
-    public void testSerialization() throws Serializable.SerializationException {
+    public void testSerialization() {
         m.imagine("a");
         JSONObject object = JSONUtil.parse(m.serialize());
         assertNotNull(object);

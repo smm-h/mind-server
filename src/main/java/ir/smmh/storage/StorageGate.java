@@ -18,7 +18,7 @@ public interface StorageGate<T extends Stored> {
 
     @NotNull T createBlank(String identifier);
 
-    @Nullable T deserialize(String identifier, String serialization) throws Serializable.SerializationException;
+    @Nullable T deserialize(String identifier, String serialization);
 
     @NotNull Storage getStorage();
 

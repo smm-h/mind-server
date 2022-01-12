@@ -21,11 +21,11 @@ public class MindStorageGate extends StorageGateImpl<Mind.Mutable> {
     }
 
     @Override
-    public @Nullable Mind.Mutable deserialize(String identifier, String serialization) throws Serializable.SerializationException {
+    public @Nullable Mind.Mutable deserialize(String identifier, String serialization) {
         try {
             return new MutableMindImpl(JSONUtil.parse(serialization));
         } catch (JSONException e) {
-            throw new Serializable.SerializationException(e);
+            return null;
         }
     }
 }

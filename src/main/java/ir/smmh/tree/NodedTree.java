@@ -10,8 +10,8 @@ import java.util.LinkedList;
 import static ir.smmh.util.FunctionalUtil.with;
 
 /**
- * A tree is just a thin wrapper over its root node. It offers direct interaction with
- * some of the useful root methods like traverse, get degree, get height, and get count.
+ * A {@code NodedTree} is a {@link SpecificTree} and a wrapper over a single {@link Node} called
+ * its "root", to which it delegates most methods required by {@link Tree}.
  */
 @SuppressWarnings("unused")
 public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends NodedTree<T, N, Q>> extends SpecificTree<T, Q> {
@@ -48,14 +48,12 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
 
         @Override
         default void clear() {
-            setRoot((N) null);
+            setRootNode(null);
         }
 
-        void setRoot(T data);
+        void setRootNode(N node);
 
-        void setRoot(N node);
-
-        interface Node<T, N extends Node<T, N, Q>, Q extends Mutable<T, N, Q>> extends NodedTree.Node<T, N, Q>, Sequential.Mutable<N> {
+        interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree.Mutable<T, N, Q>> extends NodedTree.Node<T, N, Q>, Sequential.Mutable<N> {
         }
     }
 
@@ -151,7 +149,7 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
 
         interface Mutable<T, N extends Mutable.Node<T, N, Q>, Q extends Mutable<T, N, Q>> extends NodedTree.Binary<T, N, Q>, NodedTree.Mutable<T, N, Q>, SpecificTree.Binary.Mutable<T, Q> {
 
-            interface Node<T, N extends Node<T, N, Q>, Q extends Mutable<T, N, Q>> extends NodedTree.Binary.Node<T, N, Q>, NodedTree.Mutable.Node<T, N, Q> {
+            interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree.Binary.Mutable<T, N, Q>> extends NodedTree.Binary.Node<T, N, Q>, NodedTree.Mutable.Node<T, N, Q> {
                 void setLeftChild(@Nullable N leftChild);
 
                 void setRightChild(@Nullable N rightChild);
