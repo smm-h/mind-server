@@ -26,4 +26,11 @@ public interface RandomUtil {
         }
         return new String(array);
     }
+
+    static int[] generateRandomIntArray(int count, int bound) {
+        int[] array = new int[count];
+        for (int i = 0; i < count; i++)
+            array[i] = generate.nextInt(bound);
+        return array;
+    }
 }

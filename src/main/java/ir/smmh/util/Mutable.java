@@ -1,9 +1,9 @@
 package ir.smmh.util;
 
-import ir.smmh.util.jile.Quality;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Predicate;
 
 /**
  * A mutable object is an object that when it is mutated it calls the taint
@@ -14,8 +14,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public interface Mutable {
 
-    Quality<Object> MUTABLE = o -> o instanceof Mutable;
-    Quality<Mutable> DIRTY = Mutable::isDirty;
+    Predicate<Object> MUTABLE = o -> o instanceof Mutable;
+    Predicate<Mutable> DIRTY = Mutable::isDirty;
 
     /**
      * @return Whether or not it is dirty.

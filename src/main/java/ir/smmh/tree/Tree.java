@@ -43,8 +43,6 @@ public interface Tree<T> extends CanContain<T>, Serializable {
         }
     }
 
-    // TODO BFS, DFS
-
     interface DataTraversal {
         @NotNull <T, Q extends Tree<T>> Sequential<T> traverseData(@NotNull Q tree);
     }

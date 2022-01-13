@@ -8,10 +8,7 @@ import ir.smmh.util.impl.MutableImpl;
 import ir.smmh.util.impl.ViewImpl;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -21,7 +18,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
     static <T> Sequential<T> of(java.util.List<T> list) {
 
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
             @Override
             public T getAt(int index) throws IndexOutOfBoundsException {
                 return list.get(index);
@@ -35,7 +32,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static Sequential<Integer> of(int[] array) {
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
 
             @Override
             public Integer getAt(int index) throws IndexOutOfBoundsException {
@@ -50,7 +47,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static Sequential<Float> of(float[] array) {
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
 
             @Override
             public Float getAt(int index) throws IndexOutOfBoundsException {
@@ -65,7 +62,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static Sequential<Long> of(long[] array) {
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
 
             @Override
             public Long getAt(int index) throws IndexOutOfBoundsException {
@@ -80,7 +77,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static Sequential<Double> of(double[] array) {
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
 
             @Override
             public Double getAt(int index) throws IndexOutOfBoundsException {
@@ -95,7 +92,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static Sequential<Byte> of(byte[] array) {
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
 
             @Override
             public Byte getAt(int index) throws IndexOutOfBoundsException {
@@ -110,7 +107,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static Sequential<Character> of(char[] array) {
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
 
             @Override
             public Character getAt(int index) throws IndexOutOfBoundsException {
@@ -125,7 +122,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static Sequential<Boolean> of(boolean[] array) {
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
 
             @Override
             public Boolean getAt(int index) throws IndexOutOfBoundsException {
@@ -140,7 +137,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static <T> Sequential<T> of(T[] array) {
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
 
             @Override
             public T getAt(int index) throws IndexOutOfBoundsException {
@@ -155,7 +152,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static <T> Sequential<T> empty() {
-        return new Sequential<>() {
+        return new AbstractSequential<>() {
             @Override
             public T getAt(int index) throws IndexOutOfBoundsException {
                 throw new IndexOutOfBoundsException();
@@ -168,7 +165,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         };
     }
 
-    default int count(Predicate<T> toTest) {
+    default int count(Predicate<? super T> toTest) {
         int count = 0;
         for (T element : this) {
             if (toTest.test(element)) {
@@ -178,7 +175,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return count;
     }
 
-    default Sequential<T> filterOutOfPlace(Predicate<T> toTest) {
+    default Sequential<T> filterOutOfPlace(Predicate<? super T> toTest) {
         Sequential.Mutable<T> filtered = Sequential.Mutable.of(new ArrayList<>(count(toTest)));
         for (T element : this) {
             if (toTest.test(element)) {
@@ -188,7 +185,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return filtered;
     }
 
-    default <R> Sequential<R> applyOutOfPlace(Function<T, R> toReplace) {
+    default <R> Sequential<R> applyOutOfPlace(Function<? super T, ? extends R> toReplace) {
         Sequential.Mutable<R> applied = Sequential.Mutable.of(new ArrayList<>(getLength()));
         for (T element : this) {
             applied.append(toReplace.apply(element));
@@ -289,13 +286,14 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
     int getLength();
 
+
     interface Mutable<T> extends Sequential<T>, CanAppendTo<T>, CanRemoveElementFrom<T>, CanRemoveIndexFrom<T>, ir.smmh.util.Mutable {
 
         static <T> Sequential.Mutable<T> of(java.util.List<T> list) {
             return new List<>(list);
         }
 
-        default void filterInPlace(Predicate<T> toTest) {
+        default void filterInPlace(Predicate<? super T> toTest) {
             if (!isEmpty()) {
                 for (int i = 0; i < getLength(); i++) {
                     T element = getAt(i);
@@ -340,7 +338,33 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         }
     }
 
-    class List<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
+    abstract class AbstractSequential<T> implements Sequential<T> {
+        @Override
+        public String toString() {
+            StringJoiner joiner = new StringJoiner(", ", "[", "]");
+            for (T element : this)
+                joiner.add(element.toString());
+            return joiner.toString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Sequential) {
+                Sequential<?> other = (Sequential<?>) obj;
+                if (getLength() == other.getLength()) {
+                    for (int i = 0; i < getLength(); i++) {
+                        if (!Objects.equals(getAt(i), other.getAt(i))) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    class List<T> extends AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
 
         private final java.util.List<T> list;
         private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
@@ -468,16 +492,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         public View(Sequential<T> sequential) {
             super(sequential);
             this.length = computeLength();
-        }
-
-        @Override
-        public boolean isExpired() {
-            return this.length == -1;
-        }
-
-        @Override
-        public void expire() {
-            this.length = -1;
+            getOnExpireListeners().add(() -> length = -1);
         }
 
         @Override
@@ -538,9 +553,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
         public static class Conditional<T> extends Reference<T> {
 
-            private final Predicate<T> condition;
+            private final Predicate<? super T> condition;
 
-            public Conditional(Sequential<T> sequential, Predicate<T> condition) {
+            public Conditional(Sequential<T> sequential, Predicate<? super T> condition) {
                 super(sequential);
                 this.condition = condition;
             }

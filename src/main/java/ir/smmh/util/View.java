@@ -1,9 +1,9 @@
 package ir.smmh.util;
 
-import ir.smmh.util.jile.Quality;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Predicate;
 
 /**
  * A {@code View} on any collection is a light-weight layer on it that
@@ -14,7 +14,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public interface View<T> {
 
-    Quality<View<?>> EXPIRED = View::isExpired;
+    Predicate<View<?>> EXPIRED = View::isExpired;
 
     @NotNull T getCore();
 

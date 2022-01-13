@@ -1,10 +1,10 @@
 package ir.smmh.tgbot;
 
-import ir.smmh.util.jile.Quality;
+import java.util.function.Predicate;
 
 public interface Bot {
 
-    Quality<Bot> RUNNING = Bot::isRunning;
+    Predicate<Bot> RUNNING = Bot::isRunning;
 
     void start(String token);
 

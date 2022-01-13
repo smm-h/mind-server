@@ -3,11 +3,11 @@ package ir.smmh.util.jile;
 import ir.smmh.util.RandomUtil;
 import org.junit.jupiter.api.Test;
 
-import static ir.smmh.util.jile.Qualities.Number.*;
-import static ir.smmh.util.jile.Qualities.String.*;
-import static ir.smmh.util.jile.Quality.*;
+import static ir.smmh.util.FunctionalUtil.*;
+import static ir.smmh.util.NumberPredicates.*;
+import static ir.smmh.util.StringPredicates.*;
 
-class QualitiesTest {
+class PredicatesTest {
     @Test
     void numbers() {
         assert is(1, WHOLE);

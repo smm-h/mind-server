@@ -1,9 +1,9 @@
 package ir.smmh.nile.verbs;
 
-import ir.smmh.util.jile.Quality;
+import java.util.function.Predicate;
 
 public interface CanContain<T> {
-    Quality<CanContain<?>> EMPTY = CanContain::isEmpty;
+    Predicate<CanContain<?>> EMPTY = CanContain::isEmpty;
 
     boolean contains(T toCheck);
 
