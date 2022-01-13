@@ -69,7 +69,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
 
     private void setup() {
         setupStored();
-        intensions.addOnCleanListener(() -> intensionsCache = ((Comprehension.Set<String, Idea>) mind::findIdeaByName).comprehend(intensions));
+        intensions.getOnCleanListeners().add(() -> intensionsCache = ((Comprehension.Set<String, Idea>) mind::findIdeaByName).comprehend(intensions));
     }
 
     @Override

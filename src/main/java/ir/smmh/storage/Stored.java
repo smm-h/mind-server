@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public interface Stored extends Serializable, Mutable, Named {
 
     default void setupStored() {
-        addOnCleanListener(() -> getStorage().write(getName(), serialize()));
+        getOnCleanListeners().add(() -> getStorage().write(getName(), serialize()));
     }
 
     @NotNull Storage getStorage();

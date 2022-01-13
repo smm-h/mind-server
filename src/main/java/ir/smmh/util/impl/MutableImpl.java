@@ -1,17 +1,21 @@
 package ir.smmh.util.impl;
 
+import ir.smmh.util.Listeners;
+import ir.smmh.util.ListenersImpl;
 import ir.smmh.util.Mutable;
 import ir.smmh.util.Named;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedList;
-import java.util.List;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Stack;
 
+@ParametersAreNonnullByDefault
 public class MutableImpl implements Mutable {
 
     private static final Stack<MutableImpl> stack = new Stack<>();
-    private final List<OnCleanListener> listeners = new LinkedList<>();
-    private final Object injected;
+    private final Listeners<OnCleanListener> onCleanListeners = new ListenersImpl<>();
+    private final Listeners<OnTaintListener> onTaintListeners = new ListenersImpl<>();
+    private final Mutable.Injected injected;
     private boolean dirty = true;
 
     public MutableImpl(Mutable.Injected injected) {
@@ -38,24 +42,17 @@ public class MutableImpl implements Mutable {
     }
 
     @Override
-    public final void taint() {
-        dirty = true;
+    public void setDirty(boolean dirty) {
+        this.dirty = dirty;
     }
 
     @Override
-    public final void onClean() {
-        dirty = false;
-        for (OnCleanListener listener : listeners) {
-            try {
-                listener.onClean();
-            } catch (CleaningException e) {
-                taint();
-            }
-        }
+    public @NotNull Listeners<OnCleanListener> getOnCleanListeners() {
+        return onCleanListeners;
     }
 
     @Override
-    public void addOnCleanListener(OnCleanListener listener) {
-        listeners.add(listener);
+    public @NotNull Listeners<OnTaintListener> getOnTaintListeners() {
+        return onTaintListeners;
     }
 }

@@ -149,7 +149,7 @@ public class OpenFileImpl implements OpenFile {
 
         private Writeable(@Nullable String contents, @Nullable String ext, @Nullable String filename) {
             super(contents, ext, filename);
-            addOnCleanListener(this::synchronize);
+            getOnCleanListeners().add(this::synchronize);
         }
 
         @Override

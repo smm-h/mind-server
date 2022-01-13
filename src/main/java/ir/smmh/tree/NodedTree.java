@@ -59,7 +59,13 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
 
     interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree<T, N, Q>> extends Sequential<N> {
 
+        default @NotNull Sequential<N> getSiblings() {
+            return new Sequential.View.AllButOne<>(getParent(), getIndexInParent());
+        }
+
         @NotNull N specificThis();
+
+        int getIndexInParent();
 
         @NotNull
         T getData();

@@ -4,13 +4,22 @@ import ir.smmh.nile.verbs.CanAppendTo;
 import ir.smmh.nile.verbs.CanContain;
 import ir.smmh.nile.verbs.CanRemoveElementFrom;
 import ir.smmh.nile.verbs.CanRemoveIndexFrom;
+import ir.smmh.util.impl.MutableImpl;
+import ir.smmh.util.impl.ViewImpl;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
+@SuppressWarnings("unused")
 public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanContain<T> {
 
-    static <T> Sequential<T> of(List<T> list) {
+    static <T> Sequential<T> of(java.util.List<T> list) {
 
         return new Sequential<>() {
             @Override
@@ -159,7 +168,35 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         };
     }
 
-    default @NotNull List<T> asList() {
+    default int count(Predicate<T> toTest) {
+        int count = 0;
+        for (T element : this) {
+            if (toTest.test(element)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    default Sequential<T> filterOutOfPlace(Predicate<T> toTest) {
+        Sequential.Mutable<T> filtered = Sequential.Mutable.of(new ArrayList<>(count(toTest)));
+        for (T element : this) {
+            if (toTest.test(element)) {
+                filtered.append(element);
+            }
+        }
+        return filtered;
+    }
+
+    default <R> Sequential<R> applyOutOfPlace(Function<T, R> toReplace) {
+        Sequential.Mutable<R> applied = Sequential.Mutable.of(new ArrayList<>(getLength()));
+        for (T element : this) {
+            applied.append(toReplace.apply(element));
+        }
+        return applied;
+    }
+
+    default @NotNull java.util.List<T> asList() {
         return new AbstractList<>() {
             @Override
             public int size() {
@@ -219,18 +256,18 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return findFirst(toFind);
         if (n == -1)
             return findLast(toFind);
-        List<Integer> all = findAll(toFind);
+        Sequential<Integer> all = findAll(toFind);
         if (n < 0)
-            n += all.size();
-        return n < 0 || n >= all.size() ? -1 : all.get(n);
+            n += all.getLength();
+        return n < 0 || n >= all.getLength() ? -1 : all.getAt(n);
     }
 
-    default List<Integer> findAll(T toFind) {
-        List<Integer> all = new ArrayList<>(count(toFind));
+    default Sequential<Integer> findAll(T toFind) {
+        Sequential.Mutable<Integer> all = Sequential.Mutable.of(new ArrayList<>(count(toFind)));
         int length = getLength();
         for (int i = 0; i < length; i++) {
             if (Objects.equals(getAt(i), toFind)) {
-                all.add(i);
+                all.append(i);
             }
         }
         return all;
@@ -252,7 +289,42 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
     int getLength();
 
-    interface Mutable<T> extends Sequential<T>, CanAppendTo<T>, CanRemoveElementFrom<T>, CanRemoveIndexFrom<T> {
+    interface Mutable<T> extends Sequential<T>, CanAppendTo<T>, CanRemoveElementFrom<T>, CanRemoveIndexFrom<T>, ir.smmh.util.Mutable {
+
+        static <T> Sequential.Mutable<T> of(java.util.List<T> list) {
+            return new List<>(list);
+        }
+
+        default void filterInPlace(Predicate<T> toTest) {
+            if (!isEmpty()) {
+                for (int i = 0; i < getLength(); i++) {
+                    T element = getAt(i);
+                    if (!toTest.test(element)) {
+                        removeIndexFrom(i);
+                        taint();
+                    }
+                }
+            }
+        }
+
+        default void applyInPlace(Function<T, T> toReplace) {
+            if (!isEmpty()) {
+                for (int i = 0; i < getLength(); i++) {
+                    set(i, toReplace.apply(getAt(i)));
+                }
+                taint();
+            }
+        }
+
+        default void applyInPlace(Consumer<T> toApply) {
+            if (!isEmpty()) {
+                for (T element : this) {
+                    toApply.accept(element);
+                }
+                taint();
+            }
+        }
+
         void set(int index, T toSet);
 
         @NotNull
@@ -266,40 +338,55 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         default Iterable<T> inReverse() {
             return () -> new ReverseIterator.Mutable<>(this);
         }
+    }
 
-        static <T> Sequential.Mutable<T> of(List<T> list) {
+    class List<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
 
-            return new Sequential.Mutable<>() {
-                @Override
-                public void removeIndexFrom(int toRemove) {
-                    list.remove(toRemove);
-                }
+        private final java.util.List<T> list;
+        private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
-                @Override
-                public void removeElementFrom(T toRemove) {
-                    list.remove(toRemove);
-                }
+        public List(java.util.List<T> list) {
+            this.list = list;
+        }
 
-                @Override
-                public void append(T toAppend) {
-                    list.add(toAppend);
-                }
+        @Override
+        public void removeIndexFrom(int toRemove) {
+            list.remove(toRemove);
+        }
 
-                @Override
-                public void set(int index, T toSet) {
-                    list.set(index, toSet);
-                }
+        @Override
+        public void removeElementFrom(T toRemove) {
+            list.remove(toRemove);
+        }
 
-                @Override
-                public T getAt(int index) throws IndexOutOfBoundsException {
-                    return list.get(index);
-                }
+        @Override
+        public void append(T toAppend) {
+            list.add(toAppend);
+        }
 
-                @Override
-                public int getLength() {
-                    return list.size();
-                }
-            };
+        @Override
+        public void add(T toAdd) {
+            Sequential.Mutable.super.add(toAdd);
+        }
+
+        @Override
+        public void set(int index, T toSet) {
+            list.set(index, toSet);
+        }
+
+        @Override
+        public T getAt(int index) throws IndexOutOfBoundsException {
+            return list.get(index);
+        }
+
+        @Override
+        public int getLength() {
+            return list.size();
+        }
+
+        @Override
+        public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+            return injectedMutable;
         }
     }
 
@@ -338,21 +425,21 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     class ReverseIterator<S extends Sequential<T>, T> implements Iterator<T> {
 
         protected final S sequential;
-        protected int i;
+        protected int index;
 
         public ReverseIterator(S sequential) {
             this.sequential = sequential;
-            this.i = sequential.getLength();
+            this.index = sequential.getLength();
         }
 
         @Override
         public boolean hasNext() {
-            return i < sequential.getLength();
+            return index < sequential.getLength();
         }
 
         @Override
         public T next() {
-            return sequential.getAt(i++);
+            return sequential.getAt(index++);
         }
 
         static class Mutable<T> extends ReverseIterator<Sequential.Mutable<T>, T> {
@@ -362,7 +449,175 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
             @Override
             public void remove() {
-                sequential.removeIndexFrom(i);
+                sequential.removeIndexFrom(index);
+            }
+        }
+    }
+
+    /**
+     * A read-only partial view on another sequential.
+     *
+     * @param <T> Type of data
+     * @see Ranged
+     * @see Reversed
+     * @see Conditional
+     */
+    abstract class View<T> extends ViewImpl<Sequential<T>> implements Sequential<T> {
+        private int length;
+
+        public View(Sequential<T> sequential) {
+            super(sequential);
+            this.length = computeLength();
+        }
+
+        @Override
+        public boolean isExpired() {
+            return this.length == -1;
+        }
+
+        @Override
+        public void expire() {
+            this.length = -1;
+        }
+
+        @Override
+        public T getAt(int index) throws IndexOutOfBoundsException {
+            return core.getAt(transformIndex(index));
+        }
+
+        protected abstract int computeLength();
+
+        protected abstract int transformIndex(int index);
+
+        @Override
+        public int getLength() {
+            return length;
+        }
+
+        public static class AllButOne<T> extends View<T> {
+
+            private final int except;
+
+            public AllButOne(Sequential<T> sequential, int except) {
+                super(sequential);
+                this.except = except;
+            }
+
+            @Override
+            protected int computeLength() {
+                return core.getLength() - 1;
+            }
+
+            @Override
+            protected int transformIndex(int index) {
+                return index >= except ? index + 1 : index;
+            }
+        }
+
+        public static abstract class Reference<T> extends View<T> {
+
+            private final int[] indices;
+
+            public Reference(Sequential<T> sequential) {
+                super(sequential);
+                indices = computeReference();
+            }
+
+            protected abstract int[] computeReference();
+
+            @Override
+            protected int computeLength() {
+                return indices.length;
+            }
+
+            @Override
+            protected int transformIndex(int index) {
+                return indices[index];
+            }
+        }
+
+        public static class Conditional<T> extends Reference<T> {
+
+            private final Predicate<T> condition;
+
+            public Conditional(Sequential<T> sequential, Predicate<T> condition) {
+                super(sequential);
+                this.condition = condition;
+            }
+
+            @Override
+            protected int[] computeReference() {
+
+                int index = 0;
+                int total = core.getLength();
+
+                int foundIndex = 0;
+                int foundTotal = core.count(condition);
+
+                int[] reference = new int[foundTotal];
+
+                while (foundIndex < foundTotal && index < total) {
+                    if (condition.test(core.getAt(index))) {
+                        reference[foundIndex++] = index;
+                    }
+                    index++;
+                }
+
+                return reference;
+            }
+        }
+
+        public static class Reversed<T> extends View<T> {
+
+            public Reversed(Sequential<T> sequential) {
+                super(sequential);
+            }
+
+            @Override
+            protected int computeLength() {
+                return core.getLength();
+            }
+
+            @Override
+            protected int transformIndex(int index) {
+                return getLength() - index - 1;
+            }
+        }
+
+        public static class Ranged<T> extends View<T> {
+
+            private final int start, end;
+
+            /**
+             * A sequential ranged view on another sequential object
+             * starting from start and ending at the end
+             *
+             * @param start Inclusive starting index
+             */
+            public Ranged(Sequential<T> sequential, int start) {
+                this(sequential, start, sequential.getLength());
+            }
+
+            /**
+             * A sequential ranged view on another sequential object
+             *
+             * @param start Inclusive starting index
+             * @param end   Non-inclusive ending index
+             */
+            public Ranged(Sequential<T> sequential, int start, int end) {
+                super(sequential);
+                this.start = start;
+                this.end = end;
+            }
+
+            @Override
+            protected int computeLength() {
+                return end - start;
+            }
+
+            @Override
+            protected int transformIndex(int index) {
+                return index + start;
             }
         }
     }
