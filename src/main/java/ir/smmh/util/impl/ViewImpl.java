@@ -5,12 +5,13 @@ import ir.smmh.util.ListenersImpl;
 import ir.smmh.util.Mutable;
 import ir.smmh.util.View;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ViewImpl<T> implements View<T> {
 
     private final Listeners<OnExpireListener> onExpireListeners = new ListenersImpl<>();
+    private T core;
     private boolean expired;
-    protected final T core;
 
     public ViewImpl(T core) {
         this.core = core;
@@ -19,10 +20,15 @@ public class ViewImpl<T> implements View<T> {
         }
     }
 
-    @NotNull
+    @Nullable
     @Override
     public T getCore() {
         return core;
+    }
+
+    @Override
+    public void nullifyCore() {
+        core = null;
     }
 
     @Override
@@ -38,5 +44,15 @@ public class ViewImpl<T> implements View<T> {
     @Override
     public @NotNull Listeners<OnExpireListener> getOnExpireListeners() {
         return onExpireListeners;
+    }
+
+    @Override
+    public String toString() {
+        return (expired ? "Expired v" : "V") + "iew on: " + core.getClass().getSimpleName();
+    }
+
+    @Override
+    public int hashCode() {
+        return expired ? -1 : core.hashCode();
     }
 }

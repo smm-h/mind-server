@@ -1,6 +1,7 @@
 package ir.smmh.util;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Predicate;
@@ -16,7 +17,9 @@ public interface View<T> {
 
     Predicate<View<?>> EXPIRED = View::isExpired;
 
-    @NotNull T getCore();
+    @Nullable T getCore();
+
+    void nullifyCore();
 
     boolean isExpired();
 
@@ -29,6 +32,7 @@ public interface View<T> {
         for (OnExpireListener listener : getOnExpireListeners()) {
             listener.onExpire();
         }
+        nullifyCore();
     }
 
     /**
@@ -40,5 +44,35 @@ public interface View<T> {
 
     interface OnExpireListener {
         void onExpire();
+    }
+
+    interface Injected<T> extends View<T> {
+
+        @NotNull View<T> getInjectedView();
+
+        @Override
+        default @Nullable T getCore() {
+            return getInjectedView().getCore();
+        }
+
+        @Override
+        default boolean isExpired() {
+            return getInjectedView().isExpired();
+        }
+
+        @Override
+        default void setExpired() {
+            getInjectedView().setExpired();
+        }
+
+        @Override
+        default void nullifyCore() {
+            getInjectedView().nullifyCore();
+        }
+
+        @Override
+        default @NotNull Listeners<OnExpireListener> getOnExpireListeners() {
+            return getInjectedView().getOnExpireListeners();
+        }
     }
 }
