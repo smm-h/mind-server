@@ -8,9 +8,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
 
-public class SequenceJoiner<T> implements Sequential.Mutable<T>, Mutable.Injected {
+// TODO TEST
+public class SequenceJoiner<T> extends Sequential.AbstractSequential<T> implements Sequential.Mutable<T>, Mutable.Injected {
 
-    private final Sequential.Mutable<Sequential<? extends T>> subSequences = new SequentialList<>(new LinkedList<>());
+    private final Sequential.Mutable<Sequential<? extends T>> subSequences = new SequentialImpl<>(new LinkedList<>());
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
     @Override
@@ -37,7 +38,7 @@ public class SequenceJoiner<T> implements Sequential.Mutable<T>, Mutable.Injecte
 
     @Override
     public void set(int index, @Nullable T toSet) {
-
+        // TODO pre and post mutate
     }
 
     @Override
@@ -53,5 +54,10 @@ public class SequenceJoiner<T> implements Sequential.Mutable<T>, Mutable.Injecte
     @Override
     public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
         return injectedMutable;
+    }
+
+    @Override
+    public Sequential<T> clone(boolean deepIfPossible) {
+        return null;
     }
 }

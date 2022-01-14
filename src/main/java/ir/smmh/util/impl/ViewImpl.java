@@ -5,6 +5,9 @@ import ir.smmh.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
 public class ViewImpl<T> implements View<T> {
 
     private final Listeners<FunctionalUtil.OnEventListener> onExpireListeners = new ListenersImpl<>();
@@ -14,22 +17,7 @@ public class ViewImpl<T> implements View<T> {
     public ViewImpl(T core) {
         this.core = core;
         if (core instanceof Mutable) {
-            ((Mutable) core).getOnPreMutateListeners().add(this::onPreMutate);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void onPreMutate() {
-        if (core instanceof Mutable) {
-            ((Mutable) core).getOnPreMutateListeners().remove(this::onPreMutate);
-            try {
-                if (core instanceof CanClone) {
-                    core = ((CanClone<T>) core).clone(false);
-                    return;
-                }
-            } catch (Throwable ignored) {
-            }
-            expire();
+            ((Mutable) core).getOnPostMutateListeners().addDisposable(this::expire);
         }
     }
 

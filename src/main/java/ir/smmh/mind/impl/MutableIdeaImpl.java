@@ -115,17 +115,19 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     @Override
     public void become(String ideaName) {
         if (!intensions.contains(ideaName)) {
+            preMutate();
             intensions.add(ideaName);
-            mutate();
+            postMutate();
         }
     }
 
     @Override
     public PropertyImpl possess(String name, String type, Supplier<Value> defaultValue) {
         if (!properties.containsKey(name)) {
+            preMutate();
             PropertyImpl property = new PropertyImpl(this, name, type, defaultValue);
             properties.put(name, property);
-            mutate();
+            postMutate();
         }
         return properties.get(name);
     }
@@ -133,9 +135,10 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     @Override
     public StaticPropertyImpl reify(String name, String type, Value value) {
         if (!staticProperties.containsKey(name)) {
+            preMutate();
             StaticPropertyImpl property = new StaticPropertyImpl(this, name, type, value);
             staticProperties.put(name, property);
-            mutate();
+            postMutate();
         }
         return staticProperties.get(name);
     }

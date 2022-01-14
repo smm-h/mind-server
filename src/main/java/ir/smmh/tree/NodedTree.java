@@ -55,15 +55,19 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
 
         void setRootNode(N node);
 
-        interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree.Mutable<T, N, Q>> extends NodedTree.Node<T, N, Q>, Sequential.Mutable<N> {
+        interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree.Mutable<T, N, Q>> extends NodedTree.Node<T, N, Q> {
+            @Override
+            @NotNull Sequential.Mutable<N> getChildren();
         }
     }
 
-    interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree<T, N, Q>> extends Sequential<N>, FunctionalUtil.RecursivelySpecific<N> {
+    interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree<T, N, Q>> extends FunctionalUtil.RecursivelySpecific<N> {
 
         default @NotNull Sequential<N> getSiblings() {
-            return new Sequential.View.AllButOne<>(getParent(), getIndexInParent());
+            return new Sequential.View.AllButOne<>(getParent().getChildren(), getIndexInParent());
         }
+
+        @NotNull Sequential<N> getChildren();
 
         int getIndexInParent();
 
@@ -77,11 +81,11 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
         Q getTree();
 
         default int getDegree() {
-            if (isEmpty()) {
+            if (getChildren().isEmpty()) {
                 return 0;
             } else {
-                int degree = getLength();
-                for (N node : this) {
+                int degree = getChildren().getLength();
+                for (N node : getChildren()) {
                     degree = Math.max(degree, node.getDegree());
                 }
                 return degree;
@@ -89,11 +93,11 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
         }
 
         default int getHeight() {
-            if (isEmpty()) {
+            if (getChildren().isEmpty()) {
                 return 0;
             } else {
                 int height = 0;
-                for (N node : this) {
+                for (N node : getChildren()) {
                     height = Math.max(height, node.getDegree());
                 }
                 return height + 1;
@@ -101,11 +105,11 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
         }
 
         default int getCount() {
-            if (isEmpty()) {
+            if (getChildren().isEmpty()) {
                 return 1;
             } else {
                 int count = 0;
-                for (N node : this) {
+                for (N node : getChildren()) {
                     count += node.getCount();
                 }
                 return count;
@@ -113,11 +117,11 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
         }
 
         default int getLeafCount() {
-            if (isEmpty()) {
+            if (getChildren().isEmpty()) {
                 return 1;
             } else {
                 int leafCount = 0;
-                for (N node : this) {
+                for (N node : getChildren()) {
                     leafCount += node.getLeafCount();
                 }
                 return leafCount;

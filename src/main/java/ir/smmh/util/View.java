@@ -1,9 +1,13 @@
 package ir.smmh.util;
 
+import ir.smmh.nile.adj.Sequential;
+import ir.smmh.nile.verbs.CanClone;
+import ir.smmh.util.impl.ViewImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**

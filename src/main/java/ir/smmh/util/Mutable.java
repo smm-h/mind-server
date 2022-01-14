@@ -33,7 +33,15 @@ public interface Mutable {
     /**
      * Makes the object dirty. Optionally may do other things as well.
      */
-    default void mutate() {
+    default void preMutate() {
+        for (FunctionalUtil.OnEventListener listener : getOnPreMutateListeners()) {
+            listener.onEvent();
+        }
+    }
+    /**
+     * Makes the object dirty. Optionally may do other things as well.
+     */
+    default void postMutate() {
         for (FunctionalUtil.OnEventListener listener : getOnPreMutateListeners()) {
             listener.onEvent();
         }
@@ -93,8 +101,13 @@ public interface Mutable {
         }
 
         @Override
-        default void mutate() {
-            getInjectedMutable().mutate();
+        default void preMutate() {
+            getInjectedMutable().preMutate();
+        }
+
+        @Override
+        default void postMutate() {
+            getInjectedMutable().postMutate();
         }
     }
 

@@ -1,7 +1,7 @@
 package ir.smmh.util.impl;
 
 import ir.smmh.nile.adj.Sequential;
-import ir.smmh.nile.adj.impl.SequentialList;
+import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,7 +98,7 @@ public abstract class MapImpl<K> implements Map<K> {
 
             @Override
             public void place(K place, V toPlace) {
-                Sequential.Mutable<V> s = map.computeIfAbsent(place, k -> new SequentialList<>(new LinkedList<>()));
+                Sequential.Mutable<V> s = map.computeIfAbsent(place, k -> new SequentialImpl<>(new LinkedList<>()));
                 s.append(toPlace);
             }
 

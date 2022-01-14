@@ -192,8 +192,9 @@ public interface OpenFile {
 
         default void write(String contents) {
             if (!contents.equals(getContents())) {
+                preMutate();
                 setContents(contents);
-                mutate();
+                postMutate();
             }
         }
 

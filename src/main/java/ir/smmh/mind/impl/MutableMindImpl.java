@@ -93,9 +93,10 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
     public @NotNull MutableIdeaImpl imagine(@NotNull String name) {
         @Nullable MutableIdeaImpl idea = ideas.get(name);
         if (idea == null) {
+            preMutate();
             idea = new MutableIdeaImpl(this, name, new MutableHashSet<>(), new HashSet<>(), new HashSet<>());
             ideas.place(idea.getName(), idea);
-            mutate();
+            postMutate();
         }
         return idea;
     }

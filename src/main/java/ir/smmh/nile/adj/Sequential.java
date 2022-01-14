@@ -1,7 +1,8 @@
 package ir.smmh.nile.adj;
 
-import ir.smmh.nile.adj.impl.SequentialList;
+import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.nile.verbs.CanAppendTo;
+import ir.smmh.nile.verbs.CanClone;
 import ir.smmh.nile.verbs.CanContain;
 import ir.smmh.nile.verbs.CanRemoveIndexFrom;
 import ir.smmh.util.impl.ViewImpl;
@@ -18,7 +19,7 @@ import static ir.smmh.util.FunctionalUtil.with;
 
 @SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
-public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanContain<T> {
+public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanContain<T>, CanClone<Sequential<T>> {
 
     static <T> Sequential<T> of(List<T> list) {
 
@@ -314,7 +315,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     interface Mutable<T> extends Sequential<T>, CanAppendTo<T>, CanRemoveIndexFrom<T>, ir.smmh.util.Mutable {
 
         static <T> Sequential.Mutable<T> of(List<T> list) {
-            return new SequentialList<>(list);
+            return new SequentialImpl<>(list);
         }
 
         static <T> Sequential.Mutable<T> of(T[] array) {
@@ -325,31 +326,40 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
         default void filterInPlace(Predicate<? super T> toTest) {
             if (!isEmpty()) {
+                boolean mutated = false;
                 for (int i = 0; i < getLength(); i++) {
                     T element = getAt(i);
                     if (!toTest.test(element)) {
+                        if (!mutated) {
+                            preMutate();
+                            mutated = true;
+                        }
                         removeIndexFrom(i);
-                        mutate();
                     }
+                }
+                if (mutated) {
+                    postMutate();
                 }
             }
         }
 
         default void applyInPlace(Function<T, T> toReplace) {
             if (!isEmpty()) {
+                preMutate();
                 for (int i = 0; i < getLength(); i++) {
                     set(i, toReplace.apply(getAt(i)));
                 }
-                mutate();
+                postMutate();
             }
         }
 
         default void applyInPlace(Consumer<T> toApply) {
             if (!isEmpty()) {
+                preMutate();
                 for (T element : this) {
                     toApply.accept(element);
                 }
-                mutate();
+                postMutate();
             }
         }
 
@@ -370,6 +380,12 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
     interface View<T> extends ir.smmh.util.View.Injected<Sequential<T>>, Sequential<T> {
 
+        default void addExpirationHandler(Consumer<Sequential<T>> handler) {
+            Sequential<T> core = getCore();
+            if (core instanceof Sequential.Mutable) {
+                ((Sequential.Mutable<T>) core).getOnPreMutateListeners().addDisposable(() -> handler.accept(clone(false)));
+            }
+        }
 
         @Override
         default T getAt(int index) throws IndexOutOfBoundsException {
@@ -513,6 +529,16 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     abstract class AbstractSequential<T> implements Sequential<T> {
+        @Override
+        public Sequential<T> specificThis() {
+            return this;
+        }
+
+        @Override
+        public Sequential<T> clone(boolean deepIfPossible) {
+            return new SequentialImpl<>(asList());
+        }
+
         @Override
         public String toString() {
             StringJoiner joiner = new StringJoiner(", ", "[", "]");

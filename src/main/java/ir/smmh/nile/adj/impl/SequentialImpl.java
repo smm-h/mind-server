@@ -4,25 +4,31 @@ import ir.smmh.nile.adj.Sequential;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
-public class SequentialList<T> extends Sequential.AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
+public class SequentialImpl<T> extends Sequential.AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
 
-    private final List<T> list;
+    private final List<T> list = new LinkedList<>();
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
-    public SequentialList(List<T> list) {
-        this.list = list;
+    public SequentialImpl(Collection<T> collection) {
+        this.list.addAll(collection);
     }
 
     @Override
     public void removeIndexFrom(int toRemove) {
+        preMutate();
         list.remove(toRemove);
+        postMutate();
     }
 
     @Override
     public void append(T toAppend) {
+        preMutate();
         list.add(toAppend);
+        postMutate();
     }
 
     @Override
@@ -32,7 +38,9 @@ public class SequentialList<T> extends Sequential.AbstractSequential<T> implemen
 
     @Override
     public void set(int index, T toSet) {
+        preMutate();
         list.set(index, toSet);
+        postMutate();
     }
 
     @Override

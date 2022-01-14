@@ -3,33 +3,62 @@ package ir.smmh.util;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
 @ParametersAreNonnullByDefault
 public class ListenersImpl<L> implements Listeners<L> {
 
-    // remembers the order of insertion
-    private final Set<L> set = new LinkedHashSet<>();
+    private final List<L> listeners = new LinkedList<>(); // new ConcurrentSkipListSet<>(Comparator.comparingInt(Object::hashCode)); // new LinkedHashSet<>(); //
+    private final Set<L> disposables = new LinkedHashSet<>();
 
     @Override
     public void clear() {
-        set.clear();
+        listeners.clear();
     }
 
     @Override
     public void add(L listener) {
-        set.add(listener);
+        listeners.add(listener);
+    }
+
+    @Override
+    public void addDisposable(L listener) {
+        add(listener);
+        disposables.add(listener);
     }
 
     @Override
     public void remove(L listener) {
-        set.remove(listener);
+        listeners.remove(listener);
     }
 
     @Override
     public @NotNull Iterator<L> iterator() {
-        return set.iterator();
+        return new Iterator<>() {
+            private int index = 0;
+
+            @Override
+            public boolean hasNext() {
+                return index < listeners.size();
+            }
+
+            @Override
+            public L next() {
+                L listener = listeners.get(index);
+                if (disposables.contains(listener))
+                    return listeners.remove(index);
+                index++;
+                return listener;
+            }
+        };
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(", ", "Listeners: {", "}");
+        for (L listener : listeners) {
+            joiner.add(Integer.toString(listener.hashCode()));
+        }
+        return joiner.toString();
     }
 }

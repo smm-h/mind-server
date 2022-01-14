@@ -2,7 +2,6 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MutableIdeaImpl;
 import ir.smmh.storage.Stored;
-import ir.smmh.util.Map;
 import ir.smmh.util.Named;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
