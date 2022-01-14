@@ -64,7 +64,7 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
     interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree<T, N, Q>> extends FunctionalUtil.RecursivelySpecific<N> {
 
         default @NotNull Sequential<N> getSiblings() {
-            return new Sequential.View.AllButOne<>(getParent().getChildren(), getIndexInParent());
+            return new Sequential.View.AllButOne<>(with(getParent(), Node::getChildren, Sequential.empty()), getIndexInParent());
         }
 
         @NotNull Sequential<N> getChildren();

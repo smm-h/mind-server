@@ -38,6 +38,7 @@ public interface Mutable {
             listener.onEvent();
         }
     }
+
     /**
      * Makes the object dirty. Optionally may do other things as well.
      */

@@ -1,6 +1,5 @@
 package ir.smmh.util.impl;
 
-import ir.smmh.nile.verbs.CanClone;
 import ir.smmh.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -1,5 +1,6 @@
 package ir.smmh.util;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,6 +62,7 @@ public interface FunctionalUtil {
     }
 
     interface RecursivelySpecific<T> {
+        @Contract("->this")
         T specificThis();
     }
 }

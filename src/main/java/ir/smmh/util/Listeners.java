@@ -14,6 +14,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 public interface Listeners<L> extends CanClear, Iterable<L> {
     void add(L listener);
+
     void addDisposable(L listener);
 
     void remove(L listener);

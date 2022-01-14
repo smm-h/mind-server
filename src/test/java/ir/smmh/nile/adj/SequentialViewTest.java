@@ -7,7 +7,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static ir.smmh.util.CharacterPredicates.VOWEL;
 import static ir.smmh.util.FunctionalUtil.is;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SequentialViewTest {
     private static final String[] array = {"apples", "oranges", "bananas"};
