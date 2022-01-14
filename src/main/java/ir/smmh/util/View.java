@@ -28,12 +28,8 @@ public interface View<T> {
 
     default void expire() {
         setExpired();
-        T core = getCore();
-        if (core instanceof Mutable) {
-            ((Mutable) core).getOnPostMutateListeners().remove(this::expire);
-        }
-        for (OnExpireListener listener : getOnExpireListeners()) {
-            listener.onExpire();
+        for (FunctionalUtil.OnEventListener listener : getOnExpireListeners()) {
+            listener.onEvent();
         }
         nullifyCore();
     }
@@ -43,11 +39,7 @@ public interface View<T> {
      */
     void setExpired();
 
-    @NotNull Listeners<OnExpireListener> getOnExpireListeners();
-
-    interface OnExpireListener {
-        void onExpire();
-    }
+    @NotNull Listeners<FunctionalUtil.OnEventListener> getOnExpireListeners();
 
     interface Injected<T> extends View<T> {
 
@@ -74,7 +66,7 @@ public interface View<T> {
         }
 
         @Override
-        default @NotNull Listeners<OnExpireListener> getOnExpireListeners() {
+        default @NotNull Listeners<FunctionalUtil.OnEventListener> getOnExpireListeners() {
             return getInjectedView().getOnExpireListeners();
         }
     }

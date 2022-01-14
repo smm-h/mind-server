@@ -1,22 +1,35 @@
 package ir.smmh.util.impl;
 
-import ir.smmh.util.Listeners;
-import ir.smmh.util.ListenersImpl;
-import ir.smmh.util.Mutable;
-import ir.smmh.util.View;
+import ir.smmh.nile.verbs.CanClone;
+import ir.smmh.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ViewImpl<T> implements View<T> {
 
-    private final Listeners<OnExpireListener> onExpireListeners = new ListenersImpl<>();
+    private final Listeners<FunctionalUtil.OnEventListener> onExpireListeners = new ListenersImpl<>();
     private T core;
     private boolean expired;
 
     public ViewImpl(T core) {
         this.core = core;
         if (core instanceof Mutable) {
-            ((Mutable) core).getOnPostMutateListeners().add(this::expire);
+            ((Mutable) core).getOnPreMutateListeners().add(this::onPreMutate);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void onPreMutate() {
+        if (core instanceof Mutable) {
+            ((Mutable) core).getOnPreMutateListeners().remove(this::onPreMutate);
+            try {
+                if (core instanceof CanClone) {
+                    core = ((CanClone<T>) core).clone(false);
+                    return;
+                }
+            } catch (Throwable ignored) {
+            }
+            expire();
         }
     }
 
@@ -28,7 +41,7 @@ public class ViewImpl<T> implements View<T> {
 
     @Override
     public void nullifyCore() {
-        core = null;
+        this.core = null;
     }
 
     @Override
@@ -42,7 +55,7 @@ public class ViewImpl<T> implements View<T> {
     }
 
     @Override
-    public @NotNull Listeners<OnExpireListener> getOnExpireListeners() {
+    public @NotNull Listeners<FunctionalUtil.OnEventListener> getOnExpireListeners() {
         return onExpireListeners;
     }
 

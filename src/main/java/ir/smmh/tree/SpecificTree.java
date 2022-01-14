@@ -1,6 +1,7 @@
 package ir.smmh.tree;
 
 import ir.smmh.nile.adj.Sequential;
+import ir.smmh.util.FunctionalUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -10,9 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * @param <Q> Specific tree type
  */
 @SuppressWarnings("unused")
-public interface SpecificTree<T, Q extends SpecificTree<T, Q>> extends Tree<T> {
-
-    @NotNull Q specificThis();
+public interface SpecificTree<T, Q extends SpecificTree<T, Q>> extends Tree<T>, FunctionalUtil.RecursivelySpecific<Q> {
 
     @NotNull Sequential<Q> getSpecificImmediateSubtrees();
 

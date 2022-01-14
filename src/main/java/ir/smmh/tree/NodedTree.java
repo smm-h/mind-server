@@ -2,6 +2,7 @@ package ir.smmh.tree;
 
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.verbs.CanContain;
+import ir.smmh.util.FunctionalUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,8 +18,6 @@ import static ir.smmh.util.FunctionalUtil.with;
 public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends NodedTree<T, N, Q>> extends SpecificTree<T, Q> {
 
     @NotNull CanContain<N> nodes();
-
-    @NotNull Q specificThis();
 
     @Nullable N getRootNode();
 
@@ -60,13 +59,11 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
         }
     }
 
-    interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree<T, N, Q>> extends Sequential<N> {
+    interface Node<T, N extends Node<T, N, Q>, Q extends NodedTree<T, N, Q>> extends Sequential<N>, FunctionalUtil.RecursivelySpecific<N> {
 
         default @NotNull Sequential<N> getSiblings() {
             return new Sequential.View.AllButOne<>(getParent(), getIndexInParent());
         }
-
-        @NotNull N specificThis();
 
         int getIndexInParent();
 

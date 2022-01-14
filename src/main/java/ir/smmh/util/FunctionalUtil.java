@@ -59,4 +59,8 @@ public interface FunctionalUtil {
     interface OnEventListenerWithException<E extends Throwable> {
         void onEventWithException() throws E;
     }
+
+    interface RecursivelySpecific<T> {
+        T specificThis();
+    }
 }
