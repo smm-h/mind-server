@@ -25,7 +25,7 @@ public class MutableHashSet<T> extends HashSet<T> implements MutableSet<T>, ir.s
     @Override
     public boolean add(T t) {
         if (super.add(t)) {
-            postMutate();
+            mutate();
             return true;
         } else {
             return false;
@@ -35,7 +35,7 @@ public class MutableHashSet<T> extends HashSet<T> implements MutableSet<T>, ir.s
     @Override
     public boolean remove(Object o) {
         if (super.remove(o)) {
-            postMutate();
+            mutate();
             return true;
         } else {
             return false;
@@ -45,7 +45,7 @@ public class MutableHashSet<T> extends HashSet<T> implements MutableSet<T>, ir.s
     @Override
     public void clear() {
         if (!isEmpty())
-            postMutate();
+            mutate();
         super.clear();
     }
 }

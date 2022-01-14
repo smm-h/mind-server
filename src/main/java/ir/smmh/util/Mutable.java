@@ -33,22 +33,27 @@ public interface Mutable {
     /**
      * Makes the object dirty. Optionally may do other things as well.
      */
-    default void postMutate() {
+    default void mutate() {
+        for (FunctionalUtil.OnEventListener listener : getOnPreMutateListeners()) {
+            listener.onEvent();
+        }
         setDirty(true);
-        for (OnTaintListener listener : getOnTaintListeners()) {
-            listener.onTaint();
+        for (FunctionalUtil.OnEventListener listener : getOnPostMutateListeners()) {
+            listener.onEvent();
         }
     }
 
-    @NotNull Listeners<OnTaintListener> getOnTaintListeners();
+    @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPreMutateListeners();
 
-    @NotNull Listeners<OnCleanListener> getOnCleanListeners();
+    @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPostMutateListeners();
+
+    @NotNull Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>> getOnCleanListeners();
 
     default boolean clean() {
         if (isDirty()) {
-            for (OnCleanListener listener : getOnCleanListeners()) {
+            for (FunctionalUtil.OnEventListenerWithException<CleaningException> listener : getOnCleanListeners()) {
                 try {
-                    listener.onClean();
+                    listener.onEventWithException();
                 } catch (CleaningException e) {
                     return false;
                 }
@@ -56,16 +61,6 @@ public interface Mutable {
             setDirty(false);
         }
         return true;
-    }
-
-    @FunctionalInterface
-    interface OnCleanListener {
-        void onClean() throws CleaningException;
-    }
-
-    @FunctionalInterface
-    interface OnTaintListener {
-        void onTaint();
     }
 
     interface Injected extends Mutable {
@@ -83,18 +78,23 @@ public interface Mutable {
         }
 
         @Override
-        default @NotNull Listeners<OnCleanListener> getOnCleanListeners() {
+        default @NotNull Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>> getOnCleanListeners() {
             return getInjectedMutable().getOnCleanListeners();
         }
 
         @Override
-        default @NotNull Listeners<OnTaintListener> getOnTaintListeners() {
-            return getInjectedMutable().getOnTaintListeners();
+        default @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPreMutateListeners() {
+            return getInjectedMutable().getOnPreMutateListeners();
         }
 
         @Override
-        default void postMutate() {
-            getInjectedMutable().postMutate();
+        default @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPostMutateListeners() {
+            return getInjectedMutable().getOnPostMutateListeners();
+        }
+
+        @Override
+        default void mutate() {
+            getInjectedMutable().mutate();
         }
     }
 

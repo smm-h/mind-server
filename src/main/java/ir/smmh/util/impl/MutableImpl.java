@@ -1,9 +1,6 @@
 package ir.smmh.util.impl;
 
-import ir.smmh.util.Listeners;
-import ir.smmh.util.ListenersImpl;
-import ir.smmh.util.Mutable;
-import ir.smmh.util.Named;
+import ir.smmh.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -13,8 +10,11 @@ import java.util.Stack;
 public class MutableImpl implements Mutable {
 
     private static final Stack<MutableImpl> stack = new Stack<>();
-    private final Listeners<OnCleanListener> onCleanListeners = new ListenersImpl<>();
-    private final Listeners<OnTaintListener> onTaintListeners = new ListenersImpl<>();
+    private final Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>>
+            onCleanListeners = new ListenersImpl<>();
+    private final Listeners<FunctionalUtil.OnEventListener>
+            onPostMutateListeners = new ListenersImpl<>(),
+            onPreMutateListeners = new ListenersImpl<>();
     private final Mutable.Injected injected;
     private boolean dirty = true;
 
@@ -47,12 +47,17 @@ public class MutableImpl implements Mutable {
     }
 
     @Override
-    public @NotNull Listeners<OnCleanListener> getOnCleanListeners() {
+    public @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPreMutateListeners() {
+        return onPreMutateListeners;
+    }
+
+    @Override
+    public @NotNull Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>> getOnCleanListeners() {
         return onCleanListeners;
     }
 
     @Override
-    public @NotNull Listeners<OnTaintListener> getOnTaintListeners() {
-        return onTaintListeners;
+    public @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPostMutateListeners() {
+        return onPostMutateListeners;
     }
 }

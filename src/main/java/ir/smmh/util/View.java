@@ -30,7 +30,7 @@ public interface View<T> {
         setExpired();
         T core = getCore();
         if (core instanceof Mutable) {
-            ((Mutable) core).getOnTaintListeners().remove(this::expire);
+            ((Mutable) core).getOnPostMutateListeners().remove(this::expire);
         }
         for (OnExpireListener listener : getOnExpireListeners()) {
             listener.onExpire();

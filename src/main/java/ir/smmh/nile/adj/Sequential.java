@@ -329,7 +329,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                     T element = getAt(i);
                     if (!toTest.test(element)) {
                         removeIndexFrom(i);
-                        postMutate();
+                        mutate();
                     }
                 }
             }
@@ -340,7 +340,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 for (int i = 0; i < getLength(); i++) {
                     set(i, toReplace.apply(getAt(i)));
                 }
-                postMutate();
+                mutate();
             }
         }
 
@@ -349,7 +349,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 for (T element : this) {
                     toApply.accept(element);
                 }
-                postMutate();
+                mutate();
             }
         }
 

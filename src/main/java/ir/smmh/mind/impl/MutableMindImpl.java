@@ -95,7 +95,7 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
         if (idea == null) {
             idea = new MutableIdeaImpl(this, name, new MutableHashSet<>(), new HashSet<>(), new HashSet<>());
             ideas.place(idea.getName(), idea);
-            postMutate();
+            mutate();
         }
         return idea;
     }

@@ -45,10 +45,10 @@ public interface Mind extends Named {
 
     interface Immutable extends Mind, Serializable {
 
-        @NotNull Map.SingleValue<String, Idea.Immutable> getIdeaLookup();
+        @NotNull Function<String, Idea.Immutable> getIdeaLookup();
 
         default @Nullable Idea.Immutable findIdeaByName(String name) {
-            return getIdeaLookup().get(name);
+            return getIdeaLookup().apply(name);
         }
     }
 }

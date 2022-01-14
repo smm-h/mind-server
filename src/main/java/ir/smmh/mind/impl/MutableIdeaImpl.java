@@ -116,7 +116,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     public void become(String ideaName) {
         if (!intensions.contains(ideaName)) {
             intensions.add(ideaName);
-            postMutate();
+            mutate();
         }
     }
 
@@ -125,7 +125,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
         if (!properties.containsKey(name)) {
             PropertyImpl property = new PropertyImpl(this, name, type, defaultValue);
             properties.put(name, property);
-            postMutate();
+            mutate();
         }
         return properties.get(name);
     }
@@ -135,7 +135,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
         if (!staticProperties.containsKey(name)) {
             StaticPropertyImpl property = new StaticPropertyImpl(this, name, type, value);
             staticProperties.put(name, property);
-            postMutate();
+            mutate();
         }
         return staticProperties.get(name);
     }

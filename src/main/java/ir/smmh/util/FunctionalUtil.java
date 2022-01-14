@@ -49,4 +49,14 @@ public interface FunctionalUtil {
     static <T> Predicate<T> or(Predicate<T> p, Predicate<T> q) {
         return o -> p.test(o) || q.test(o);
     }
+
+    @FunctionalInterface
+    interface OnEventListener {
+        void onEvent();
+    }
+
+    @FunctionalInterface
+    interface OnEventListenerWithException<E extends Throwable> {
+        void onEventWithException() throws E;
+    }
 }

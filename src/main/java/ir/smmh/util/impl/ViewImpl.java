@@ -16,7 +16,7 @@ public class ViewImpl<T> implements View<T> {
     public ViewImpl(T core) {
         this.core = core;
         if (core instanceof Mutable) {
-            ((Mutable) core).getOnTaintListeners().add(this::expire);
+            ((Mutable) core).getOnPostMutateListeners().add(this::expire);
         }
     }
 
