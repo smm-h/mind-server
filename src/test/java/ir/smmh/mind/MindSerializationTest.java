@@ -2,7 +2,6 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MindStorageGate;
 import ir.smmh.util.JSONUtil;
-import ir.smmh.util.Serializable;
 import ir.smmh.util.impl.MutableImpl;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;

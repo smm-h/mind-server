@@ -4,7 +4,6 @@ import ir.smmh.mind.Mind;
 import ir.smmh.storage.impl.StorageGateImpl;
 import ir.smmh.storage.impl.StorageImpl;
 import ir.smmh.util.JSONUtil;
-import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;

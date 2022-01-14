@@ -2,7 +2,6 @@ package ir.smmh.nile.adj;
 
 import ir.smmh.util.FunctionalUtil;
 import ir.smmh.util.RandomUtil;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;

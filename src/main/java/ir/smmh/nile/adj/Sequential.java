@@ -1,12 +1,12 @@
 package ir.smmh.nile.adj;
 
+import ir.smmh.nile.adj.impl.SequentialList;
 import ir.smmh.nile.verbs.CanAppendTo;
 import ir.smmh.nile.verbs.CanContain;
-import ir.smmh.nile.verbs.CanRemoveElementFrom;
 import ir.smmh.nile.verbs.CanRemoveIndexFrom;
-import ir.smmh.util.impl.MutableImpl;
 import ir.smmh.util.impl.ViewImpl;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
@@ -20,7 +20,7 @@ import static ir.smmh.util.FunctionalUtil.with;
 @ParametersAreNonnullByDefault
 public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanContain<T> {
 
-    static <T> Sequential<T> of(java.util.List<T> list) {
+    static <T> Sequential<T> of(List<T> list) {
 
         return new AbstractSequential<>() {
             @Override
@@ -213,7 +213,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return applied;
     }
 
-    default @NotNull java.util.List<T> asList() {
+    default @NotNull List<T> asList() {
         return new AbstractList<>() {
             @Override
             public int size() {
@@ -311,10 +311,16 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
 
-    interface Mutable<T> extends Sequential<T>, CanAppendTo<T>, CanRemoveElementFrom<T>, CanRemoveIndexFrom<T>, ir.smmh.util.Mutable {
+    interface Mutable<T> extends Sequential<T>, CanAppendTo<T>, CanRemoveIndexFrom<T>, ir.smmh.util.Mutable {
 
-        static <T> Sequential.Mutable<T> of(java.util.List<T> list) {
-            return new List<>(list);
+        static <T> Sequential.Mutable<T> of(List<T> list) {
+            return new SequentialList<>(list);
+        }
+
+        static <T> Sequential.Mutable<T> of(T[] array) {
+            List<T> list = new ArrayList<>(array.length);
+            list.addAll(Arrays.asList(array));
+            return of(list);
         }
 
         default void filterInPlace(Predicate<? super T> toTest) {
@@ -323,7 +329,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                     T element = getAt(i);
                     if (!toTest.test(element)) {
                         removeIndexFrom(i);
-                        taint();
+                        postMutate();
                     }
                 }
             }
@@ -334,7 +340,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 for (int i = 0; i < getLength(); i++) {
                     set(i, toReplace.apply(getAt(i)));
                 }
-                taint();
+                postMutate();
             }
         }
 
@@ -343,11 +349,11 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 for (T element : this) {
                     toApply.accept(element);
                 }
-                taint();
+                postMutate();
             }
         }
 
-        void set(int index, T toSet);
+        void set(int index, @Nullable T toSet);
 
         @NotNull
         @Override
@@ -529,56 +535,6 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
             }
             return false;
-        }
-    }
-
-    class List<T> extends AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
-
-        private final java.util.List<T> list;
-        private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
-
-        public List(java.util.List<T> list) {
-            this.list = list;
-        }
-
-        @Override
-        public void removeIndexFrom(int toRemove) {
-            list.remove(toRemove);
-        }
-
-        @Override
-        public void removeElementFrom(T toRemove) {
-            list.remove(toRemove);
-        }
-
-        @Override
-        public void append(T toAppend) {
-            list.add(toAppend);
-        }
-
-        @Override
-        public void add(T toAdd) {
-            Sequential.Mutable.super.add(toAdd);
-        }
-
-        @Override
-        public void set(int index, T toSet) {
-            list.set(index, toSet);
-        }
-
-        @Override
-        public T getAt(int index) throws IndexOutOfBoundsException {
-            return list.get(index);
-        }
-
-        @Override
-        public int getLength() {
-            return list.size();
-        }
-
-        @Override
-        public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
-            return injectedMutable;
         }
     }
 

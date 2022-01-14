@@ -1,12 +1,12 @@
 package ir.smmh.util.impl;
 
-import ir.smmh.util.Mutable;
+import ir.smmh.util.MutableSet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashSet;
 
-public class MutableHashSet<T> extends HashSet<T> implements Mutable.Set<T>, ir.smmh.util.Mutable.Injected {
+public class MutableHashSet<T> extends HashSet<T> implements MutableSet<T>, ir.smmh.util.Mutable.Injected {
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
     public MutableHashSet() {
@@ -25,7 +25,7 @@ public class MutableHashSet<T> extends HashSet<T> implements Mutable.Set<T>, ir.
     @Override
     public boolean add(T t) {
         if (super.add(t)) {
-            taint();
+            postMutate();
             return true;
         } else {
             return false;
@@ -35,7 +35,7 @@ public class MutableHashSet<T> extends HashSet<T> implements Mutable.Set<T>, ir.
     @Override
     public boolean remove(Object o) {
         if (super.remove(o)) {
-            taint();
+            postMutate();
             return true;
         } else {
             return false;
@@ -45,7 +45,7 @@ public class MutableHashSet<T> extends HashSet<T> implements Mutable.Set<T>, ir.
     @Override
     public void clear() {
         if (!isEmpty())
-            taint();
+            postMutate();
         super.clear();
     }
 }

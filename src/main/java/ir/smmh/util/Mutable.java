@@ -6,7 +6,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Predicate;
 
 /**
- * A mutable object is an object that when it is mutated it calls the taint
+ * A mutable object is an object that when it is mutated it calls the mutate
  * method which makes it dirty, and when it needs to be clean, it calls the
  * clean method which calls the overridden onClean method if it is dirty.
  * The onClean method must make it non-dirty again.
@@ -33,7 +33,7 @@ public interface Mutable {
     /**
      * Makes the object dirty. Optionally may do other things as well.
      */
-    default void taint() {
+    default void postMutate() {
         setDirty(true);
         for (OnTaintListener listener : getOnTaintListeners()) {
             listener.onTaint();
@@ -44,17 +44,18 @@ public interface Mutable {
 
     @NotNull Listeners<OnCleanListener> getOnCleanListeners();
 
-    default void clean() {
+    default boolean clean() {
         if (isDirty()) {
-            setDirty(false);
             for (OnCleanListener listener : getOnCleanListeners()) {
                 try {
                     listener.onClean();
                 } catch (CleaningException e) {
-                    taint();
+                    return false;
                 }
             }
+            setDirty(false);
         }
+        return true;
     }
 
     @FunctionalInterface
@@ -92,12 +93,9 @@ public interface Mutable {
         }
 
         @Override
-        default void taint() {
-            getInjectedMutable().taint();
+        default void postMutate() {
+            getInjectedMutable().postMutate();
         }
-    }
-
-    interface Set<T> extends Mutable, java.util.Set<T> {
     }
 
     class CleaningException extends Exception {

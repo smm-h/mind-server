@@ -26,14 +26,17 @@ public interface NodedTree<T, N extends NodedTree.Node<T, N, Q>, Q extends Noded
     default int getDegree() {
         return with(getRootNode(), N::getDegree, 0);
     }
+
     @Override
     default int getHeight() {
         return with(getRootNode(), N::getHeight, -1);
     }
+
     @Override
     default int getCount() {
         return with(getRootNode(), N::getCount, 0);
     }
+
     @Override
     default int getLeafCount() {
         return with(getRootNode(), N::getLeafCount, 0);

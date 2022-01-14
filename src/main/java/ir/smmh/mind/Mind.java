@@ -2,16 +2,21 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MutableIdeaImpl;
 import ir.smmh.storage.Stored;
-import ir.smmh.util.Lookup;
+import ir.smmh.util.Map;
 import ir.smmh.util.Named;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface Mind extends Named {
+
+    Iterable<String> overIdeaNames();
+
+    Iterable<Idea> overIdeas();
 
     @Nullable Idea findIdeaByName(String name);
 
@@ -31,19 +36,19 @@ public interface Mind extends Named {
          */
         @NotNull Idea.Mutable imagine(String name);
 
-        Lookup.@NotNull Mutable<MutableIdeaImpl> getIdeaLookup();
+        @NotNull Function<String, MutableIdeaImpl> getIdeaLookup();
 
         default @Nullable Idea.Mutable findIdeaByName(String name) {
-            return getIdeaLookup().find(name);
+            return getIdeaLookup().apply(name);
         }
     }
 
     interface Immutable extends Mind, Serializable {
 
-        @NotNull Lookup<Idea.Immutable> getIdeaLookup();
+        @NotNull Map.SingleValue<String, Idea.Immutable> getIdeaLookup();
 
         default @Nullable Idea.Immutable findIdeaByName(String name) {
-            return getIdeaLookup().find(name);
+            return getIdeaLookup().get(name);
         }
     }
 }

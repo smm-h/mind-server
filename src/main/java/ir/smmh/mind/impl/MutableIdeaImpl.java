@@ -3,10 +3,7 @@ package ir.smmh.mind.impl;
 import ir.smmh.mind.*;
 import ir.smmh.storage.Storage;
 import ir.smmh.storage.impl.StorageImpl;
-import ir.smmh.util.Comprehension;
-import ir.smmh.util.JSONUtil;
-import ir.smmh.util.Mutable;
-import ir.smmh.util.Serializable;
+import ir.smmh.util.*;
 import ir.smmh.util.impl.MutableHashSet;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
@@ -26,14 +23,14 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     private static final Comprehension.Map<StaticPropertyImpl, String, StaticPropertyImpl> sc = p -> entry(p.getName(), p);
     private final Mind mind;
     private final String name;
-    private final Set<String> intensions;
+    private final MutableSet<String> intensions;
     private final Map<String, PropertyImpl> properties;
     private final Map<String, StaticPropertyImpl> staticProperties;
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
     private final Storage storage;
     private java.util.Set<Idea> intensionsCache;
 
-    public MutableIdeaImpl(@NotNull Mind mind, @NotNull String name, @NotNull Set<String> intensions, @NotNull Iterable<PropertyImpl> properties, @NotNull Iterable<StaticPropertyImpl> staticProperties) {
+    public MutableIdeaImpl(@NotNull Mind mind, @NotNull String name, @NotNull MutableSet<String> intensions, @NotNull Iterable<PropertyImpl> properties, @NotNull Iterable<StaticPropertyImpl> staticProperties) {
         this.mind = mind;
         this.name = name;
         this.intensions = intensions;
@@ -119,7 +116,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     public void become(String ideaName) {
         if (!intensions.contains(ideaName)) {
             intensions.add(ideaName);
-            taint();
+            postMutate();
         }
     }
 
@@ -128,7 +125,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
         if (!properties.containsKey(name)) {
             PropertyImpl property = new PropertyImpl(this, name, type, defaultValue);
             properties.put(name, property);
-            taint();
+            postMutate();
         }
         return properties.get(name);
     }
@@ -138,7 +135,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
         if (!staticProperties.containsKey(name)) {
             StaticPropertyImpl property = new StaticPropertyImpl(this, name, type, value);
             staticProperties.put(name, property);
-            taint();
+            postMutate();
         }
         return staticProperties.get(name);
     }

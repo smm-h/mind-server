@@ -2,14 +2,15 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.NumberValue;
 import ir.smmh.mind.impl.StringValue;
-import ir.smmh.util.Lookup;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.function.Function;
+
 public interface Value extends Serializable.JSON {
-    static Value of(JSONObject object, Lookup<Idea> lookup) {
+    static Value of(JSONObject object, Function<java.lang.String, Idea> lookup) {
         try {
             final java.lang.String name = object.getString("~");
             switch (name) {
@@ -18,7 +19,7 @@ public interface Value extends Serializable.JSON {
                 case "string":
                     return new StringValue(object.getString("value"));
                 default:
-                    final Idea idea = lookup.find(name);
+                    final Idea idea = lookup.apply(name);
                     if (idea == null) {
                         System.err.println("no such idea: " + name);
                         return null;

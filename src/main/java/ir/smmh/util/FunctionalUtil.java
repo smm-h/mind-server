@@ -6,11 +6,20 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public interface FunctionalUtil {
 
     static <T> T itself(T self) {
         return self;
+    }
+
+    static <T> T with(@Nullable T it, @NotNull T defaultValue) {
+        return it == null ? defaultValue : it;
+    }
+
+    static <T> T with(@Nullable T it, @NotNull Supplier<T> supplier) {
+        return it == null ? supplier.get() : it;
     }
 
     static <T> void with(@Nullable T it, @NotNull Consumer<T> consumer) {

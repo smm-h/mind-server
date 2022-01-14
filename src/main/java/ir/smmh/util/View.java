@@ -7,10 +7,13 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.function.Predicate;
 
 /**
- * A {@code View} on any collection is a light-weight layer on it that
- * allows partial and/or out-of-order access to it. It is read-only and
- * immutable. If the core object it is viewing is mutable, it should be
- * {@link #expire}d when it mutates. View expiration is a one way process.
+ * A {@code View} on any object is a light-weight read-only layer on it
+ * that allows configurable access to its data. For example a view on a
+ * collection may offer a partial and/or out-of-order access to its elements.
+ * The general contract with views is that they never write to the core
+ * object and they only ever read from it. If the core object is mutable,
+ * the view is {@link #expire}d when it mutates. View expiration is
+ * irreversible.
  */
 @ParametersAreNonnullByDefault
 public interface View<T> {

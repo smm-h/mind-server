@@ -1,6 +1,5 @@
 package ir.smmh.util;
 
-import ir.smmh.nile.adj.Sequential;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -9,7 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 @ParametersAreNonnullByDefault
-public class ListenersImpl<L> implements Listeners<L>{
+public class ListenersImpl<L> implements Listeners<L> {
 
     // remembers the order of insertion
     private final Set<L> set = new LinkedHashSet<>();

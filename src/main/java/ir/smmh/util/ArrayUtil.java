@@ -1,7 +1,5 @@
 package ir.smmh.util;
 
-import java.util.Iterator;
-
 public interface ArrayUtil {
 
     /**

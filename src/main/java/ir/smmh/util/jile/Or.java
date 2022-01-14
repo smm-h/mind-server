@@ -24,7 +24,7 @@ public interface Or<This, That> {
 
     default boolean equalTo(Or<This, That> other) {
         return sameTypeAs(other) && isThis() ?
-                    Objects.equals(getThis(), other.getThis()) :
-                    Objects.equals(getThat(), other.getThat());
+                Objects.equals(getThis(), other.getThis()) :
+                Objects.equals(getThat(), other.getThat());
     }
 }

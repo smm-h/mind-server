@@ -1,6 +1,5 @@
 package ir.smmh.storage;
 
-import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
