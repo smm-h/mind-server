@@ -9,7 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import static ir.smmh.util.FunctionalUtil.with;
 
 @SuppressWarnings("unused")
-public interface Tree<T> extends CanContain<T>, Serializable {
+public interface Tree<DataType> extends CanContain<DataType>, Serializable {
+
+    @NotNull Sequential<?> getImmediateSubtrees();
 
     int getDegree();
 
@@ -19,31 +21,29 @@ public interface Tree<T> extends CanContain<T>, Serializable {
 
     int getLeafCount();
 
-    T getRootData();
-
-    @NotNull Sequential<Tree<T>> getImmediateSubtrees();
+    DataType getRootData();
 
     @NotNull
-    default Sequential<T> traverseData(@NotNull DataTraversal method) {
+    default Sequential<DataType> traverseData(@NotNull DataTraversal method) {
         return with(this, method::traverseData, Sequential.empty());
     }
 
-    interface Mutable<T> extends Tree<T>, CanClear, ir.smmh.util.Mutable {
-        void setRootData(T data);
+    interface Mutable<DataType> extends Tree<DataType>, CanClear, ir.smmh.util.Mutable {
+        void setRootData(DataType data);
     }
 
-    interface Binary<T> extends Tree<T> {
-        @NotNull Sequential<T> traverseDataPreOrder();
+    interface Binary<DataType> extends Tree<DataType> {
+        @NotNull Sequential<DataType> traverseDataPreOrder();
 
-        @NotNull Sequential<T> traverseDataInOrder();
+        @NotNull Sequential<DataType> traverseDataInOrder();
 
-        @NotNull Sequential<T> traverseDataPostOrder();
+        @NotNull Sequential<DataType> traverseDataPostOrder();
 
-        interface Mutable<T> extends Tree.Binary<T>, Tree.Mutable<T> {
+        interface Mutable<DataType> extends Tree.Binary<DataType>, Tree.Mutable<DataType> {
         }
     }
 
     interface DataTraversal {
-        @NotNull <T, Q extends Tree<T>> Sequential<T> traverseData(@NotNull Q tree);
+        @NotNull <DataType, TreeType extends Tree<DataType>> Sequential<DataType> traverseData(@NotNull TreeType tree);
     }
 }

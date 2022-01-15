@@ -7,20 +7,21 @@ import org.jetbrains.annotations.NotNull;
 /**
  * A {@code SpecificTree} is a {@link Tree} whose subtrees are all of the same type as itself.
  *
- * @param <T> Data type
- * @param <Q> Specific tree type
+ * @param <DataType> Data type
+ * @param <TreeType> Specific tree type
  */
 @SuppressWarnings("unused")
-public interface SpecificTree<T, Q extends SpecificTree<T, Q>> extends Tree<T>, FunctionalUtil.RecursivelySpecific<Q> {
+public interface SpecificTree<DataType, TreeType extends SpecificTree<DataType, TreeType>> extends Tree<DataType>, FunctionalUtil.RecursivelySpecific<TreeType> {
 
-    @NotNull Sequential<Q> getSpecificImmediateSubtrees();
+    @Override
+    @NotNull Sequential<TreeType> getImmediateSubtrees();
 
-    interface Mutable<T, Q extends Mutable<T, Q>> extends SpecificTree<T, Q>, Tree.Mutable<T> {
-        void setRootData(T data);
+    interface Mutable<DataType, TreeType extends Mutable<DataType, TreeType>> extends SpecificTree<DataType, TreeType>, Tree.Mutable<DataType> {
+        void setRootData(DataType data);
     }
 
-    interface Binary<T, Q extends Binary<T, Q>> extends SpecificTree<T, Q>, Tree.Binary<T> {
-        interface Mutable<T, Q extends Mutable<T, Q>> extends SpecificTree.Binary<T, Q>, SpecificTree.Mutable<T, Q>, Tree.Binary.Mutable<T> {
+    interface Binary<DataType, TreeType extends Binary<DataType, TreeType>> extends SpecificTree<DataType, TreeType>, Tree.Binary<DataType> {
+        interface Mutable<DataType, TreeType extends Mutable<DataType, TreeType>> extends SpecificTree.Binary<DataType, TreeType>, SpecificTree.Mutable<DataType, TreeType>, Tree.Binary.Mutable<DataType> {
         }
     }
 }

@@ -13,8 +13,11 @@ public class SequentialImpl<T> extends Sequential.AbstractSequential<T> implemen
     private final List<T> list = new LinkedList<>();
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
+    public SequentialImpl() {
+    }
+
     public SequentialImpl(Collection<T> collection) {
-        this.list.addAll(collection);
+        list.addAll(collection);
     }
 
     @Override
