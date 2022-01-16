@@ -60,7 +60,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
             setRootNode(null);
         }
 
-        void setRootNode(NodeType node);
+        void setRootNode(@Nullable NodeType node);
 
         interface Node<DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Mutable<DataType, NodeType, TreeType>> extends NodedTree.Node<DataType, NodeType, TreeType> {
             @Override
@@ -106,8 +106,8 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                 return 0;
             } else {
                 int degree = getChildren().getSize();
-                for (NodeType node : getChildren()) {
-                    degree = Math.max(degree, node.getDegree());
+                for (NodeType child : getChildren()) {
+                    degree = Math.max(degree, with(child, NodeType::getDegree, 0));
                 }
                 return degree;
             }
@@ -118,8 +118,8 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                 return 0;
             } else {
                 int height = 0;
-                for (NodeType node : getChildren()) {
-                    height = Math.max(height, node.getDegree());
+                for (NodeType child : getChildren()) {
+                    height = Math.max(height, with(child, NodeType::getHeight, 0));
                 }
                 return height + 1;
             }
@@ -130,8 +130,8 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                 return 1;
             } else {
                 int count = 0;
-                for (NodeType node : getChildren()) {
-                    count += node.getCount();
+                for (NodeType child : getChildren()) {
+                    count += with(child, NodeType::getCount, 0);
                 }
                 return count;
             }
@@ -142,8 +142,8 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                 return 1;
             } else {
                 int leafCount = 0;
-                for (NodeType node : getChildren()) {
-                    leafCount += node.getLeafCount();
+                for (NodeType child : getChildren()) {
+                    leafCount += with(child, NodeType::getLeafCount, 0);
                 }
                 return leafCount;
             }
@@ -153,6 +153,11 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
     interface Binary<DataType, NodeType extends Binary.Node<DataType, NodeType, TreeType>, TreeType extends Binary<DataType, NodeType, TreeType>> extends NodedTree<DataType, NodeType, TreeType>, SpecificTree.Binary<DataType, TreeType> {
         default @NotNull Sequential<NodeType> traverseNodesPreOrder() {
             return with(getRootNode(), NodeTraversal.Binary.PRE_ORDER::traverseNodesBinary, Sequential.empty());
+        }
+
+        @Override
+        default int getDegree() {
+            return SpecificTree.Binary.super.getDegree();
         }
 
         default @NotNull Sequential<NodeType> traverseNodesInOrder() {

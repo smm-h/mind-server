@@ -167,6 +167,10 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         };
     }
 
+    static Sequential<Character> of(String string) {
+        return Sequential.of(string.toCharArray()); // TODO optimize
+    }
+
     @Override
     default boolean hasIndex(int index) {
         return index >= 0 && index < getSize();
@@ -184,6 +188,15 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         long[] array = new long[getSize()];
         for (int i = 0; i < array.length; i++) {
             array[i] = toLong.applyAsLong(getAtIndex(i));
+        }
+        return array;
+    }
+
+    default T[] toArray() {
+        @SuppressWarnings("unchecked")
+        T[] array = (T[]) new Object[getSize()];
+        for (int i = 0; i < array.length; i++) {
+            array[i] = getAtIndex(i);
         }
         return array;
     }

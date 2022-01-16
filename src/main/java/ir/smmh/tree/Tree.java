@@ -46,6 +46,11 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
 
         interface Mutable<DataType> extends Tree.Binary<DataType>, Tree.Mutable<DataType> {
         }
+
+        @Override
+        default int getDegree() {
+            return 2;
+        }
     }
 
     interface DataTraversal {
