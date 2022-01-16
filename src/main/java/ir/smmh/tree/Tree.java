@@ -19,6 +19,11 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
 
     int getCount();
 
+    @Override
+    default int getSize() {
+        return getCount(); // TODO rename this
+    }
+
     int getLeafCount();
 
     DataType getRootData();

@@ -1,15 +1,21 @@
 package ir.smmh.util;
 
+import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
 @ParametersAreNonnullByDefault
-public class ListenersImpl<L> implements Listeners<L> {
+public class ListenersImpl<L> implements Listeners<L>, Mutable.Injected {
 
     private final List<L> listeners = new LinkedList<>(); // new ConcurrentSkipListSet<>(Comparator.comparingInt(Object::hashCode)); // new LinkedHashSet<>(); //
     private final Set<L> disposables = new LinkedHashSet<>();
+
+    @Override
+    public int getSize() {
+        return listeners.size();
+    }
 
     @Override
     public void clear() {
@@ -60,5 +66,11 @@ public class ListenersImpl<L> implements Listeners<L> {
             joiner.add(Integer.toString(listener.hashCode()));
         }
         return joiner.toString();
+    }
+
+    @Override
+    public @NotNull Mutable getInjectedMutable() {
+        //noinspection ConstantConditions
+        return null;
     }
 }

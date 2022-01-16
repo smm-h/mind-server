@@ -1,6 +1,8 @@
 package ir.smmh.nile.verbs;
 
-public interface CanRemoveElementFrom<T> {
+import ir.smmh.nile.adj.Multitude;
+
+public interface CanRemoveElementFrom<T> extends Multitude.VariableSize {
 
     static <T> void removeFrom(CanRemoveElementFrom<T> canRemoveElementFrom, T toRemove) {
         canRemoveElementFrom.removeElementFrom(toRemove);

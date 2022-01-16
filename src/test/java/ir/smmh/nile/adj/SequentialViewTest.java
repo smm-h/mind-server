@@ -12,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SequentialViewTest {
     private static final String[] array = {"apples", "oranges", "bananas"};
-    Sequential.Mutable<String> data;
+    Sequential.Mutable.VariableSize<String> data;
 
     @BeforeEach
     void beforeEach() {
-        data = Sequential.Mutable.of(array);
+        data = Sequential.Mutable.VariableSize.of(array);
     }
 
     @Test

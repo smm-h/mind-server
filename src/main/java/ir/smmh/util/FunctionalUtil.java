@@ -65,4 +65,12 @@ public interface FunctionalUtil {
         @Contract("->this")
         T specificThis();
     }
+
+    interface ToFloatFunction<T> {
+        float applyAsFloat(T object);
+    }
+
+    interface ToCharFunction<T> {
+        char applyAsChar(T object);
+    }
 }

@@ -1,6 +1,8 @@
 package ir.smmh.nile.verbs;
 
-public interface CanAddTo<T> {
+import ir.smmh.nile.adj.Multitude;
+
+public interface CanAddTo<T> extends Multitude.VariableSize {
 
     static <T> void addTo(CanAddTo<T> canAddTo, T toAdd) {
         canAddTo.add(toAdd);

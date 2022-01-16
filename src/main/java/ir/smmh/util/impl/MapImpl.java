@@ -30,6 +30,11 @@ public abstract class MapImpl<K> implements Map<K> {
         protected final java.util.Map<K, V> map = new HashMap<>();
 
         @Override
+        public int getSize() {
+            return map.size();
+        }
+
+        @Override
         public boolean isEmpty() {
             return map.isEmpty();
         }
@@ -40,7 +45,7 @@ public abstract class MapImpl<K> implements Map<K> {
         }
 
         @Override
-        public @Nullable V get(K key) {
+        public @Nullable V getAtPlace(K key) {
             return map.get(key);
         }
 
@@ -59,8 +64,8 @@ public abstract class MapImpl<K> implements Map<K> {
             private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
             @Override
-            public void place(K place, V toPlace) {
-                map.put(place, toPlace);
+            public void setAtPlace(K place, V toSet) {
+                map.put(place, toSet);
             }
 
             @Override
@@ -71,7 +76,7 @@ public abstract class MapImpl<K> implements Map<K> {
     }
 
     public static class MultiValue<K, V> extends MapImpl<K> implements Map.MultiValue<K, V> {
-        protected final java.util.Map<K, Sequential.Mutable<V>> map = new HashMap<>();
+        protected final java.util.Map<K, Sequential.Mutable.VariableSize<V>> map = new HashMap<>();
 
         @Override
         public boolean contains(K toCheck) {
@@ -89,17 +94,22 @@ public abstract class MapImpl<K> implements Map<K> {
         }
 
         @Override
-        public @NotNull Sequential<V> get(K key) {
+        public @NotNull Sequential<V> getAtPlace(K key) {
             return with(map.get(key), Sequential.empty());
+        }
+
+        @Override
+        public int getSize() {
+            return map.size();
         }
 
         public static class Mutable<K, V> extends MapImpl.MultiValue<K, V> implements Map.MultiValue.Mutable<K, V>, ir.smmh.util.Mutable.Injected {
             private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
             @Override
-            public void place(K place, V toPlace) {
-                Sequential.Mutable<V> s = map.computeIfAbsent(place, k -> new SequentialImpl<>(new LinkedList<>()));
-                s.append(toPlace);
+            public void setAtPlace(K place, V toSet) {
+                Sequential.Mutable.VariableSize<V> s = map.computeIfAbsent(place, k -> new SequentialImpl<>(new LinkedList<>()));
+                s.append(toSet);
             }
 
             @Override

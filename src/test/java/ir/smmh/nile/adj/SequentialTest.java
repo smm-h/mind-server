@@ -1,5 +1,6 @@
 package ir.smmh.nile.adj;
 
+import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.util.FunctionalUtil;
 import ir.smmh.util.RandomUtil;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class SequentialTest {
     @Test
     void countPredicateAndFilterOutOfPlace() {
         Sequential<Integer> s = Sequential.of(RandomUtil.generateRandomIntArray(70, 90));
-        assertEquals(s.count(PRIME), s.filterOutOfPlace(PRIME).getLength());
+        assertEquals(s.count(PRIME), s.filterOutOfPlace(PRIME).getSize());
     }
 
     @Test
@@ -46,7 +47,7 @@ class SequentialTest {
         System.out.println(f);
         Sequential<Integer> r = new Sequential.View.Reference<>(s, (x) -> f.toIntArray(FunctionalUtil::itself));
         System.out.println(r);
-        assertEquals(f.getLength(), r.getLength());
+        assertEquals(f.getSize(), r.getSize());
         for (int x : r)
             assertEquals(x, m);
     }
@@ -54,7 +55,7 @@ class SequentialTest {
     @Test
     void inReverse() {
         Sequential<Integer> s = Sequential.of(RandomUtil.generateRandomIntArray(10, 70));
-        Sequential<Integer> p = Sequential.of(s.inReverse());
+        Sequential<Integer> p = new SequentialImpl<>(s.inReverse());
         Sequential<Integer> q = (new Sequential.View.Reversed<>(s));
         System.out.println(s);
         System.out.println(p);

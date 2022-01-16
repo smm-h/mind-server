@@ -9,17 +9,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedList;
 
 // TODO TEST
-public class SequenceJoiner<T> extends Sequential.AbstractSequential<T> implements Sequential.Mutable<T>, Mutable.Injected {
+public class SequenceJoiner<T> extends Sequential.AbstractMutableSequential<T> implements Sequential.Mutable.VariableSize<T>, Mutable.Injected {
 
     private final Sequential.Mutable<Sequential<? extends T>> subSequences = new SequentialImpl<>(new LinkedList<>());
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
     @Override
-    public T getAt(int index) throws IndexOutOfBoundsException {
+    public T getAtIndex(int index) throws IndexOutOfBoundsException {
         for (Sequential<? extends T> s : subSequences) {
-            int n = s.getLength();
+            int n = s.getSize();
             if (index < n) {
-                return s.getAt(index);
+                return s.getAtIndex(index);
             } else {
                 index -= n;
             }
@@ -28,16 +28,16 @@ public class SequenceJoiner<T> extends Sequential.AbstractSequential<T> implemen
     }
 
     @Override
-    public int getLength() {
+    public int getSize() {
         int n = 0;
         for (Sequential<? extends T> s : subSequences) {
-            n += s.getLength();
+            n += s.getSize();
         }
         return n;
     }
 
     @Override
-    public void set(int index, @Nullable T toSet) {
+    public void setAtIndex(int index, @Nullable T toSet) {
         // TODO pre and post mutate
     }
 
@@ -47,7 +47,7 @@ public class SequenceJoiner<T> extends Sequential.AbstractSequential<T> implemen
     }
 
     @Override
-    public void removeIndexFrom(int toRemove) {
+    public void removeIndexFrom(int toRemove) throws IndexOutOfBoundsException {
 
     }
 

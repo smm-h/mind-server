@@ -1,17 +1,16 @@
 package ir.smmh.nile.adj.impl;
 
 import ir.smmh.nile.adj.Sequential;
-import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SequentialImpl<T> extends Sequential.AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
+public class SequentialImpl<T> extends Sequential.AbstractMutableSequential<T> implements Sequential.Mutable.VariableSize<T>, ir.smmh.util.Mutable.Injected {
 
-    private final List<T> list = new LinkedList<>();
-    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
+    private final List<T> list = new ArrayList<>();
 
     public SequentialImpl() {
     }
@@ -20,8 +19,14 @@ public class SequentialImpl<T> extends Sequential.AbstractSequential<T> implemen
         list.addAll(collection);
     }
 
+    public SequentialImpl(Iterable<T> iterable) {
+        for (T element : iterable) {
+            list.add(element);
+        }
+    }
+
     @Override
-    public void removeIndexFrom(int toRemove) {
+    public void removeIndexFrom(int toRemove) throws IndexOutOfBoundsException {
         preMutate();
         list.remove(toRemove);
         postMutate();
@@ -35,29 +40,19 @@ public class SequentialImpl<T> extends Sequential.AbstractSequential<T> implemen
     }
 
     @Override
-    public void add(T toAdd) {
-        Mutable.super.add(toAdd);
-    }
-
-    @Override
-    public void set(int index, T toSet) {
+    public void setAtIndex(int index, @NotNull T toSet) {
         preMutate();
         list.set(index, toSet);
         postMutate();
     }
 
     @Override
-    public T getAt(int index) throws IndexOutOfBoundsException {
+    public T getAtIndex(int index) throws IndexOutOfBoundsException {
         return list.get(index);
     }
 
     @Override
-    public int getLength() {
+    public int getSize() {
         return list.size();
-    }
-
-    @Override
-    public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
-        return injectedMutable;
     }
 }

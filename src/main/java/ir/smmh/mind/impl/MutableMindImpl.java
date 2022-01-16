@@ -33,7 +33,7 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
         this.name = name;
         if (ideas != null) {
             for (MutableIdeaImpl idea : ideas) {
-                this.ideas.place(idea.getName(), idea);
+                this.ideas.setAtPlace(idea.getName(), idea);
             }
         }
         setup();
@@ -50,7 +50,7 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
                 return null;
             }
         })) {
-            this.ideas.place(idea.getName(), idea);
+            this.ideas.setAtPlace(idea.getName(), idea);
         }
         setup();
     }
@@ -67,7 +67,7 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
 
     @Override
     public @Nullable MutableIdeaImpl findIdeaByName(String name) {
-        return ideas.get(name);
+        return ideas.getAtPlace(name);
     }
 
     private void setup() {
@@ -91,11 +91,11 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
 
     @Override
     public @NotNull MutableIdeaImpl imagine(@NotNull String name) {
-        @Nullable MutableIdeaImpl idea = ideas.get(name);
+        @Nullable MutableIdeaImpl idea = ideas.getAtPlace(name);
         if (idea == null) {
             preMutate();
             idea = new MutableIdeaImpl(this, name, new MutableHashSet<>(), new HashSet<>(), new HashSet<>());
-            ideas.place(idea.getName(), idea);
+            ideas.setAtPlace(idea.getName(), idea);
             postMutate();
         }
         return idea;

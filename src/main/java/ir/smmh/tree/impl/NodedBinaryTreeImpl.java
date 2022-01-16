@@ -1,6 +1,7 @@
 package ir.smmh.tree.impl;
 
 import ir.smmh.nile.adj.Sequential;
+import ir.smmh.nile.adj.impl.BinarySequentialImpl;
 import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.nile.verbs.CanContain;
 import ir.smmh.tree.NodedTree;
@@ -12,10 +13,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import static ir.smmh.util.FunctionalUtil.with;
-
 @ParametersAreNonnullByDefault
-public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, NodedTreeImpl<DataType>.Node, NodedTreeImpl<DataType>> {
+public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<DataType, NodedBinaryTreeImpl<DataType>.Node, NodedBinaryTreeImpl<DataType>> {
     private final Listeners<FunctionalUtil.OnEventListener> onPreMutateListeners = new ListenersImpl<>();
     private final Listeners<FunctionalUtil.OnEventListener> onPostMutateListeners = new ListenersImpl<>();
     private final Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>> onCleanListeners = new ListenersImpl<>();
@@ -23,17 +22,17 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
     private final CanContain<Node> nodeContainer = new CanContain<>() {
         @Override
         public boolean contains(Node node) {
-            return root != null && NodedTreeImpl.this.contains(root, node);
+            return root != null && NodedBinaryTreeImpl.this.contains(root, node);
         }
 
         @Override
         public boolean isEmpty() {
-            return NodedTreeImpl.this.isEmpty();
+            return NodedBinaryTreeImpl.this.isEmpty();
         }
 
         @Override
         public int getSize() {
-            return NodedTreeImpl.this.getSize();
+            return NodedBinaryTreeImpl.this.getSize();
         }
     };
 
@@ -44,7 +43,7 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
 
     private boolean contains(Node root, DataType data) {
         if (root.getData().equals(data)) return true;
-        for (NodedTreeImpl<DataType>.Node child : root.getChildren()) {
+        for (NodedBinaryTreeImpl<DataType>.Node child : root.getChildren()) {
             if (contains(child, data)) return true;
         }
         return false;
@@ -52,7 +51,7 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
 
     private boolean contains(Node root, Node node) {
         if (root.equals(node)) return true;
-        for (NodedTreeImpl<DataType>.Node child : root.getChildren()) {
+        for (NodedBinaryTreeImpl<DataType>.Node child : root.getChildren()) {
             if (contains(child, node)) return true;
         }
         return false;
@@ -89,7 +88,7 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
     }
 
     @Override
-    public NodedTreeImpl<DataType> specificThis() {
+    public NodedBinaryTreeImpl<DataType> specificThis() {
         return this;
     }
 
@@ -123,11 +122,13 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
         return null;
     }
 
-    class Node implements NodedTree.Mutable.Node<DataType, Node, NodedTreeImpl<DataType>> {
-        private final Sequential.Mutable<Node> children = new SequentialImpl<>();
+    class Node implements NodedTree.Binary.Mutable.Node<DataType, Node, NodedBinaryTreeImpl<DataType>> {
+
+        private Node leftChild, rightChild;
         private DataType data;
         @Nullable
         private Node parent;
+
 
         Node(DataType data, @Nullable Node parent) {
             this.data = data;
@@ -135,21 +136,27 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
         }
 
         @Override
-        public @NotNull NodedTreeImpl<DataType> asTree() {
-            NodedTreeImpl<DataType> subtree = new NodedTreeImpl<>();
+        public @NotNull NodedBinaryTreeImpl<DataType> asTree() {
+            NodedBinaryTreeImpl<DataType> subtree = new NodedBinaryTreeImpl<>();
             subtree.setRootNode(this);
             // handle mutation and/or viewing
             return subtree;
         }
 
         @Override
-        public @NotNull Sequential.Mutable<Node> getChildren() {
-            return children;
+        public @NotNull Sequential<Node> getChildren() {
+            return new BinarySequentialImpl<>(leftChild, rightChild);
         }
 
         @Override
         public int getIndexInParent() {
-            return with(parent, p -> p.children.findFirst(this), -1);
+            if (parent != null) {
+                if (this == parent.leftChild)
+                    return 0;
+                if (this == parent.rightChild)
+                    return 1;
+            }
+            return -1;
         }
 
         @Override
@@ -173,13 +180,33 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
         }
 
         @Override
-        public @NotNull NodedTreeImpl<DataType> getTree() {
-            return NodedTreeImpl.this;
+        public @NotNull NodedBinaryTreeImpl<DataType> getTree() {
+            return NodedBinaryTreeImpl.this;
         }
 
         @Override
         public Node specificThis() {
             return this;
+        }
+
+        @Override
+        public @Nullable Node getLeftChild() {
+            return leftChild;
+        }
+
+        @Override
+        public void setLeftChild(@Nullable Node leftChild) {
+            this.leftChild = leftChild;
+        }
+
+        @Override
+        public @Nullable Node getRightChild() {
+            return rightChild;
+        }
+
+        @Override
+        public void setRightChild(@Nullable Node rightChild) {
+            this.rightChild = rightChild;
         }
     }
 }

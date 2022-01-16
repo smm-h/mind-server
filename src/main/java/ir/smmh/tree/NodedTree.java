@@ -2,6 +2,7 @@ package ir.smmh.tree;
 
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.SequentialImpl;
+import ir.smmh.nile.verbs.CanAppendTo;
 import ir.smmh.nile.verbs.CanContain;
 import ir.smmh.util.FunctionalUtil;
 import org.jetbrains.annotations.NotNull;
@@ -76,7 +77,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         @NotNull TreeType asTree();
 
         default @NotNull Sequential<TreeType> getImmediateSubtrees() {
-            Sequential.Mutable<TreeType> subtrees = new SequentialImpl<>();
+            Sequential.Mutable.VariableSize<TreeType> subtrees = new SequentialImpl<>();
             for (NodeType child : getChildren()) {
                 subtrees.append(child.asTree());
             }
@@ -104,7 +105,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
             if (getChildren().isEmpty()) {
                 return 0;
             } else {
-                int degree = getChildren().getLength();
+                int degree = getChildren().getSize();
                 for (NodeType node : getChildren()) {
                     degree = Math.max(degree, node.getDegree());
                 }
@@ -179,7 +180,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
 
         interface Mutable<DataType, NodeType extends Mutable.Node<DataType, NodeType, TreeType>, TreeType extends Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary<DataType, NodeType, TreeType>, NodedTree.Mutable<DataType, NodeType, TreeType>, SpecificTree.Binary.Mutable<DataType, TreeType> {
 
-            interface Node<DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary.Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, NodedTree.Mutable.Node<DataType, NodeType, TreeType> {
+            interface Node<DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary.Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary.Node<DataType, NodeType, TreeType> {
                 void setLeftChild(@Nullable NodeType leftChild);
 
                 void setRightChild(@Nullable NodeType rightChild);
@@ -199,31 +200,31 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         interface Binary extends NodeTraversal {
             Binary PRE_ORDER = new Binary() {
                 @Override
-                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillNodes(NodeType node, Sequential.Mutable<NodeType> seq) {
+                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillNodes(NodeType node, CanAppendTo<NodeType> canAppendTo) {
                     if (node == null) return;
-                    seq.add(node);
-                    fillNodes(node.getLeftChild(), seq);
-                    fillNodes(node.getRightChild(), seq);
+                    canAppendTo.add(node);
+                    fillNodes(node.getLeftChild(), canAppendTo);
+                    fillNodes(node.getRightChild(), canAppendTo);
                 }
             };
 
             Binary IN_ORDER = new Binary() {
                 @Override
-                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillNodes(NodeType node, Sequential.Mutable<NodeType> seq) {
+                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillNodes(NodeType node, CanAppendTo<NodeType> canAppendTo) {
                     if (node == null) return;
-                    fillNodes(node.getLeftChild(), seq);
-                    seq.add(node);
-                    fillNodes(node.getRightChild(), seq);
+                    fillNodes(node.getLeftChild(), canAppendTo);
+                    canAppendTo.add(node);
+                    fillNodes(node.getRightChild(), canAppendTo);
                 }
             };
 
             Binary POST_ORDER = new Binary() {
                 @Override
-                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillNodes(NodeType node, Sequential.Mutable<NodeType> seq) {
+                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillNodes(NodeType node, CanAppendTo<NodeType> canAppendTo) {
                     if (node == null) return;
-                    fillNodes(node.getLeftChild(), seq);
-                    fillNodes(node.getRightChild(), seq);
-                    seq.add(node);
+                    fillNodes(node.getLeftChild(), canAppendTo);
+                    fillNodes(node.getRightChild(), canAppendTo);
+                    canAppendTo.add(node);
                 }
             };
 
@@ -235,13 +236,13 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
             }
 
             default @NotNull <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> Sequential<NodeType> traverseNodesBinary(@NotNull NodedTree.Binary.Node<DataType, NodeType, TreeType> root) {
-                final Sequential.Mutable<NodeType> seq = Sequential.Mutable.of(new LinkedList<>());
+                final Sequential.Mutable.VariableSize<NodeType> seq = Sequential.Mutable.VariableSize.of(new LinkedList<>());
                 assert root.getDegree() <= 2;
                 fillNodes(root.specificThis(), seq);
                 return seq;
             }
 
-            <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillNodes(NodeType node, Sequential.Mutable<NodeType> seq);
+            <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillNodes(NodeType node, CanAppendTo<NodeType> canAppendTo);
 
         }
     }
@@ -252,31 +253,31 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         interface Binary extends SpecificTree.DataTraversal {
             Binary PRE_ORDER = new Binary() {
                 @Override
-                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, Sequential.Mutable<DataType> seq) {
+                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, CanAppendTo<DataType> canAppendTo) {
                     if (node == null) return;
-                    seq.add(node.getData());
-                    fillData(node.getLeftChild(), seq);
-                    fillData(node.getRightChild(), seq);
+                    canAppendTo.add(node.getData());
+                    fillData(node.getLeftChild(), canAppendTo);
+                    fillData(node.getRightChild(), canAppendTo);
                 }
             };
 
             Binary IN_ORDER = new Binary() {
                 @Override
-                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, Sequential.Mutable<DataType> seq) {
+                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, CanAppendTo<DataType> canAppendTo) {
                     if (node == null) return;
-                    fillData(node.getLeftChild(), seq);
-                    seq.add(node.getData());
-                    fillData(node.getRightChild(), seq);
+                    fillData(node.getLeftChild(), canAppendTo);
+                    canAppendTo.add(node.getData());
+                    fillData(node.getRightChild(), canAppendTo);
                 }
             };
 
             Binary POST_ORDER = new Binary() {
                 @Override
-                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, Sequential.Mutable<DataType> seq) {
+                public <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, CanAppendTo<DataType> canAppendTo) {
                     if (node == null) return;
-                    fillData(node.getLeftChild(), seq);
-                    fillData(node.getRightChild(), seq);
-                    seq.add(node.getData());
+                    fillData(node.getLeftChild(), canAppendTo);
+                    fillData(node.getRightChild(), canAppendTo);
+                    canAppendTo.add(node.getData());
                 }
             };
 
@@ -288,13 +289,13 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
             }
 
             default @NotNull <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> Sequential<DataType> traverseDataBinary(@NotNull NodedTree.Binary.Node<DataType, NodeType, TreeType> root) {
-                final Sequential.Mutable<DataType> seq = Sequential.Mutable.of(new LinkedList<>());
+                final Sequential.Mutable.VariableSize<DataType> seq = Sequential.Mutable.VariableSize.of(new LinkedList<>());
                 assert root.getDegree() <= 2;
                 fillData(root.specificThis(), seq);
                 return seq;
             }
 
-            <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, Sequential.Mutable<DataType> seq);
+            <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, CanAppendTo<DataType> canAppendTo);
 
         }
     }
