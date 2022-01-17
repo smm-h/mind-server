@@ -233,16 +233,6 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return array;
     }
 
-    default int count(Predicate<? super T> toTest) {
-        int count = 0;
-        for (T element : this) {
-            if (toTest.test(element)) {
-                count++;
-            }
-        }
-        return count;
-    }
-
     default Sequential<T> filterOutOfPlace(Predicate<? super T> toTest) {
         Sequential.Mutable.VariableSize<T> filtered = Sequential.Mutable.VariableSize.of(new ArrayList<>(count(toTest)));
         for (T element : this) {
@@ -284,53 +274,82 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return findFirst(toCheck) != -1;
     }
 
+    default int count(Predicate<? super T> toTest) {
+        return count(toTest, 0, getSize());
+    }
+
     default int count(T toCount) {
+        return count(toCount, 0, getSize());
+    }
+
+    default int findFirst(T toFind) {
+        return findFirst(toFind, 0, getSize());
+    }
+
+    default int findLast(T toFind) {
+        return findLast(toFind, 0, getSize());
+    }
+
+    default int findNth(T toFind, int n) {
+        return findNth(toFind, n, 0, getSize());
+    }
+
+    default Sequential<Integer> findAll(T toFind) {
+        return findAll(toFind, 0, getSize());
+    }
+
+    default int count(Predicate<? super T> toTest, int start, int end) {
         int count = 0;
-        for (T element : this) {
-            if (Objects.equals(element, toCount)) {
+        for (int i = start; i < end; i++) {
+            if (toTest.test(getAtIndex(i))) {
                 count++;
             }
         }
         return count;
     }
 
-    default int findFirst(T toFind) {
-        int i = 0;
-        for (T element : this) {
-            if (Objects.equals(element, toFind)) {
-                return i;
+    default int count(T toCount, int start, int end) {
+        int count = 0;
+        for (int i = start; i < end; i++) {
+            if (Objects.equals(getAtIndex(i), toCount)) {
+                count++;
             }
-            i++;
         }
-        return -1;
+        return count;
     }
 
-    default int findLast(T toFind) {
-        int i = getSize();
-        for (T element : inReverse()) {
-            i--;
-            if (Objects.equals(element, toFind)) {
+    default int findFirst(T toFind, int start, int end) {
+        for (int i = start; i < end; i++) {
+            if (Objects.equals(getAtIndex(i), toFind)) {
                 return i;
             }
         }
         return -1;
     }
 
-    default int findNth(T toFind, int n) {
+    default int findLast(T toFind, int start, int end) {
+        for (int i = start; i < end; i++) {
+            if (Objects.equals(getAtIndex(i), toFind)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    default int findNth(T toFind, int n, int start, int end) {
         if (n == 0)
-            return findFirst(toFind);
+            return findFirst(toFind, start, end);
         if (n == -1)
-            return findLast(toFind);
-        Sequential<Integer> all = findAll(toFind);
+            return findLast(toFind, start, end);
+        Sequential<Integer> all = findAll(toFind, start, end);
         if (n < 0)
-            n += all.getSize();
+            n += end - start;
         return n < 0 || n >= all.getSize() ? -1 : all.getAtIndex(n);
     }
 
-    default Sequential<Integer> findAll(T toFind) {
+    default Sequential<Integer> findAll(T toFind, int start, int end) {
         Sequential.Mutable.VariableSize<Integer> all = Sequential.Mutable.VariableSize.of(new ArrayList<>(count(toFind)));
-        int length = getSize();
-        for (int i = 0; i < length; i++) {
+        for (int i = start; i < end; i++) {
             if (Objects.equals(getAtIndex(i), toFind)) {
                 all.append(i);
             }

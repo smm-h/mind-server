@@ -4,7 +4,6 @@ import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.nile.verbs.CanAppendTo;
 import ir.smmh.nile.verbs.CanContain;
-import ir.smmh.tree.impl.TraversedDataImpl;
 import ir.smmh.tree.impl.TraversedNodesImpl;
 import ir.smmh.util.FunctionalUtil;
 import org.jetbrains.annotations.NotNull;
@@ -46,8 +45,8 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
     }
 
     @NotNull
-    default Sequential<NodeType> traverseNodes(@NotNull NodeTraversal type) {
-        return with(getRootNode(), type::traverseNodes, Sequential.empty());
+    default TraversedNodes<NodeType> traverseNodes(@NotNull NodeTraversal type) {
+        return with(getRootNode(), type::traverseNodes, TraversedNodes.empty(type));
     }
 
     @Override
@@ -153,31 +152,21 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
     }
 
     interface Binary<DataType, NodeType extends Binary.Node<DataType, NodeType, TreeType>, TreeType extends Binary<DataType, NodeType, TreeType>> extends NodedTree<DataType, NodeType, TreeType>, SpecificTree.Binary<DataType, TreeType> {
-        default @NotNull Sequential<NodeType> traverseNodesPreOrder() {
-            return with(getRootNode(), NodeTraversal.Binary.PRE_ORDER::traverseNodesBinary, Sequential.empty());
-        }
-
-        interface OrderConstructor<DataType, NodeType extends Binary.Node<DataType, NodeType, TreeType>, TreeType extends Binary<DataType, NodeType, TreeType>> {
-            @NotNull NodeTraversal.Binary getTargetType();
-            @NotNull NodeTraversal.Binary getFirstSourceType();
-            @NotNull NodeTraversal.Binary getSecondSourceType();
-            @NotNull DataType[] getTargetData();
-            @NotNull DataType[] getFirstSourceData();
-            @NotNull DataType[] getSecondSourceData();
-            @NotNull NodedTree.Binary<DataType, NodeType, TreeType> constructTree();
-        }
-
         @Override
         default int getDegree() {
             return SpecificTree.Binary.super.getDegree();
         }
 
-        default @NotNull Sequential<NodeType> traverseNodesInOrder() {
-            return with(getRootNode(), NodeTraversal.Binary.IN_ORDER::traverseNodesBinary, Sequential.empty());
+        default @NotNull TraversedNodes<NodeType> traverseNodesPreOrder() {
+            return with(getRootNode(), NodeTraversal.Binary.PRE_ORDER::traverseNodesBinary, TraversedNodes.empty(NodeTraversal.Binary.PRE_ORDER));
         }
 
-        default @NotNull Sequential<NodeType> traverseNodesPostOrder() {
-            return with(getRootNode(), NodeTraversal.Binary.POST_ORDER::traverseNodesBinary, Sequential.empty());
+        default @NotNull TraversedNodes<NodeType> traverseNodesInOrder() {
+            return with(getRootNode(), NodeTraversal.Binary.IN_ORDER::traverseNodesBinary, TraversedNodes.empty(NodeTraversal.Binary.IN_ORDER));
+        }
+
+        default @NotNull TraversedNodes<NodeType> traverseNodesPostOrder() {
+            return with(getRootNode(), NodeTraversal.Binary.POST_ORDER::traverseNodesBinary, TraversedNodes.empty(NodeTraversal.Binary.POST_ORDER));
         }
 
         @Override
@@ -193,6 +182,21 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         @Override
         default @NotNull TraversedData<DataType> traverseDataPostOrder() {
             return with(getRootNode(), NodedTree.DataTraversal.Binary.POST_ORDER::traverseDataBinary, TraversedData.empty(NodedTree.DataTraversal.Binary.POST_ORDER));
+        }
+
+        /**
+         * An order constructor is a binary tree constructor that uses two data traversals
+         * out of the three available for binary trees (pre, in and post order) to construct
+         * the binary tree itself and get the third data traversal.
+         */
+        interface OrderConstructor<DataType> {
+            @NotNull TraversedData<DataType> getFirstSource();
+
+            @NotNull TraversedData<DataType> getSecondSource();
+
+            @NotNull TraversedData<DataType> getTarget();
+
+            @NotNull Tree.Binary<DataType> getTree();
         }
 
         interface Mutable<DataType, NodeType extends Mutable.Node<DataType, NodeType, TreeType>, TreeType extends Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary<DataType, NodeType, TreeType>, NodedTree.Mutable<DataType, NodeType, TreeType>, SpecificTree.Binary.Mutable<DataType, TreeType> {
@@ -212,7 +216,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
     }
 
     interface NodeTraversal {
-        @NotNull <DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> Sequential<NodeType> traverseNodes(@NotNull NodeType root);
+        @NotNull <DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> TraversedNodes<NodeType> traverseNodes(@NotNull NodeType root);
 
         interface Binary extends NodeTraversal {
             Binary PRE_ORDER = new Binary() {
@@ -222,6 +226,11 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                     canAppendTo.add(node);
                     fillNodes(node.getLeftChild(), canAppendTo);
                     fillNodes(node.getRightChild(), canAppendTo);
+                }
+
+                @Override
+                public String toString() {
+                    return "PRE_ORDER";
                 }
             };
 
@@ -233,6 +242,11 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                     canAppendTo.add(node);
                     fillNodes(node.getRightChild(), canAppendTo);
                 }
+
+                @Override
+                public String toString() {
+                    return "IN_ORDER";
+                }
             };
 
             Binary POST_ORDER = new Binary() {
@@ -243,20 +257,25 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                     fillNodes(node.getRightChild(), canAppendTo);
                     canAppendTo.add(node);
                 }
+
+                @Override
+                public String toString() {
+                    return "POST_ORDER";
+                }
             };
 
             // TODO TEST
             @Override
             @SuppressWarnings({"unchecked", "rawtypes"})
-            default @NotNull <DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> Sequential<NodeType> traverseNodes(@NotNull NodeType root) {
+            default @NotNull <DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> TraversedNodes<NodeType> traverseNodes(@NotNull NodeType root) {
                 return traverseNodesBinary((NodedTree.Binary.Node) root);
             }
 
-            default @NotNull <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> Sequential<NodeType> traverseNodesBinary(@NotNull NodedTree.Binary.Node<DataType, NodeType, TreeType> root) {
+            default @NotNull <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> TraversedNodes<NodeType> traverseNodesBinary(@NotNull NodedTree.Binary.Node<DataType, NodeType, TreeType> root) {
                 final Sequential.Mutable.VariableSize<NodeType> seq = Sequential.Mutable.VariableSize.of(new LinkedList<>());
                 assert root.getDegree() <= 2;
                 fillNodes(root.specificThis(), seq);
-                return seq;
+                return TraversedNodes.of(seq, this);
             }
 
             <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillNodes(NodeType node, CanAppendTo<NodeType> canAppendTo);
@@ -276,6 +295,11 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                     fillData(node.getLeftChild(), canAppendTo);
                     fillData(node.getRightChild(), canAppendTo);
                 }
+
+                @Override
+                public String toString() {
+                    return "PRE_ORDER";
+                }
             };
 
             Binary IN_ORDER = new Binary() {
@@ -286,6 +310,11 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                     canAppendTo.add(node.getData());
                     fillData(node.getRightChild(), canAppendTo);
                 }
+
+                @Override
+                public String toString() {
+                    return "IN_ORDER";
+                }
             };
 
             Binary POST_ORDER = new Binary() {
@@ -295,6 +324,11 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                     fillData(node.getLeftChild(), canAppendTo);
                     fillData(node.getRightChild(), canAppendTo);
                     canAppendTo.add(node.getData());
+                }
+
+                @Override
+                public String toString() {
+                    return "POST_ORDER";
                 }
             };
 
