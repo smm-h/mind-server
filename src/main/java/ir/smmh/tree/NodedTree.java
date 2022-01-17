@@ -184,21 +184,6 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
             return with(getRootNode(), NodedTree.DataTraversal.Binary.POST_ORDER::traverseDataBinary, TraversedData.empty(NodedTree.DataTraversal.Binary.POST_ORDER));
         }
 
-        /**
-         * An order constructor is a binary tree constructor that uses two data traversals
-         * out of the three available for binary trees (pre, in and post order) to construct
-         * the binary tree itself and get the third data traversal.
-         */
-        interface OrderConstructor<DataType> {
-            @NotNull TraversedData<DataType> getFirstSource();
-
-            @NotNull TraversedData<DataType> getSecondSource();
-
-            @NotNull TraversedData<DataType> getTarget();
-
-            @NotNull Tree.Binary<DataType> getTree();
-        }
-
         interface Mutable<DataType, NodeType extends Mutable.Node<DataType, NodeType, TreeType>, TreeType extends Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary<DataType, NodeType, TreeType>, NodedTree.Mutable<DataType, NodeType, TreeType>, SpecificTree.Binary.Mutable<DataType, TreeType> {
 
             interface Node<DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary.Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary.Node<DataType, NodeType, TreeType> {

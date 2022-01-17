@@ -21,7 +21,8 @@ public class BinarySequentialImpl<T> extends Sequential.AbstractSequential<T> im
     public void setAtIndex(int index, T toSet) {
         validateIndex(index);
         preMutate();
-        if (index == 0) first = toSet; else second = toSet;
+        if (index == 0) first = toSet;
+        else second = toSet;
         postMutate();
     }
 

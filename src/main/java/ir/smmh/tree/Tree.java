@@ -3,6 +3,9 @@ package ir.smmh.tree;
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.verbs.CanClear;
 import ir.smmh.nile.verbs.CanContain;
+import ir.smmh.tree.impl.InOrderConstructor;
+import ir.smmh.tree.impl.PostOrderConstructor;
+import ir.smmh.tree.impl.PreOrderConstructor;
 import ir.smmh.tree.impl.TraversedDataImpl;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +54,33 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
         }
 
         interface Mutable<DataType> extends Tree.Binary<DataType>, Tree.Mutable<DataType> {
+        }
+
+        /**
+         * An order constructor is a binary tree constructor that uses two data traversals
+         * out of the three available for binary trees (pre, in and post order) to construct
+         * the binary tree itself and get the third data traversal.
+         */
+        interface OrderConstructor<DataType> {
+            static <DataType> OrderConstructor<DataType> targetPreOrder(Sequential<DataType> inOrder, Sequential<DataType> postOrder) {
+                return new PreOrderConstructor<>(inOrder, postOrder);
+            }
+
+            static <DataType> OrderConstructor<DataType> targetInOrder(Sequential<DataType> preOrder, Sequential<DataType> postOrder) {
+                return new InOrderConstructor<>(preOrder, postOrder);
+            }
+
+            static <DataType> OrderConstructor<DataType> targetPostOrder(Sequential<DataType> preOrder, Sequential<DataType> inOrder) {
+                return new PostOrderConstructor<>(preOrder, inOrder);
+            }
+
+            @NotNull TraversedData<DataType> getFirstSource();
+
+            @NotNull TraversedData<DataType> getSecondSource();
+
+            @NotNull TraversedData<DataType> getTarget();
+
+            @NotNull Tree.Binary<DataType> getTree();
         }
     }
 

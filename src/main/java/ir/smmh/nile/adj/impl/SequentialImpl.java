@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 
 public class SequentialImpl<T> extends Sequential.AbstractMutableSequential<T> implements Sequential.Mutable.VariableSize<T>, ir.smmh.util.Mutable.Injected {

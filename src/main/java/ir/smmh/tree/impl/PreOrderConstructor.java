@@ -1,7 +1,7 @@
 package ir.smmh.tree.impl;
 
 import ir.smmh.nile.adj.Sequential;
-import ir.smmh.tree.NodedTree;
+import ir.smmh.tree.Tree;
 import ir.smmh.tree.Tree.TraversedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import static ir.smmh.tree.NodedTree.DataTraversal.Binary.IN_ORDER;
 import static ir.smmh.tree.NodedTree.DataTraversal.Binary.POST_ORDER;
 
-public class PreOrderConstructor<DataType> implements NodedTree.Binary.OrderConstructor<DataType> {
+public class PreOrderConstructor<DataType> implements Tree.Binary.OrderConstructor<DataType> {
 
     private final Sequential<DataType> inOrder, postOrder;
     private NodedBinaryTreeImpl<DataType> tree;
