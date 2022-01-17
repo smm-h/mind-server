@@ -3,6 +3,7 @@ package ir.smmh.tree;
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.verbs.CanClear;
 import ir.smmh.nile.verbs.CanContain;
+import ir.smmh.tree.impl.TraversedDataImpl;
 import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,8 +30,8 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
     DataType getRootData();
 
     @NotNull
-    default TraversedData<DataType> traverseData(@NotNull DataTraversal method) {
-        return with(this, method::traverseData, TraversedData.empty(method));
+    default TraversedData<DataType> traverseData(@NotNull DataTraversal type) {
+        return with(this, type::traverseData, TraversedData.empty(type));
     }
 
     interface Mutable<DataType> extends Tree<DataType>, CanClear, ir.smmh.util.Mutable {
@@ -55,27 +56,6 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
 
     interface DataTraversal {
         @NotNull <DataType, TreeType extends Tree<DataType>> TraversedData<DataType> traverseData(@NotNull TreeType tree);
-    }
-
-    class TraversedDataImpl<DataType> implements TraversedData<DataType> {
-
-        private final Sequential<DataType> sequential;
-        private final DataTraversal type;
-
-        public TraversedDataImpl(Sequential<DataType> sequential, DataTraversal type) {
-            this.sequential = sequential;
-            this.type = type;
-        }
-
-        @Override
-        public @NotNull Sequential<DataType> getData() {
-            return sequential;
-        }
-
-        @Override
-        public @NotNull DataTraversal getType() {
-            return type;
-        }
     }
 
     interface TraversedData<DataType> {

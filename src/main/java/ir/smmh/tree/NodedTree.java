@@ -4,6 +4,8 @@ import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.nile.verbs.CanAppendTo;
 import ir.smmh.nile.verbs.CanContain;
+import ir.smmh.tree.impl.TraversedDataImpl;
+import ir.smmh.tree.impl.TraversedNodesImpl;
 import ir.smmh.util.FunctionalUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,8 +46,8 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
     }
 
     @NotNull
-    default Sequential<NodeType> traverseNodes(@NotNull NodeTraversal method) {
-        return with(getRootNode(), method::traverseNodes, Sequential.empty());
+    default Sequential<NodeType> traverseNodes(@NotNull NodeTraversal type) {
+        return with(getRootNode(), type::traverseNodes, Sequential.empty());
     }
 
     @Override
@@ -313,5 +315,19 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
             <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, CanAppendTo<DataType> canAppendTo);
 
         }
+    }
+
+    interface TraversedNodes<NodeType> {
+        static <NodeType> TraversedNodes<NodeType> empty(NodeTraversal type) {
+            return new TraversedNodesImpl<>(Sequential.empty(), type);
+        }
+
+        static <NodeType> TraversedNodes<NodeType> of(Sequential<NodeType> nodes, NodeTraversal type) {
+            return new TraversedNodesImpl<>(nodes, type);
+        }
+
+        @NotNull Sequential<NodeType> getData();
+
+        @NotNull NodeTraversal getType();
     }
 }
