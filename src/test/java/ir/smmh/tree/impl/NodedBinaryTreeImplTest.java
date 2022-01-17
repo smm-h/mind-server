@@ -26,10 +26,10 @@ class NodedBinaryTreeImplTest {
                 Sequential.of(postOrder));
         System.out.println(tree);
 
-        Sequential<Character> preOrder = tree.traverseData(NodedTree.DataTraversal.Binary.PRE_ORDER);
+        Tree.TraversedData<Character> preOrder = tree.traverseData(NodedTree.DataTraversal.Binary.PRE_ORDER);
         System.out.println(preOrder);
 
-        assertEquals(preOrder, Sequential.of(expectedPreOrder));
+        assertEquals(preOrder.getData(), Sequential.of(expectedPreOrder));
     }
 
 }

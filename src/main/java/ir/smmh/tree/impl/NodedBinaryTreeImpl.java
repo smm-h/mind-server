@@ -39,17 +39,41 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
         }
     };
 
+
+
     public static <DataType> NodedBinaryTreeImpl<DataType> fromInOrderAndPostOrder(Sequential<DataType> inOrder, Sequential<DataType> postOrder) {
-        NodedBinaryTreeImpl<DataType> tree = new NodedBinaryTreeImpl<>();
-        int n = inOrder.getSize();
-        tree.setRootNode(tree.fromInOrderAndPostOrder(inOrder.toArray(), postOrder.toArray(), 0, n - 1, 0, n - 1, null));
-        return tree;
+        return fromInOrderAndPostOrder(inOrder.toArray(), postOrder.toArray());
     }
 
     public static <DataType> NodedBinaryTreeImpl<DataType> fromInOrderAndPostOrder(DataType[] inOrder, DataType[] postOrder) {
         NodedBinaryTreeImpl<DataType> tree = new NodedBinaryTreeImpl<>();
         int n = inOrder.length;
+        assert n == postOrder.length;
         tree.setRootNode(tree.fromInOrderAndPostOrder(inOrder, postOrder, 0, n - 1, 0, n - 1, null));
+        return tree;
+    }
+
+    public static <DataType> NodedBinaryTreeImpl<DataType> fromPreOrderAndInOrder(Sequential<DataType> preOrder, Sequential<DataType> inOrder) {
+        return fromPreOrderAndInOrder(preOrder.toArray(), inOrder.toArray());
+    }
+
+    public static <DataType> NodedBinaryTreeImpl<DataType> fromPreOrderAndInOrder(DataType[] preOrder, DataType[] inOrder) {
+        NodedBinaryTreeImpl<DataType> tree = new NodedBinaryTreeImpl<>();
+        int n = preOrder.length;
+        assert n == inOrder.length;
+        tree.setRootNode(tree.fromPreOrderAndInOrder(preOrder, inOrder, 0, n - 1, 0, null));
+        return tree;
+    }
+
+    public static <DataType> NodedBinaryTreeImpl<DataType> fromPreOrderAndPostOrder(Sequential<DataType> preOrder, Sequential<DataType> postOrder) {
+        return fromInOrderAndPostOrder(preOrder.toArray(), postOrder.toArray());
+    }
+
+    public static <DataType> NodedBinaryTreeImpl<DataType> fromPreOrderAndPostOrder(DataType[] preOrder, DataType[] postOrder) {
+        NodedBinaryTreeImpl<DataType> tree = new NodedBinaryTreeImpl<>();
+        int n = preOrder.length;
+        assert n == postOrder.length;
+        tree.setRootNode(tree.fromPreOrderAndPostOrder(preOrder, postOrder, 0, n - 1, 0, n - 1, null));
         return tree;
     }
 
@@ -89,6 +113,30 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
         }
 
         return node;
+    }
+
+    private Node fromPreOrderAndInOrder(DataType[] inOrder, DataType[] preOrder, int inOrderFirst, int inOrderLast, int preOrderIndex, @Nullable Node parent) {
+
+        if (inOrderFirst > inOrderLast)
+            return null;
+
+        // Find index of next item in preorder traversal in in-order
+        int inOrderIndex = ArrayUtil.getIndexOf(inOrder, preOrder[preOrderIndex++]);
+
+        Node node = new Node(inOrder[inOrderIndex], parent);
+
+        // traverse left tree
+        fromPreOrderAndInOrder(inOrder, preOrder, inOrderFirst, inOrderIndex - 1, preOrderIndex, node);
+
+        // traverse right tree
+        fromPreOrderAndInOrder(inOrder, preOrder, inOrderIndex + 1, inOrderLast, preOrderIndex, node);
+
+        return node;
+    }
+
+    private Node fromPreOrderAndPostOrder(DataType[] inOrder, DataType[] postOrder, int preOrderFirst, int preOrderLast, int postOrderFirst, int postOrderLast, @Nullable Node parent) {
+
+        return null;
     }
 
     @Override

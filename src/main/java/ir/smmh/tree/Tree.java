@@ -29,8 +29,8 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
     DataType getRootData();
 
     @NotNull
-    default Sequential<DataType> traverseData(@NotNull DataTraversal method) {
-        return with(this, method::traverseData, Sequential.empty());
+    default TraversedData<DataType> traverseData(@NotNull DataTraversal method) {
+        return with(this, method::traverseData, TraversedData.empty(method));
     }
 
     interface Mutable<DataType> extends Tree<DataType>, CanClear, ir.smmh.util.Mutable {
@@ -38,22 +38,57 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
     }
 
     interface Binary<DataType> extends Tree<DataType> {
-        @NotNull Sequential<DataType> traverseDataPreOrder();
+        @NotNull TraversedData<DataType> traverseDataPreOrder();
 
-        @NotNull Sequential<DataType> traverseDataInOrder();
+        @NotNull TraversedData<DataType> traverseDataInOrder();
 
-        @NotNull Sequential<DataType> traverseDataPostOrder();
-
-        interface Mutable<DataType> extends Tree.Binary<DataType>, Tree.Mutable<DataType> {
-        }
+        @NotNull TraversedData<DataType> traverseDataPostOrder();
 
         @Override
         default int getDegree() {
             return 2;
         }
+
+        interface Mutable<DataType> extends Tree.Binary<DataType>, Tree.Mutable<DataType> {
+        }
     }
 
     interface DataTraversal {
-        @NotNull <DataType, TreeType extends Tree<DataType>> Sequential<DataType> traverseData(@NotNull TreeType tree);
+        @NotNull <DataType, TreeType extends Tree<DataType>> TraversedData<DataType> traverseData(@NotNull TreeType tree);
+    }
+
+    class TraversedDataImpl<DataType> implements TraversedData<DataType> {
+
+        private final Sequential<DataType> sequential;
+        private final DataTraversal type;
+
+        public TraversedDataImpl(Sequential<DataType> sequential, DataTraversal type) {
+            this.sequential = sequential;
+            this.type = type;
+        }
+
+        @Override
+        public @NotNull Sequential<DataType> getData() {
+            return sequential;
+        }
+
+        @Override
+        public @NotNull DataTraversal getType() {
+            return type;
+        }
+    }
+
+    interface TraversedData<DataType> {
+        static <DataType> TraversedData<DataType> empty(DataTraversal type) {
+            return new TraversedDataImpl<>(Sequential.empty(), type);
+        }
+
+        static <DataType> TraversedData<DataType> of(Sequential<DataType> data, DataTraversal type) {
+            return new TraversedDataImpl<>(data, type);
+        }
+
+        @NotNull Sequential<DataType> getData();
+
+        @NotNull DataTraversal getType();
     }
 }

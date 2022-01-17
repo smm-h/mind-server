@@ -155,6 +155,16 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
             return with(getRootNode(), NodeTraversal.Binary.PRE_ORDER::traverseNodesBinary, Sequential.empty());
         }
 
+        interface OrderConstructor<DataType, NodeType extends Binary.Node<DataType, NodeType, TreeType>, TreeType extends Binary<DataType, NodeType, TreeType>> {
+            @NotNull NodeTraversal.Binary getTargetType();
+            @NotNull NodeTraversal.Binary getFirstSourceType();
+            @NotNull NodeTraversal.Binary getSecondSourceType();
+            @NotNull DataType[] getTargetData();
+            @NotNull DataType[] getFirstSourceData();
+            @NotNull DataType[] getSecondSourceData();
+            @NotNull NodedTree.Binary<DataType, NodeType, TreeType> constructTree();
+        }
+
         @Override
         default int getDegree() {
             return SpecificTree.Binary.super.getDegree();
@@ -169,18 +179,18 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         }
 
         @Override
-        default @NotNull Sequential<DataType> traverseDataPreOrder() {
-            return with(getRootNode(), NodedTree.DataTraversal.Binary.PRE_ORDER::traverseDataBinary, Sequential.empty());
+        default @NotNull TraversedData<DataType> traverseDataPreOrder() {
+            return with(getRootNode(), NodedTree.DataTraversal.Binary.PRE_ORDER::traverseDataBinary, TraversedData.empty(NodedTree.DataTraversal.Binary.PRE_ORDER));
         }
 
         @Override
-        default @NotNull Sequential<DataType> traverseDataInOrder() {
-            return with(getRootNode(), NodedTree.DataTraversal.Binary.IN_ORDER::traverseDataBinary, Sequential.empty());
+        default @NotNull TraversedData<DataType> traverseDataInOrder() {
+            return with(getRootNode(), NodedTree.DataTraversal.Binary.IN_ORDER::traverseDataBinary, TraversedData.empty(NodedTree.DataTraversal.Binary.IN_ORDER));
         }
 
         @Override
-        default @NotNull Sequential<DataType> traverseDataPostOrder() {
-            return with(getRootNode(), NodedTree.DataTraversal.Binary.POST_ORDER::traverseDataBinary, Sequential.empty());
+        default @NotNull TraversedData<DataType> traverseDataPostOrder() {
+            return with(getRootNode(), NodedTree.DataTraversal.Binary.POST_ORDER::traverseDataBinary, TraversedData.empty(NodedTree.DataTraversal.Binary.POST_ORDER));
         }
 
         interface Mutable<DataType, NodeType extends Mutable.Node<DataType, NodeType, TreeType>, TreeType extends Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary<DataType, NodeType, TreeType>, NodedTree.Mutable<DataType, NodeType, TreeType>, SpecificTree.Binary.Mutable<DataType, TreeType> {
@@ -289,15 +299,15 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
             @Override
             @NotNull
             @SuppressWarnings({"unchecked", "rawtypes"})
-            default <DataType, TreeType extends Tree<DataType>> Sequential<DataType> traverseData(@NotNull TreeType tree) {
-                return with(((NodedTree.Binary/*<DataType, ?, ?>*/) tree).getRootNode(), r -> traverseDataBinary((NodedTree.Binary.Node/*<DataType, ?, ?>*/) r), Sequential.empty());
+            default <DataType, TreeType extends Tree<DataType>> TraversedData<DataType> traverseData(@NotNull TreeType tree) {
+                return with(((NodedTree.Binary/*<DataType, ?, ?>*/) tree).getRootNode(), r -> traverseDataBinary((NodedTree.Binary.Node/*<DataType, ?, ?>*/) r), TraversedData.empty(this));
             }
 
-            default @NotNull <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> Sequential<DataType> traverseDataBinary(@NotNull NodedTree.Binary.Node<DataType, NodeType, TreeType> root) {
+            default @NotNull <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> TraversedData<DataType> traverseDataBinary(@NotNull NodedTree.Binary.Node<DataType, NodeType, TreeType> root) {
                 final Sequential.Mutable.VariableSize<DataType> seq = Sequential.Mutable.VariableSize.of(new LinkedList<>());
                 assert root.getDegree() <= 2;
                 fillData(root.specificThis(), seq);
-                return seq;
+                return TraversedData.of(seq, this);
             }
 
             <DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> void fillData(NodeType node, CanAppendTo<DataType> canAppendTo);

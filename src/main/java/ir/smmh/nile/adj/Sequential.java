@@ -353,9 +353,12 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     @Override
     T getAtIndex(int index) throws IndexOutOfBoundsException;
 
-    interface Mutable<T> extends Sequential<T>, CanSetAtIndex<T> {
+    interface Mutable<T> extends Sequential<T>, CanSetAtIndex<T>, CanSwapAtIndices<T> {
+        static Sequential.Mutable<Character> of(String string) {
+            return Sequential.Mutable.of(string.toCharArray()); // TODO optimize
+        }
 
-        static <T> Sequential<T> of(List<T> list) {
+        static <T> Sequential.Mutable<T> of(List<T> list) {
 
             return new AbstractMutableSequential<>() {
                 @Override
@@ -376,7 +379,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             };
         }
 
-        static Sequential<Integer> of(int[] array) {
+        static Sequential.Mutable<Integer> of(int[] array) {
             return new AbstractMutableSequential<>() {
 
                 @Override
@@ -397,7 +400,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             };
         }
 
-        static Sequential<Float> of(float[] array) {
+        static Sequential.Mutable<Float> of(float[] array) {
             return new AbstractMutableSequential<>() {
 
                 @Override
@@ -418,7 +421,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             };
         }
 
-        static Sequential<Long> of(long[] array) {
+        static Sequential.Mutable<Long> of(long[] array) {
             return new AbstractMutableSequential<>() {
 
                 @Override
@@ -439,7 +442,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             };
         }
 
-        static Sequential<Double> of(double[] array) {
+        static Sequential.Mutable<Double> of(double[] array) {
             return new AbstractMutableSequential<>() {
 
                 @Override
@@ -460,7 +463,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             };
         }
 
-        static Sequential<Byte> of(byte[] array) {
+        static Sequential.Mutable<Byte> of(byte[] array) {
             return new AbstractMutableSequential<>() {
 
                 @Override
@@ -481,7 +484,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             };
         }
 
-        static Sequential<Character> of(char[] array) {
+        static Sequential.Mutable<Character> of(char[] array) {
             return new AbstractMutableSequential<>() {
 
                 @Override
@@ -502,7 +505,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             };
         }
 
-        static Sequential<Boolean> of(boolean[] array) {
+        static Sequential.Mutable<Boolean> of(boolean[] array) {
             return new AbstractMutableSequential<>() {
 
                 @Override
@@ -523,7 +526,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             };
         }
 
-        static <T> Sequential<T> of(T[] array) {
+        static <T> Sequential.Mutable<T> of(T[] array) {
             return new AbstractMutableSequential<>() {
 
                 @Override
@@ -542,6 +545,24 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                     array[index] = Objects.requireNonNull(toSet);
                 }
             };
+        }
+
+        default void fillWithPermutations(CanAppendTo<Sequential<T>> permutations, int l, int r) {
+            if (l != r) {
+                for (int i = l; i <= r; i++) {
+                    swap(l, i);
+                    fillWithPermutations(permutations, l + 1, r);
+                    swap(l, i);
+                }
+            } else {
+                permutations.append(clone(false));
+            }
+        }
+
+        default Sequential<Sequential<T>> getPermutations() {
+            Sequential.Mutable.VariableSize<Sequential<T>> permutations = new SequentialImpl<>();
+            fillWithPermutations(permutations, 0, getSize() - 1);
+            return permutations;
         }
 
         default void applyInPlace(Function<T, T> toReplace) {

@@ -18,11 +18,17 @@ class SequentialTest {
         List<String> fruitList;
         String[] fruitArray;
         fruitList = new LinkedList<>();
-        fruitList.add("apple");
-        fruitList.add("orange");
-        fruitList.add("banana");
-        fruitArray = new String[]{"apple", "orange", "banana"};
+        fruitList.add("apples");
+        fruitList.add("oranges");
+        fruitList.add("bananas");
+        fruitArray = new String[]{"apples", "oranges", "bananas"};
         assertEquals(Sequential.of(fruitArray), Sequential.of(fruitList));
+    }
+
+    @Test
+    void permutation() {
+        Multitude permutations = Sequential.Mutable.of("123").getPermutations();
+        assertEquals(permutations.getSize(), 6);
     }
 
     @Test
