@@ -30,6 +30,8 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
 
     int getLeafCount();
 
+    @NotNull TraversedData<DataType> getLeafData();
+
     DataType getRootData();
 
     @NotNull

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.StringJoiner;
 
 import static ir.smmh.util.FunctionalUtil.with;
@@ -108,7 +108,7 @@ public abstract class MapImpl<K> implements Map<K> {
 
             @Override
             public void setAtPlace(K place, V toSet) {
-                Sequential.Mutable.VariableSize<V> s = map.computeIfAbsent(place, k -> new SequentialImpl<>(new LinkedList<>()));
+                Sequential.Mutable.VariableSize<V> s = map.computeIfAbsent(place, k -> new SequentialImpl<>(new ArrayList<>()));
                 s.append(toSet);
             }
 

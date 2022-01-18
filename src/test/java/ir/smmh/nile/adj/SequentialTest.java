@@ -5,7 +5,7 @@ import ir.smmh.util.FunctionalUtil;
 import ir.smmh.util.RandomUtil;
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import static ir.smmh.util.NumberPredicates.*;
@@ -17,7 +17,7 @@ class SequentialTest {
     void equality() {
         List<String> fruitList;
         String[] fruitArray;
-        fruitList = new LinkedList<>();
+        fruitList = new ArrayList<>();
         fruitList.add("apples");
         fruitList.add("oranges");
         fruitList.add("bananas");

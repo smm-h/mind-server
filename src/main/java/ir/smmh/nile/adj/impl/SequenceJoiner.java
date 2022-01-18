@@ -6,12 +6,12 @@ import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 // TODO TEST
 public class SequenceJoiner<T> extends Sequential.AbstractMutableSequential<T> implements Sequential.Mutable.VariableSize<T>, Mutable.Injected {
 
-    private final Sequential.Mutable<Sequential<? extends T>> subSequences = new SequentialImpl<>(new LinkedList<>());
+    private final Sequential.Mutable<Sequential<? extends T>> subSequences = new SequentialImpl<>(new ArrayList<>());
     private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
 
     @Override

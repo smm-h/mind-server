@@ -8,7 +8,7 @@ import java.util.*;
 @ParametersAreNonnullByDefault
 public class ListenersImpl<L> implements Listeners<L>, Mutable.Injected {
 
-    private final List<L> listeners = new LinkedList<>(); // new ConcurrentSkipListSet<>(Comparator.comparingInt(Object::hashCode)); // new LinkedHashSet<>(); //
+    private final List<L> listeners = new ArrayList<>(); // new ConcurrentSkipListSet<>(Comparator.comparingInt(Object::hashCode)); // new LinkedHashSet<>(); //
     private final Set<L> disposables = new LinkedHashSet<>();
 
     @Override

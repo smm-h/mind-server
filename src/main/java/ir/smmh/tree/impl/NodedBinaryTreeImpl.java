@@ -12,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import java.util.Objects;
+
 import static ir.smmh.util.FunctionalUtil.with;
 
 @SuppressWarnings("unused")
@@ -49,7 +51,7 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
     }
 
     private boolean contains(Node root, DataType data) {
-        if (root.getData().equals(data)) return true;
+        if (Objects.equals(root.getData(), data)) return true;
         for (NodedBinaryTreeImpl<DataType>.Node child : root.getChildren()) {
             if (contains(child, data)) return true;
         }
@@ -132,7 +134,7 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
     class Node implements NodedTree.Binary.Mutable.Node<DataType, Node, NodedBinaryTreeImpl<DataType>> {
 
         private Node leftChild, rightChild;
-        private DataType data;
+        private @Nullable DataType data;
 
         private @Nullable Node parent;
 
@@ -149,7 +151,7 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
         private String nodeToString() {
             Node l = getLeftChild();
             Node r = getRightChild();
-            String s = getData().toString();
+            String s = with(getData(), Object::toString, "~");
             if (l != null || r != null)
                 s += ":(" +
                         (l == null ? "-" : l.nodeToString()) + ", " +
@@ -182,7 +184,7 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
         }
 
         @Override
-        public @NotNull DataType getData() {
+        public @Nullable DataType getData() {
             return data;
         }
 

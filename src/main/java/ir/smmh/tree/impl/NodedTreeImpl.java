@@ -12,6 +12,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import java.util.Objects;
+
 import static ir.smmh.util.FunctionalUtil.with;
 
 @ParametersAreNonnullByDefault
@@ -42,8 +44,8 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
         return root != null && contains(root, data);
     }
 
-    private boolean contains(Node root, DataType data) {
-        if (root.getData().equals(data)) return true;
+    private boolean contains(Node root, @Nullable DataType data) {
+        if (Objects.equals(root.getData(), data)) return true;
         for (NodedTreeImpl<DataType>.Node child : root.getChildren()) {
             if (contains(child, data)) return true;
         }
@@ -74,7 +76,7 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
     }
 
     @Override
-    public void setRootNode(Node node) {
+    public void setRootNode(@Nullable Node node) {
         this.root = node;
     }
 
@@ -125,9 +127,8 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
 
     class Node implements NodedTree.Mutable.Node<DataType, Node, NodedTreeImpl<DataType>> {
         private final Sequential.Mutable<Node> children = new SequentialImpl<>();
-        private DataType data;
-        @Nullable
-        private Node parent;
+        private @Nullable DataType data;
+        private @Nullable Node parent;
 
         Node(DataType data, @Nullable Node parent) {
             this.data = data;
@@ -153,7 +154,7 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
         }
 
         @Override
-        public @NotNull DataType getData() {
+        public @Nullable DataType getData() {
             return data;
         }
 
