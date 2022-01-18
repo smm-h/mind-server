@@ -34,7 +34,7 @@ class OrderConstructorTest {
                 of(expectedPreOrder), targetPreOrder(
                         of(inOrder),
                         of(postOrder))
-                        .getTarget().getData());
+                        .getTarget());
     }
 
     void post(String preOrder, String inOrder, String expectedPostOrder) {
@@ -42,7 +42,7 @@ class OrderConstructorTest {
                 of(expectedPostOrder), targetPostOrder(
                         of(preOrder),
                         of(inOrder))
-                        .getTarget().getData());
+                        .getTarget());
     }
 
     void in(String preOrder, String postOrder, String expectedInOrder) {
@@ -50,7 +50,7 @@ class OrderConstructorTest {
                 of(expectedInOrder), targetInOrder(
                         of(preOrder),
                         of(postOrder))
-                        .getTarget().getData());
+                        .getTarget());
     }
 
 }

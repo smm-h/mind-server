@@ -2,12 +2,8 @@ package ir.smmh.tree.impl;
 
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.tree.Tree;
-import ir.smmh.tree.Tree.TraversedData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import static ir.smmh.tree.NodedTree.DataTraversal.Binary.POST_ORDER;
-import static ir.smmh.tree.NodedTree.DataTraversal.Binary.PRE_ORDER;
 
 public class InOrderConstructor<DataType> implements Tree.Binary.OrderConstructor<DataType> {
 
@@ -22,28 +18,22 @@ public class InOrderConstructor<DataType> implements Tree.Binary.OrderConstructo
     }
 
     @Override
-    public @NotNull TraversedData<DataType> getFirstSource() {
-        return TraversedData.of(preOrder, PRE_ORDER);
+    public @NotNull Sequential<DataType> getFirstSource() {
+        return preOrder;
     }
 
     @Override
-    public @NotNull TraversedData<DataType> getSecondSource() {
-        return TraversedData.of(postOrder, POST_ORDER);
+    public @NotNull Sequential<DataType> getSecondSource() {
+        return postOrder;
     }
 
     @Override
-    public @NotNull TraversedData<DataType> getTarget() {
-        makeTree();
-        return tree.traverseDataInOrder();
+    public @NotNull Sequential<DataType> getTarget() {
+        return getTree().traverseDataInOrder();
     }
 
     @Override
     public @NotNull NodedBinaryTreeImpl<DataType> getTree() {
-        makeTree();
-        return tree;
-    }
-
-    private void makeTree() {
         if (tree == null) {
             tree = new NodedBinaryTreeImpl<>();
             size = preOrder.getSize();
@@ -51,6 +41,7 @@ public class InOrderConstructor<DataType> implements Tree.Binary.OrderConstructo
             preOrderIndex = 0;
             tree.setRootNode(makeNode(0, size - 1, null));
         }
+        return tree;
     }
 
     private NodedBinaryTreeImpl<DataType>.Node makeNode(int start, int end, @Nullable NodedBinaryTreeImpl<DataType>.Node parent) {
