@@ -170,7 +170,7 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
         }
 
         @Override
-        public final @NotNull Sequential<Node> getChildren() {
+        public final @NotNull Sequential.Mutable<Node> getChildren() {
             return new BinarySequentialImpl<>(leftChild, rightChild);
         }
 

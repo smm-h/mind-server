@@ -243,10 +243,10 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
         return filtered;
     }
 
-    default <R> Sequential<R> applyOutOfPlace(Function<? super T, ? extends R> toReplace) {
+    default <R> Sequential<R> applyOutOfPlace(Function<? super T, ? extends R> toApply) {
         Sequential.Mutable.VariableSize<R> applied = Sequential.Mutable.VariableSize.of(new ArrayList<>(getSize()));
         for (T element : this) {
-            applied.append(toReplace.apply(element));
+            applied.append(toApply.apply(element));
         }
         return applied;
     }
@@ -591,7 +591,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
             return permutations;
         }
 
-        default void applyInPlace(Function<? super T, ? extends T> toReplace) {
+        default void replaceData(Function<? super T, ? extends T> toReplace) {
             if (!isEmpty()) {
                 preMutate();
                 for (int i = 0; i < getSize(); i++) {
@@ -601,7 +601,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
             }
         }
 
-        default void applyInPlace(Consumer<T> toApply) {
+        default void mutateData(Consumer<T> toApply) {
             if (!isEmpty()) {
                 preMutate();
                 for (T element : this) {

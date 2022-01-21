@@ -18,8 +18,7 @@ import java.util.StringJoiner;
 import static ir.smmh.util.FunctionalUtil.with;
 
 @ParametersAreNonnullByDefault
-public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, NodedTreeImpl<DataType>.Node,
-        NodedTreeImpl<DataType>>, Mutable.WithListeners {
+public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, NodedTreeImpl<DataType>.Node, NodedTreeImpl<DataType>>, Mutable.WithListeners {
     private final Listeners<FunctionalUtil.OnEventListener> onPreMutateListeners = ListenersImpl.blank();
     private final Listeners<FunctionalUtil.OnEventListener> onPostMutateListeners = ListenersImpl.blank();
     private final Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>> onCleanListeners = ListenersImpl.blank();

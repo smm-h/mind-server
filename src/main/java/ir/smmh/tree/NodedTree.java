@@ -7,12 +7,15 @@ import ir.smmh.nile.adj.impl.LIFO;
 import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.nile.verbs.CanAppendTo;
 import ir.smmh.nile.verbs.CanContain;
+import ir.smmh.tree.impl.NodedTreeImpl;
 import ir.smmh.tree.impl.TraversedImpl;
 import ir.smmh.util.FunctionalUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static ir.smmh.util.FunctionalUtil.with;
@@ -28,6 +31,21 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
 
     @Nullable NodeType getRootNode();
 
+    // TODO filter/prune, in-place/out-of-place, boolean leaf-only
+
+    default <OtherDataType> @NotNull NodedTreeImpl<OtherDataType> applyOutOfPlace(Function<? super DataType, ? extends OtherDataType> toApply) {
+        NodedTreeImpl<OtherDataType> otherTree = new NodedTreeImpl<>();
+        NodeType rootNode = getRootNode();
+        if (getRootNode() != null) {
+            applyOutOfPlace(otherTree, getRootNode(), null, toApply);
+        }
+        return otherTree;
+    }
+
+    default <OtherDataType> void applyOutOfPlace(NodedTreeImpl<OtherDataType> otherTree, NodeType node, NodedTreeImpl<OtherDataType>.Node parent, Function<? super DataType, ? extends OtherDataType> toApply) {
+        otherTree.new Node(toApply.apply(node.getData()), parent);
+    }
+
     default @NotNull Traversed<DataType, NodeType, TreeType> traverse(@NotNull Traversal<DataType, NodeType, TreeType> type) {
         return with(getRootNode(), type::traverse, Traversed.empty(type));
     }
@@ -36,11 +54,9 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         return traverse(new Traversal.LeafOnly<>());
     }
 
-
     default @NotNull Sequential<NodeType> getLeafNodes() {
         return traverseLeafOnly().getNodes();
     }
-
 
     @Override
     default @NotNull Sequential<DataType> getLeafData() {
@@ -90,7 +106,24 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         return with(getRootNode(), Node::getImmediateSubtrees, Sequential.empty());
     }
 
-    interface Mutable<DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends Mutable<DataType, NodeType, TreeType>> extends NodedTree<DataType, NodeType, TreeType>, SpecificTree.Mutable<DataType, TreeType> {
+    interface Mutable<DataType, NodeType extends Mutable.Node<DataType, NodeType, TreeType>,
+            TreeType extends Mutable<DataType, NodeType, TreeType>> extends NodedTree<DataType, NodeType, TreeType>, SpecificTree.Mutable<DataType, TreeType> {
+
+        default void replaceData(Function<? super DataType, ? extends DataType> toReplace) {
+            preMutate();
+            for (NodeType node : traverseBreadthFirst().getNodes()) {
+                node.replaceData(toReplace);
+            }
+            postMutate();
+        }
+
+        default void mutateData(Consumer<DataType> toApply) {
+            preMutate();
+            for (NodeType node : traverseBreadthFirst().getNodes()) {
+                node.mutateData(toApply);
+            }
+            postMutate();
+        }
 
         @Override
         default void clear() {
@@ -102,6 +135,14 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         interface Node<DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Mutable<DataType, NodeType, TreeType>> extends NodedTree.Node<DataType, NodeType, TreeType> {
             @Override
             @NotNull Sequential.Mutable<NodeType> getChildren();
+
+            default void replaceData(Function<? super DataType, ? extends DataType> toReplace) {
+                setData(toReplace.apply(getData()));
+            }
+
+            default void mutateData(Consumer<DataType> toApply) {
+                toApply.accept(getData());
+            }
         }
     }
 
@@ -230,7 +271,8 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
 
         interface Mutable<DataType, NodeType extends Mutable.Node<DataType, NodeType, TreeType>, TreeType extends Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary<DataType, NodeType, TreeType>, NodedTree.Mutable<DataType, NodeType, TreeType>, SpecificTree.Binary.Mutable<DataType, TreeType> {
 
-            interface Node<DataType, NodeType extends Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary.Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary.Node<DataType, NodeType, TreeType> {
+            interface Node<DataType, NodeType extends Node<DataType, NodeType, TreeType>,
+                    TreeType extends NodedTree.Binary.Mutable<DataType, NodeType, TreeType>> extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, NodedTree.Mutable.Node<DataType, NodeType, TreeType> {
                 void setLeftChild(@Nullable NodeType leftChild);
 
                 void setRightChild(@Nullable NodeType rightChild);
@@ -337,6 +379,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
 
             Order<NodeType> makeOrder(int capacity);
         }
+
         @FunctionalInterface
         interface ByOrderReverseChildren<DataType, NodeType extends NodedTree.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> extends Traversal<DataType, NodeType, TreeType> {
 
