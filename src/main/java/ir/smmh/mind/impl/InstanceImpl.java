@@ -16,41 +16,42 @@ public class InstanceImpl implements Instance {
     private final Map<Idea, Instance> intensions = new HashMap<>();
 
     public InstanceImpl(@NotNull Idea type) {
+        super();
         this.type = type;
     }
 
     @Override
-    public @NotNull Idea getType() {
+    public final @NotNull Idea getType() {
         return type;
     }
 
     @Override
-    public boolean has(Property property) {
+    public final boolean has(Property property) {
         return values.containsKey(property);
     }
 
     @Override
-    public void set(Property property, Value value) {
+    public final void set(Property property, Value value) {
         values.put(property, value);
     }
 
     @Override
-    public Value get(Property property) {
+    public final Value get(Property property) {
         return values.get(property);
     }
 
     @Override
-    public boolean is(Idea idea) {
+    public final boolean is(Idea idea) {
         return intensions.containsKey(idea);
     }
 
     @Override
-    public void setLink(Idea idea, Instance instance) {
+    public final void setLink(Idea idea, Instance instance) {
         intensions.put(idea, instance);
     }
 
     @Override
-    public Instance getLink(Idea idea) {
+    public final Instance getLink(Idea idea) {
         return intensions.get(idea);
     }
 }

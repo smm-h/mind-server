@@ -25,6 +25,7 @@ public interface Cache<Wrapper, Contents> {
 
         boolean exists(Contents contents);
 
+        @Override
         @NotNull
         default Wrapper get(Contents contents) {
             if (!exists(contents)) {

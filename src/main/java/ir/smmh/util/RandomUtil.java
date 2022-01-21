@@ -18,10 +18,10 @@ public interface RandomUtil {
      * @return A randomly generated string
      */
     @NotNull
-    static String generateRandomHex(final int length) {
-        final char[] array = new char[length];
+    static String generateRandomHex(int length) {
+        char[] array = new char[length];
         for (int i = 0; i < length; i++) {
-            final int x = generate.nextInt(16);
+            int x = generate.nextInt(16);
             array[i] = (char) (x < 10 ? '0' + x : 'a' + x - 10);
         }
         return new String(array);

@@ -24,7 +24,7 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
 
     DataType getRootData();
 
-    interface Mutable<DataType> extends Tree<DataType>, CanClear, ir.smmh.util.Mutable {
+    interface Mutable<DataType> extends Tree<DataType>, CanClear {
         void setRootData(DataType data);
     }
 

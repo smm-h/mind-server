@@ -90,7 +90,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         }
 
         default @NotNull Sequential<NodeType> getSiblings() {
-            return new Sequential.View.AllButOne<>(with(getParent(), Node::getChildren, Sequential.empty()), getIndexInParent());
+            return Sequential.View.allButOne(with(getParent(), Node::getChildren, Sequential.empty()), getIndexInParent());
         }
 
         @NotNull TreeType asTree();
@@ -241,7 +241,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
 
             @NotNull Predicate<NodeType> getCondition();
 
-            default void fillNodes(NodeType node, CanAppendTo<NodeType> canAppendTo, Predicate<NodeType> condition) {
+            default void fillNodes(NodeType node, CanAppendTo<? super NodeType> canAppendTo, Predicate<? super NodeType> condition) {
                 if (node == null) return;
                 if (condition.test(node)) {
                     canAppendTo.add(node);
@@ -261,11 +261,11 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                 return Traversed.of(seq, this);
             }
 
-            void fillData(NodeType node, CanAppendTo<NodeType> canAppendTo);
+            void fillData(NodeType node, CanAppendTo<? super NodeType> canAppendTo);
 
             class PreOrder<DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> implements Binary<DataType, NodeType, TreeType> {
                 @Override
-                public void fillData(NodeType node, CanAppendTo<NodeType> canAppendTo) {
+                public final void fillData(NodeType node, CanAppendTo<? super NodeType> canAppendTo) {
                     if (node == null) return;
                     canAppendTo.add(node);
                     fillData(node.getLeftChild(), canAppendTo);
@@ -275,7 +275,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
 
             class InOrder<DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> implements Binary<DataType, NodeType, TreeType> {
                 @Override
-                public void fillData(NodeType node, CanAppendTo<NodeType> canAppendTo) {
+                public final void fillData(NodeType node, CanAppendTo<? super NodeType> canAppendTo) {
                     if (node == null) return;
                     fillData(node.getLeftChild(), canAppendTo);
                     canAppendTo.add(node);
@@ -285,7 +285,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
 
             class PostOrder<DataType, NodeType extends NodedTree.Binary.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree.Binary<DataType, NodeType, TreeType>> implements Binary<DataType, NodeType, TreeType> {
                 @Override
-                public void fillData(NodeType node, CanAppendTo<NodeType> canAppendTo) {
+                public final void fillData(NodeType node, CanAppendTo<? super NodeType> canAppendTo) {
                     if (node == null) return;
                     fillData(node.getLeftChild(), canAppendTo);
                     fillData(node.getRightChild(), canAppendTo);
@@ -296,21 +296,21 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
 
         class LeafOnly<DataType, NodeType extends NodedTree.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> implements Conditional<DataType, NodeType, TreeType> {
             @Override
-            public @NotNull Predicate<NodeType> getCondition() {
+            public final @NotNull Predicate<NodeType> getCondition() {
                 return NodeType::isLeaf;
             }
         }
 
         class NonLeafOnly<DataType, NodeType extends NodedTree.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> implements Conditional<DataType, NodeType, TreeType> {
             @Override
-            public @NotNull Predicate<NodeType> getCondition() {
+            public final @NotNull Predicate<NodeType> getCondition() {
                 return Predicate.not(NodeType::isLeaf);
             }
         }
 
         class HasDataOnly<DataType, NodeType extends NodedTree.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> implements Conditional<DataType, NodeType, TreeType> {
             @Override
-            public @NotNull Predicate<NodeType> getCondition() {
+            public final @NotNull Predicate<NodeType> getCondition() {
                 return NodeType::hasData;
             }
         }

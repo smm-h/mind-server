@@ -9,11 +9,12 @@ public class LogImpl implements Log {
     private final PrintStream printStream;
 
     public LogImpl(PrintStream printStream) {
+        super();
         this.printStream = printStream;
     }
 
     @Override
-    public @NotNull PrintStream getPrintStream() {
+    public final @NotNull PrintStream getPrintStream() {
         return printStream;
     }
 }

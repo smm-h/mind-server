@@ -16,13 +16,13 @@ import static ir.smmh.util.FunctionalUtil.with;
 
 @SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
-public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanContain<T>, CanClone<Sequential<T>>, CanGetAtIndex<T> {
+public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone<Sequential<T>>, CanGetAtIndex<T> {
 
-    static <T> Sequential<T> of(List<T> list) {
+    static <T> Sequential<T> of(List<? extends T> list) {
 
         return new AbstractSequential<>() {
             @Override
-            public T getAtIndex(int index) throws IndexOutOfBoundsException {
+            public T getAtIndex(int index) {
                 return list.get(index);
             }
 
@@ -37,7 +37,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return new AbstractSequential<>() {
 
             @Override
-            public Integer getAtIndex(int index) throws IndexOutOfBoundsException {
+            public Integer getAtIndex(int index) {
                 return array[index];
             }
 
@@ -52,7 +52,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return new AbstractSequential<>() {
 
             @Override
-            public Float getAtIndex(int index) throws IndexOutOfBoundsException {
+            public Float getAtIndex(int index) {
                 return array[index];
             }
 
@@ -67,7 +67,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return new AbstractSequential<>() {
 
             @Override
-            public Long getAtIndex(int index) throws IndexOutOfBoundsException {
+            public Long getAtIndex(int index) {
                 return array[index];
             }
 
@@ -82,7 +82,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return new AbstractSequential<>() {
 
             @Override
-            public Double getAtIndex(int index) throws IndexOutOfBoundsException {
+            public Double getAtIndex(int index) {
                 return array[index];
             }
 
@@ -97,7 +97,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return new AbstractSequential<>() {
 
             @Override
-            public Byte getAtIndex(int index) throws IndexOutOfBoundsException {
+            public Byte getAtIndex(int index) {
                 return array[index];
             }
 
@@ -112,7 +112,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return new AbstractSequential<>() {
 
             @Override
-            public Character getAtIndex(int index) throws IndexOutOfBoundsException {
+            public Character getAtIndex(int index) {
                 return array[index];
             }
 
@@ -127,7 +127,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return new AbstractSequential<>() {
 
             @Override
-            public Boolean getAtIndex(int index) throws IndexOutOfBoundsException {
+            public Boolean getAtIndex(int index) {
                 return array[index];
             }
 
@@ -142,7 +142,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return new AbstractSequential<>() {
 
             @Override
-            public T getAtIndex(int index) throws IndexOutOfBoundsException {
+            public T getAtIndex(int index) {
                 return array[index];
             }
 
@@ -156,7 +156,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     static <T> Sequential<T> empty() {
         return new AbstractSequential<>() {
             @Override
-            public T getAtIndex(int index) throws IndexOutOfBoundsException {
+            public T getAtIndex(int index) {
                 throw new IndexOutOfBoundsException();
             }
 
@@ -168,7 +168,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     static Sequential<Character> of(String string) {
-        return Sequential.of(string.toCharArray()); // TODO optimize
+        return of(string.toCharArray()); // TODO optimize
     }
 
     @Override
@@ -176,7 +176,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return index >= 0 && index < getSize();
     }
 
-    default boolean[] toBooleanArray(Predicate<T> toBoolean) {
+    default boolean[] toBooleanArray(Predicate<? super T> toBoolean) {
         boolean[] array = new boolean[getSize()];
         for (int i = 0; i < array.length; i++) {
             array[i] = toBoolean.test(getAtIndex(i));
@@ -184,7 +184,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return array;
     }
 
-    default long[] toLongArray(ToLongFunction<T> toLong) {
+    default long[] toLongArray(ToLongFunction<? super T> toLong) {
         long[] array = new long[getSize()];
         for (int i = 0; i < array.length; i++) {
             array[i] = toLong.applyAsLong(getAtIndex(i));
@@ -193,15 +193,14 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
     }
 
     default T[] toArray() {
-        @SuppressWarnings("unchecked")
-        T[] array = (T[]) new Object[getSize()];
+        @SuppressWarnings("unchecked") T[] array = (T[]) new Object[getSize()];
         for (int i = 0; i < array.length; i++) {
             array[i] = getAtIndex(i);
         }
         return array;
     }
 
-    default float[] toFloatArray(FunctionalUtil.ToFloatFunction<T> toFloat) {
+    default float[] toFloatArray(FunctionalUtil.ToFloatFunction<? super T> toFloat) {
         float[] array = new float[getSize()];
         for (int i = 0; i < array.length; i++) {
             array[i] = toFloat.applyAsFloat(getAtIndex(i));
@@ -209,7 +208,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return array;
     }
 
-    default double[] toDoubleArray(ToDoubleFunction<T> toDouble) {
+    default double[] toDoubleArray(ToDoubleFunction<? super T> toDouble) {
         double[] array = new double[getSize()];
         for (int i = 0; i < array.length; i++) {
             array[i] = toDouble.applyAsDouble(getAtIndex(i));
@@ -217,7 +216,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return array;
     }
 
-    default char[] toCharArray(FunctionalUtil.ToCharFunction<T> toChar) {
+    default char[] toCharArray(FunctionalUtil.ToCharFunction<? super T> toChar) {
         char[] array = new char[getSize()];
         for (int i = 0; i < array.length; i++) {
             array[i] = toChar.applyAsChar(getAtIndex(i));
@@ -225,7 +224,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return array;
     }
 
-    default int[] toIntArray(ToIntFunction<T> toInt) {
+    default int[] toIntArray(ToIntFunction<? super T> toInt) {
         int[] array = new int[getSize()];
         for (int i = 0; i < array.length; i++) {
             array[i] = toInt.applyAsInt(getAtIndex(i));
@@ -270,6 +269,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return getSize() == 0;
     }
 
+    @Override
     default boolean contains(T toCheck) {
         return findFirst(toCheck) != -1;
     }
@@ -369,19 +369,24 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         return () -> new ReverseIterator<>(this);
     }
 
+    /**
+     * @param index Unsigned integer
+     * @return Data stored at index
+     * @throws IndexOutOfBoundsException If integer is negative or equal or more than size
+     */
     @Override
-    T getAtIndex(int index) throws IndexOutOfBoundsException;
+    T getAtIndex(int index);
 
-    interface Mutable<T> extends Sequential<T>, CanSetAtIndex<T>, CanSwapAtIndices<T> {
+    interface Mutable<T> extends Sequential<T>, CanSwapAtIndices<T> {
         static Sequential.Mutable<Character> of(String string) {
-            return Sequential.Mutable.of(string.toCharArray()); // TODO optimize
+            return of(string.toCharArray()); // TODO optimize
         }
 
         static <T> Sequential.Mutable<T> of(List<T> list) {
 
             return new AbstractMutableSequential<>() {
                 @Override
-                public T getAtIndex(int index) throws IndexOutOfBoundsException {
+                public T getAtIndex(int index) {
                     return list.get(index);
                 }
 
@@ -391,7 +396,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void setAtIndex(int index, @Nullable T toSet) throws IndexOutOfBoundsException {
+                public void setAtIndex(int index, @Nullable T toSet) {
                     validateIndex(index);
                     list.set(index, toSet);
                 }
@@ -402,7 +407,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return new AbstractMutableSequential<>() {
 
                 @Override
-                public Integer getAtIndex(int index) throws IndexOutOfBoundsException {
+                public Integer getAtIndex(int index) {
                     return array[index];
                 }
 
@@ -412,7 +417,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void setAtIndex(int index, @Nullable Integer toSet) throws IndexOutOfBoundsException {
+                public void setAtIndex(int index, @Nullable Integer toSet) {
                     validateIndex(index);
                     array[index] = Objects.requireNonNull(toSet);
                 }
@@ -423,7 +428,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return new AbstractMutableSequential<>() {
 
                 @Override
-                public Float getAtIndex(int index) throws IndexOutOfBoundsException {
+                public Float getAtIndex(int index) {
                     return array[index];
                 }
 
@@ -433,7 +438,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void setAtIndex(int index, @Nullable Float toSet) throws IndexOutOfBoundsException {
+                public void setAtIndex(int index, @Nullable Float toSet) {
                     validateIndex(index);
                     array[index] = Objects.requireNonNull(toSet);
                 }
@@ -444,7 +449,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return new AbstractMutableSequential<>() {
 
                 @Override
-                public Long getAtIndex(int index) throws IndexOutOfBoundsException {
+                public Long getAtIndex(int index) {
                     return array[index];
                 }
 
@@ -454,7 +459,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void setAtIndex(int index, @Nullable Long toSet) throws IndexOutOfBoundsException {
+                public void setAtIndex(int index, @Nullable Long toSet) {
                     validateIndex(index);
                     array[index] = Objects.requireNonNull(toSet);
                 }
@@ -465,7 +470,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return new AbstractMutableSequential<>() {
 
                 @Override
-                public Double getAtIndex(int index) throws IndexOutOfBoundsException {
+                public Double getAtIndex(int index) {
                     return array[index];
                 }
 
@@ -475,7 +480,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void setAtIndex(int index, @Nullable Double toSet) throws IndexOutOfBoundsException {
+                public void setAtIndex(int index, @Nullable Double toSet) {
                     validateIndex(index);
                     array[index] = Objects.requireNonNull(toSet);
                 }
@@ -486,7 +491,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return new AbstractMutableSequential<>() {
 
                 @Override
-                public Byte getAtIndex(int index) throws IndexOutOfBoundsException {
+                public Byte getAtIndex(int index) {
                     return array[index];
                 }
 
@@ -496,7 +501,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void setAtIndex(int index, @Nullable Byte toSet) throws IndexOutOfBoundsException {
+                public void setAtIndex(int index, @Nullable Byte toSet) {
                     validateIndex(index);
                     array[index] = Objects.requireNonNull(toSet);
                 }
@@ -507,7 +512,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return new AbstractMutableSequential<>() {
 
                 @Override
-                public Character getAtIndex(int index) throws IndexOutOfBoundsException {
+                public Character getAtIndex(int index) {
                     return array[index];
                 }
 
@@ -517,7 +522,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void setAtIndex(int index, @Nullable Character toSet) throws IndexOutOfBoundsException {
+                public void setAtIndex(int index, @Nullable Character toSet) {
                     validateIndex(index);
                     array[index] = Objects.requireNonNull(toSet);
                 }
@@ -528,7 +533,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return new AbstractMutableSequential<>() {
 
                 @Override
-                public Boolean getAtIndex(int index) throws IndexOutOfBoundsException {
+                public Boolean getAtIndex(int index) {
                     return array[index];
                 }
 
@@ -538,7 +543,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void setAtIndex(int index, @Nullable Boolean toSet) throws IndexOutOfBoundsException {
+                public void setAtIndex(int index, @Nullable Boolean toSet) {
                     validateIndex(index);
                     array[index] = Objects.requireNonNull(toSet);
                 }
@@ -549,7 +554,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             return new AbstractMutableSequential<>() {
 
                 @Override
-                public T getAtIndex(int index) throws IndexOutOfBoundsException {
+                public T getAtIndex(int index) {
                     return array[index];
                 }
 
@@ -559,32 +564,33 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void setAtIndex(int index, @Nullable T toSet) throws IndexOutOfBoundsException {
+                public void setAtIndex(int index, @Nullable T toSet) {
                     validateIndex(index);
                     array[index] = Objects.requireNonNull(toSet);
                 }
             };
         }
 
-        default void fillWithPermutations(CanAppendTo<Sequential<T>> permutations, int l, int r) {
-            if (l != r) {
-                for (int i = l; i <= r; i++) {
-                    swap(l, i);
-                    fillWithPermutations(permutations, l + 1, r);
-                    swap(l, i);
-                }
-            } else {
+        default void fillWithPermutations(CanAppendTo<? super Sequential<T>> permutations, int first, int last) {
+            if (first == last) {
                 permutations.append(clone(false));
+            } else {
+                for (int i = first; i <= last; i++) {
+                    swap(first, i);
+                    fillWithPermutations(permutations, first + 1, last);
+                    swap(first, i);
+                }
             }
         }
 
         default Sequential<Sequential<T>> getPermutations() {
+            @SuppressWarnings("ClassReferencesSubclass")
             Sequential.Mutable.VariableSize<Sequential<T>> permutations = new SequentialImpl<>();
             fillWithPermutations(permutations, 0, getSize() - 1);
             return permutations;
         }
 
-        default void applyInPlace(Function<T, T> toReplace) {
+        default void applyInPlace(Function<? super T, ? extends T> toReplace) {
             if (!isEmpty()) {
                 preMutate();
                 for (int i = 0; i < getSize(); i++) {
@@ -651,21 +657,40 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
     interface View<T> extends ir.smmh.util.View.Injected<Sequential<T>>, Sequential<T> {
 
-        default void addExpirationHandler(Consumer<Sequential<T>> handler) {
+
+        static <T> View<T> allButOne(Sequential<T> sequential, int except) {
+            return new AllButOne<>(sequential, except);
+        }
+
+        static <T> View<T> ranged(Sequential<T> sequential, int start) {
+            return new Ranged<>(sequential, start);
+        }
+
+        static <T> View<T> ranged(Sequential<T> sequential, int start, int end) {
+            return new Ranged<>(sequential, start, end);
+        }
+
+        static <T> View<T> reversed(Sequential<T> sequential) {
+            return new Reversed<>(sequential);
+        }
+
+        default void addExpirationHandler(Consumer<? super Sequential<T>> handler) {
             Sequential<T> core = getCore();
-            if (core instanceof Sequential.Mutable) {
-                ((Sequential.Mutable<T>) core).getOnPreMutateListeners().addDisposable(() -> handler.accept(clone(false)));
+            if (core instanceof ir.smmh.util.Mutable.WithListeners) {
+                ((ir.smmh.util.Mutable.WithListeners) core).getOnPreMutateListeners().addDisposable(() -> handler.accept(clone(false)));
             }
         }
 
         @Override
-        default T getAtIndex(int index) throws IndexOutOfBoundsException {
-            return with(getCore(), s -> s.getAtIndex(transformIndex(index)), null);
+        default T getAtIndex(int index) {
+            return with(getCore(), seq -> seq.getAtIndex(transformIndex(index)), null);
         }
 
         int transformIndex(int index);
 
         interface Referential<T> extends View<T> {
+
+            int[] EMPTY_INDICES = new int[0];
 
             int[] getIndices();
 
@@ -679,6 +704,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 return getIndices()[index];
             }
 
+            @FunctionalInterface
             interface ReferenceComputer<T> {
                 int[] computeReference(Sequential<T> sequential);
             }
@@ -687,23 +713,25 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         class Reference<T> extends AbstractView<T> implements Referential<T> {
             private int[] indices;
 
-            public Reference(Sequential<T> sequential, ReferenceComputer<T> computer) {
+            @SuppressWarnings("OverridableMethodCallDuringObjectConstruction")
+            Reference(Sequential<T> sequential, ReferenceComputer<T> computer) {
                 super(sequential);
-                this.indices = computer.computeReference(sequential);
-                getOnExpireListeners().add(() -> this.indices = new int[0]);
+                indices = computer.computeReference(sequential);
+                getOnExpireListeners().add(() -> indices = EMPTY_INDICES);
             }
 
+            @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")
             @Override
-            public int[] getIndices() {
+            public final int[] getIndices() {
                 return indices;
             }
         }
 
-        class AllButOne<T> extends AbstractView<T> {
+        final class AllButOne<T> extends AbstractView<T> {
 
             private final int except;
 
-            public AllButOne(Sequential<T> sequential, int except) {
+            private AllButOne(Sequential<T> sequential, int except) {
                 super(sequential);
                 this.except = except;
             }
@@ -721,19 +749,19 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
         class Conditional<T> extends Reference<T> {
 
-            public Conditional(Sequential<T> sequential, Predicate<? super T> condition) {
-                super(sequential, s -> {
+            Conditional(Sequential<T> sequential, Predicate<? super T> condition) {
+                super(sequential, seq -> {
 
                     int index = 0;
-                    int total = s.getSize();
+                    int total = seq.getSize();
 
                     int foundIndex = 0;
-                    int foundTotal = s.count(condition);
+                    int foundTotal = seq.count(condition);
 
                     int[] reference = new int[foundTotal];
 
                     while (foundIndex < foundTotal && index < total) {
-                        if (condition.test(s.getAtIndex(index))) {
+                        if (condition.test(seq.getAtIndex(index))) {
                             reference[foundIndex++] = index;
                         }
                         index++;
@@ -744,9 +772,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             }
         }
 
-        class Reversed<T> extends AbstractView<T> {
+        final class Reversed<T> extends AbstractView<T> {
 
-            public Reversed(Sequential<T> sequential) {
+            private Reversed(Sequential<T> sequential) {
                 super(sequential);
             }
 
@@ -761,7 +789,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
             }
         }
 
-        class Ranged<T> extends AbstractView<T> {
+        final class Ranged<T> extends AbstractView<T> {
 
             private final int start, end;
 
@@ -771,7 +799,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
              *
              * @param start Inclusive starting index
              */
-            public Ranged(Sequential<T> sequential, int start) {
+            private Ranged(Sequential<T> sequential, int start) {
                 this(sequential, start, sequential.getSize());
             }
 
@@ -781,7 +809,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
              * @param start Inclusive starting index
              * @param end   Non-inclusive ending index
              */
-            public Ranged(Sequential<T> sequential, int start, int end) {
+            private Ranged(Sequential<T> sequential, int start, int end) {
                 super(sequential);
                 this.start = start;
                 this.end = end;
@@ -799,19 +827,24 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         }
     }
 
-    abstract class AbstractMutableSequential<T> extends AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
+    abstract class AbstractMutableSequential<T> extends AbstractSequential<T> implements Sequential.Mutable<T>,
+            ir.smmh.util.Mutable.WithListeners.Injected {
 
-        private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
+        private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
+
+        protected AbstractMutableSequential() {
+            super();
+        }
 
         @Override
-        public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+        public @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
             return injectedMutable;
         }
     }
 
     abstract class AbstractSequential<T> implements Sequential<T> {
         @Override
-        public Sequential<T> specificThis() {
+        public final Sequential<T> specificThis() {
             return this;
         }
 
@@ -821,7 +854,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         }
 
         @Override
-        public String toString() {
+        public final String toString() {
             StringJoiner joiner = new StringJoiner(", ", "[", "]");
             for (T element : this)
                 joiner.add(element.toString());
@@ -829,7 +862,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public final boolean equals(Object obj) {
             if (obj instanceof Sequential) {
                 Sequential<?> other = (Sequential<?>) obj;
                 if (getSize() == other.getSize()) {
@@ -851,17 +884,18 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         protected int i;
 
         public ObverseIterator(S sequential) {
+            super();
             this.sequential = sequential;
-            this.i = 0;
+            i = 0;
         }
 
         @Override
-        public boolean hasNext() {
+        public final boolean hasNext() {
             return i < sequential.getSize();
         }
 
         @Override
-        public T next() {
+        public final T next() {
             return sequential.getAtIndex(i++);
         }
 
@@ -876,7 +910,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void remove() {
+                public final void remove() {
                     sequential.removeIndexFrom(i);
                 }
             }
@@ -889,17 +923,18 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
         protected int index;
 
         public ReverseIterator(S sequential) {
+            super();
             this.sequential = sequential;
-            this.index = sequential.getSize();
+            index = sequential.getSize();
         }
 
         @Override
-        public boolean hasNext() {
+        public final boolean hasNext() {
             return index > 0;
         }
 
         @Override
-        public T next() {
+        public final T next() {
             return sequential.getAtIndex(--index);
         }
 
@@ -915,7 +950,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
                 }
 
                 @Override
-                public void remove() {
+                public final void remove() {
                     sequential.removeIndexFrom(index);
                 }
             }
@@ -935,12 +970,13 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanConta
 
         private final ir.smmh.util.View<Sequential<T>> injectedView;
 
-        public AbstractView(Sequential<T> sequential) {
-            this.injectedView = new ViewImpl<>(sequential);
+        protected AbstractView(Sequential<T> sequential) {
+            super();
+            injectedView = ViewImpl.of(sequential);
         }
 
         @Override
-        public @NotNull ir.smmh.util.View<Sequential<T>> getInjectedView() {
+        public final @NotNull ir.smmh.util.View<Sequential<T>> getInjectedView() {
             return injectedView;
         }
     }

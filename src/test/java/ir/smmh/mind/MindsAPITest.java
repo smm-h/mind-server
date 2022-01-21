@@ -7,14 +7,14 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("SameParameterValue")
+@SuppressWarnings({"SameParameterValue", "ClassWithoutConstructor", "ClassNamePrefixedWithPackageName", "ClassWithTooManyMethods"})
 class MindsAPITest {
 
-    final String mindName = "test";
-    MindsAPI api;
+    private static final String mindName = "test";
+    private MindsAPI api;
 
     @BeforeEach
-    void beforeEach() {
+    final void beforeEach() {
         api = new MindsAPI();
         mind();
         imagine("a");
@@ -24,36 +24,36 @@ class MindsAPITest {
         imagine("t");
     }
 
-    JSONObject process(String method, JSONObject parameters) {
-        final JSONObject request = new JSONObject();
+    final JSONObject process(String method, JSONObject parameters) {
+        JSONObject request = new JSONObject();
         request.put("method", method);
         request.put("parameters", parameters);
         return JSONUtil.parse(api.process(request.toString()));
     }
 
-    void mind() {
-        final JSONObject parameters = new JSONObject();
+    final void mind() {
+        JSONObject parameters = new JSONObject();
         parameters.put("name", mindName);
         process("mind", parameters);
     }
 
-    void imagine(String name) {
-        final JSONObject parameters = new JSONObject();
+    final void imagine(String name) {
+        JSONObject parameters = new JSONObject();
         parameters.put("mind", mindName);
         parameters.put("name", name);
         process("imagine", parameters);
     }
 
-    void become(String idea, String intension) {
-        final JSONObject parameters = new JSONObject();
+    final void become(String idea, String intension) {
+        JSONObject parameters = new JSONObject();
         parameters.put("mind", mindName);
         parameters.put("idea", idea);
         parameters.put("intension", intension);
         process("become", parameters);
     }
 
-    void possess(String idea, String name, String type, JSONObject defaultValue) {
-        final JSONObject parameters = new JSONObject();
+    final void possess(String idea, String name, String type, JSONObject defaultValue) {
+        JSONObject parameters = new JSONObject();
         parameters.put("mind", mindName);
         parameters.put("idea", idea);
         parameters.put("name", name);
@@ -62,55 +62,56 @@ class MindsAPITest {
         process("possess", parameters);
     }
 
-    boolean is(String idea, String intension) {
-        final JSONObject parameters = new JSONObject();
+    final boolean is(String idea, String intension) {
+        JSONObject parameters = new JSONObject();
         parameters.put("mind", mindName);
         parameters.put("idea", idea);
         parameters.put("intension", intension);
         return process("is", parameters).getJSONObject("results").getBoolean("is");
     }
 
-    boolean has(String idea, String name) {
-        final JSONObject parameters = new JSONObject();
+    final boolean has(String idea, String name) {
+        JSONObject parameters = new JSONObject();
         parameters.put("mind", mindName);
         parameters.put("idea", idea);
         parameters.put("name", name);
         return process("has", parameters).getJSONObject("results").getBoolean("has");
     }
 
-    String idea(String idea) {
-        final JSONObject parameters = new JSONObject();
+    final String idea(String idea) {
+        JSONObject parameters = new JSONObject();
         parameters.put("mind", mindName);
         parameters.put("idea", idea);
         return process("idea", parameters).getJSONObject("results").getString("code");
     }
 
     @Test
-    public void testIntension() {
+    final void testIntension() {
         become("a", "b");
-        assertTrue(is("a", "b"));
+        System.out.println(idea("a"));
+        assertTrue(is("a", "b"), "a is not b");
     }
 
     @Test
-    public void testTransitivity() {
+    final void testTransitivity() {
         become("c", "d");
         become("b", "c");
         become("a", "b");
-        assertTrue(is("a", "c"));
-        assertTrue(is("b", "d"));
-        assertTrue(is("a", "d"));
+        assertTrue(is("a", "c"), "a is not c");
+        assertTrue(is("b", "d"), "b is not d");
+        assertTrue(is("a", "d"), "a is not d");
     }
 
     @Test
-    public void testPossession() {
+    final void testPossession() {
         possess("a", "p", "t", new JSONObject());
-        assertTrue(has("a", "p"));
+        assertTrue(has("a", "p"), "a does not have p");
     }
 
     @Test
-    public void testTransitivePossession() {
+    final void testTransitivePossession() {
         become("a", "b");
         possess("b", "p", "t", new JSONObject());
-        assertTrue(has("a", "p"));
+        assertTrue(has("a", "p"), "a does not have p");
     }
 }

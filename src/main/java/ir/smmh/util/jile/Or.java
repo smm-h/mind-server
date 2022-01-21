@@ -27,4 +27,8 @@ public interface Or<This, That> {
                 Objects.equals(getThis(), other.getThis()) :
                 Objects.equals(getThat(), other.getThat());
     }
+
+    default Object getObject() {
+        return isThis() ? getThis() : getThat();
+    }
 }

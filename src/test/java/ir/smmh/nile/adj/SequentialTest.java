@@ -11,61 +11,63 @@ import java.util.List;
 import static ir.smmh.util.NumberPredicates.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings({"MagicNumber", "ClassWithoutConstructor"})
 class SequentialTest {
 
     @Test
-    void equality() {
+    final void equality() {
         List<String> fruitList;
         String[] fruitArray;
-        fruitList = new ArrayList<>();
+        fruitList = new ArrayList<>(3);
         fruitList.add("apples");
         fruitList.add("oranges");
         fruitList.add("bananas");
         fruitArray = new String[]{"apples", "oranges", "bananas"};
-        assertEquals(Sequential.of(fruitArray), Sequential.of(fruitList));
+        assertEquals(Sequential.of(fruitArray), Sequential.of(fruitList), "Sequentials made from a list and an array " +
+                "do not equate.");
     }
 
     @Test
-    void permutation() {
+    final void permutation() {
         Multitude permutations = Sequential.Mutable.of("123").getPermutations();
-        assertEquals(permutations.getSize(), 6);
+        assertEquals(6, permutations.getSize(), "The number of permutations is not 6 as expected.");
     }
 
     @Test
-    void countPredicateAndFilterOutOfPlace() {
-        Sequential<Integer> s = Sequential.of(RandomUtil.generateRandomIntArray(70, 90));
-        assertEquals(s.count(PRIME), s.filterOutOfPlace(PRIME).getSize());
+    final void countPredicateAndFilterOutOfPlace() {
+        Sequential<Integer> seq = Sequential.of(RandomUtil.generateRandomIntArray(70, 90));
+        assertEquals(seq.count(PRIME), seq.filterOutOfPlace(PRIME).getSize(), "The number of primes do not equate");
     }
 
     @Test
-    void applyOutOfPlace() {
-        Sequential<Integer> s = Sequential.of(RandomUtil.generateRandomIntArray(20, 70));
-        Sequential<Integer> p = s.applyOutOfPlace(x -> x + 1);
-        assertEquals(s.count(ODD), p.count(EVEN));
+    final void applyOutOfPlace() {
+        Sequential<Integer> seq = Sequential.of(RandomUtil.generateRandomIntArray(20, 70));
+        Sequential<Integer> p = seq.applyOutOfPlace(x -> x + 1);
+        assertEquals(seq.count(ODD), p.count(EVEN), "Something went very wrong");
     }
 
     @Test
-    void findAll() {
-        int m = 5;
-        Sequential<Integer> s = Sequential.of(RandomUtil.generateRandomIntArray(40, m * 2));
-        System.out.println(s);
-        Sequential<Integer> f = s.findAll(m);
-        System.out.println(f);
-        Sequential<Integer> r = new Sequential.View.Reference<>(s, (x) -> f.toIntArray(FunctionalUtil::itself));
-        System.out.println(r);
-        assertEquals(f.getSize(), r.getSize());
-        for (int x : r)
-            assertEquals(x, m);
+    final void findAll() {
+        final int m = 5;
+        Sequential<Integer> seq = Sequential.of(RandomUtil.generateRandomIntArray(40, m * 2));
+        System.out.println(seq);
+        Sequential<Integer> all = seq.findAll(m);
+        System.out.println(all);
+        Sequential<Integer> ref = new Sequential.View.Reference<>(seq, (x) -> all.toIntArray(FunctionalUtil::itself));
+        System.out.println(ref);
+        assertEquals(all.getSize(), ref.getSize(), "The number of " + m + "'s do not add up.");
+        for (int x : ref)
+            assertEquals(m, x, () -> "A " + m + " was instead a " + x);
     }
 
     @Test
-    void inReverse() {
-        Sequential<Integer> s = Sequential.of(RandomUtil.generateRandomIntArray(10, 70));
-        Sequential<Integer> p = new SequentialImpl<>(s.inReverse());
-        Sequential<Integer> q = (new Sequential.View.Reversed<>(s));
-        System.out.println(s);
+    final void inReverse() {
+        Sequential<Integer> seq = Sequential.of(RandomUtil.generateRandomIntArray(10, 70));
+        Sequential<Integer> p = new SequentialImpl<>(seq.inReverse());
+        Sequential<Integer> q = (Sequential.View.reversed(seq));
+        System.out.println(seq);
         System.out.println(p);
         System.out.println(q);
-        assertEquals(p, q);
+        assertEquals(p, q, "Reverse iteration does not equate reversed view.");
     }
 }

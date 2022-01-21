@@ -1,19 +1,20 @@
-package ir.smmh.jile.common;
+package ir.smmh.util.jile;
 
 public abstract class Service extends Thread {
 
     public final long pace;
 
-    public Service() {
+    protected Service() {
         this(100L);
     }
 
-    public Service(long milliseconds) {
+    protected Service(long milliseconds) {
+        super();
         pace = milliseconds;
     }
 
     @Override
-    public void run() {
+    public final void run() {
         do {
             try {
                 Thread.sleep(Math.max(5L, pace));

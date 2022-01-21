@@ -1,7 +1,5 @@
 package ir.smmh.util;
 
-import ir.smmh.nile.verbs.CanClear;
-
 import javax.annotation.ParametersAreNonnullByDefault;
 
 /**
@@ -12,10 +10,14 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * @param <L> Type of listeners
  */
 @ParametersAreNonnullByDefault
-public interface Listeners<L> extends CanClear, Iterable<L> {
+public interface Listeners<L> extends Iterable<L> {
     void add(L listener);
 
     void addDisposable(L listener);
 
     void remove(L listener);
+
+    void clear();
+
+    int getSize();
 }

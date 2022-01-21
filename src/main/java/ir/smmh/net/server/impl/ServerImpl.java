@@ -13,30 +13,31 @@ public class ServerImpl implements Server {
     private boolean running;
 
     public ServerImpl(API api, int defaultPort) {
+        super();
         this.api = api;
         this.defaultPort = defaultPort;
     }
 
     @Override
-    public API getAPI() {
+    public final API getAPI() {
         return api;
     }
 
     @Override
-    public int getDefaultPort() {
+    public final int getDefaultPort() {
         return defaultPort;
     }
 
     @Override
-    public void stop() {
+    public final void stop() {
         running = false;
     }
 
     @Override
-    public void start(int port) {
+    public final void start(int port) {
         System.out.println("Server started...");
         try {
-            final ServerSocket serverSocket = new ServerSocket(port);
+            ServerSocket serverSocket = new ServerSocket(port);
             running = true;
             while (running)
                 new RequestHandlerImpl(serverSocket.accept(), getAPI()::sendRequest).start();

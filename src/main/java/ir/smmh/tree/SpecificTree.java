@@ -17,7 +17,6 @@ public interface SpecificTree<DataType, TreeType extends SpecificTree<DataType, 
     @NotNull Sequential<TreeType> getImmediateSubtrees();
 
     interface Mutable<DataType, TreeType extends Mutable<DataType, TreeType>> extends SpecificTree<DataType, TreeType>, Tree.Mutable<DataType> {
-        void setRootData(DataType data);
     }
 
     interface Binary<DataType, TreeType extends Binary<DataType, TreeType>> extends SpecificTree<DataType, TreeType>, Tree.Binary<DataType> {

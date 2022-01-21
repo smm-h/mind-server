@@ -12,17 +12,20 @@ import java.time.Instant;
 public class ClockChronometer implements Chronometer {
 
     private final Clock clock;
-    private Instant then = null;
+    private Instant then;
 
     public ClockChronometer(Clock clock) {
+        super();
         this.clock = clock;
     }
 
-    public void reset() {
+    @Override
+    public final void reset() {
         then = clock.instant();
     }
 
-    public double stop() {
+    @Override
+    public final double stop() {
         Instant now = clock.instant();
         long difference = then.toEpochMilli() - now.toEpochMilli();
         return difference / 10e6;

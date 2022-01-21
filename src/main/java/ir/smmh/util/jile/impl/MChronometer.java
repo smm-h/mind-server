@@ -10,13 +10,15 @@ import ir.smmh.util.jile.Chronometer;
  */
 public class MChronometer implements Chronometer {
 
-    private double m = 0;
+    private double m;
 
-    public void reset() {
+    @Override
+    public final void reset() {
         m = System.currentTimeMillis();
     }
 
-    public double stop() {
+    @Override
+    public final double stop() {
         return System.currentTimeMillis() - m;
     }
 }

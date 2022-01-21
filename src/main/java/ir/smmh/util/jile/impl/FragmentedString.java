@@ -2,6 +2,7 @@ package ir.smmh.util.jile.impl;
 
 import ir.smmh.util.jile.Typeable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
@@ -10,29 +11,33 @@ public class FragmentedString implements Typeable {
     private final int CHUNK_SIZE;
 
     private final ArrayList<Fragment> fragments = new ArrayList<>(32);
-    private TypeableFragment typeable;
+    private @Nullable TypeableFragment typeable;
     private int typeableIndex;
     private int caret;
 
     public FragmentedString() {
+        super();
         CHUNK_SIZE = 256;
     }
 
     public FragmentedString(int chunkSize) {
+        super();
         CHUNK_SIZE = chunkSize;
     }
 
     public FragmentedString(String string) {
+        super();
         CHUNK_SIZE = Math.max(32, Math.min(1024, string.length() / 16));
         append(string);
     }
 
     public FragmentedString(String string, int chunkSize) {
+        super();
         CHUNK_SIZE = chunkSize;
         append(string);
     }
 
-    public void append(String string) {
+    public final void append(String string) {
         if (CHUNK_SIZE == 0) {
             fragments.add(new RealFragment(string));
         } else {
@@ -43,20 +48,20 @@ public class FragmentedString implements Typeable {
         }
     }
 
-    public String getString() {
+    public final String getString() {
         StringBuilder string = new StringBuilder();
         for (Fragment fragment : fragments)
             string.append(fragment.getString());
         return string.toString();
     }
 
-    public void defragment() {
+    public final void defragment() {
         String string = getString();
         clear();
         append(string);
     }
 
-    public void defragment(int from, int to) {
+    public final void defragment(int from, int to) {
 
         StringBuilder string = new StringBuilder();
 
@@ -72,7 +77,7 @@ public class FragmentedString implements Typeable {
         fragments.add(indexFirst, new RealFragment(string.toString()));
     }
 
-    public void clear() {
+    public final void clear() {
         fragments.clear();
     }
 
@@ -90,7 +95,7 @@ public class FragmentedString implements Typeable {
         return position;
     }
 
-    public void insert(int position, String string) {
+    public final void insert(int position, String string) {
 
         // find out which fragment contains this position
         int index = indexOfFragmentContaining(position);
@@ -122,21 +127,21 @@ public class FragmentedString implements Typeable {
 
     @NotNull
     @Override
-    public String toString() {
+    public final String toString() {
         StringBuilder string = new StringBuilder();
         for (Fragment fragment : fragments)
             string.append("[").append(fragment.getString()).append("]");
         return string.toString();
     }
 
-    public int getLength() {
+    public final int getLength() {
         int length = 0;
         for (Fragment fragment : fragments)
             length += fragment.getLength();
         return length;
     }
 
-    public void delete(int from, int to) {
+    public final void delete(int from, int to) {
 
         // find out which fragments each position belongs to
         int indexFirst = indexOfFragmentContaining(from);
@@ -229,7 +234,7 @@ public class FragmentedString implements Typeable {
     }
 
     @Override
-    public void type(char c) {
+    public final void type(char c) {
         startTyping();
         int p = caret - getFragmentStart(typeableIndex);
         typeable.string = typeable.string.substring(0, p) + c + typeable.string.substring(p);
@@ -238,7 +243,7 @@ public class FragmentedString implements Typeable {
     }
 
     @Override
-    public void pressBackspace() {
+    public final void pressBackspace() {
         startTyping();
         int p = caret - getFragmentStart(typeableIndex);
         typeable.string = typeable.string.substring(0, p - 1) + typeable.string.substring(p);
@@ -247,12 +252,12 @@ public class FragmentedString implements Typeable {
     }
 
     @Override
-    public int getCaret() {
+    public final int getCaret() {
         return caret;
     }
 
     @Override
-    public void setCaret(int position) {
+    public final void setCaret(int position) {
         finishTyping();
         caret = position;
     }
@@ -275,13 +280,14 @@ public class FragmentedString implements Typeable {
         protected int length;
 
         AbstractFragment(int length) {
+            super();
             if (length == 0)
                 throw new NullPointerException("String fragment length cannot be zero");
             this.length = length;
         }
 
         @Override
-        public int getLength() {
+        public final int getLength() {
             return length;
         }
     }
@@ -298,27 +304,27 @@ public class FragmentedString implements Typeable {
         }
 
         @Override
-        public String getString() {
+        public final String getString() {
             return new String(array);
         }
 
         @Override
-        public Fragment fromStartToIndex(int index) {
+        public final Fragment fromStartToIndex(int index) {
             return new FakeFragment(this, 0, index);
         }
 
         @Override
-        public Fragment fromIndexToEnd(int index) {
+        public final Fragment fromIndexToEnd(int index) {
             return new FakeFragment(this, index, length);
         }
 
         @Override
-        public int getLengthOfFromStartToIndex(int index) {
+        public final int getLengthOfFromStartToIndex(int index) {
             return index;
         }
 
         @Override
-        public int getLengthOfFromIndexToEnd(int index) {
+        public final int getLengthOfFromIndexToEnd(int index) {
             return length - index;
         }
     }
@@ -334,27 +340,27 @@ public class FragmentedString implements Typeable {
         }
 
         @Override
-        public String getString() {
+        public final String getString() {
             return new String(parent.array, offset, length);
         }
 
         @Override
-        public Fragment fromStartToIndex(int index) {
+        public final Fragment fromStartToIndex(int index) {
             return new FakeFragment(parent, offset, index);
         }
 
         @Override
-        public Fragment fromIndexToEnd(int index) {
+        public final Fragment fromIndexToEnd(int index) {
             return new FakeFragment(parent, offset + index, offset + length);
         }
 
         @Override
-        public int getLengthOfFromStartToIndex(int index) {
+        public final int getLengthOfFromStartToIndex(int index) {
             return index - offset;
         }
 
         @Override
-        public int getLengthOfFromIndexToEnd(int index) {
+        public final int getLengthOfFromIndexToEnd(int index) {
             return length - index;
         }
     }
@@ -369,27 +375,27 @@ public class FragmentedString implements Typeable {
         }
 
         @Override
-        public String getString() {
+        public final String getString() {
             return string;
         }
 
         @Override
-        public Fragment fromStartToIndex(int index) {
+        public final Fragment fromStartToIndex(int index) {
             return new RealFragment(string.substring(0, index));
         }
 
         @Override
-        public Fragment fromIndexToEnd(int index) {
+        public final Fragment fromIndexToEnd(int index) {
             return new RealFragment(string.substring(index, length));
         }
 
         @Override
-        public int getLengthOfFromStartToIndex(int index) {
+        public final int getLengthOfFromStartToIndex(int index) {
             return index;
         }
 
         @Override
-        public int getLengthOfFromIndexToEnd(int index) {
+        public final int getLengthOfFromIndexToEnd(int index) {
             return length - index;
         }
     }

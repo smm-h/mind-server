@@ -5,13 +5,13 @@ import org.jetbrains.annotations.Nullable;
 
 public interface Storage {
 
-    boolean exists(@NotNull final String id);
+    boolean exists(@NotNull String id);
 
-    @Nullable String read(@NotNull final String id);
+    @Nullable String read(@NotNull String id);
 
-    boolean write(@NotNull final String id, @NotNull final String contents);
+    boolean write(@NotNull String id, @NotNull String contents);
 
-    boolean delete(@NotNull final String id);
+    boolean delete(@NotNull String id);
 
     void deleteAll();
 }

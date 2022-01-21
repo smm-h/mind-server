@@ -9,7 +9,7 @@ public class StandardAPIBotImpl extends APIBotImpl implements StandardAPIBot {
     }
 
     @Override
-    public StandardAPI getAPI() {
+    public final StandardAPI getAPI() {
         return (StandardAPI) super.getAPI();
     }
 }

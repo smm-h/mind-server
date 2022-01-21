@@ -1,6 +1,8 @@
 package ir.smmh.storage.impl;
 
 import ir.smmh.storage.Storage;
+import ir.smmh.util.FileUtil;
+import ir.smmh.util.FunctionalUtil;
 import ir.smmh.util.Log;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,28 +13,30 @@ import java.nio.file.Path;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class StorageImpl implements Storage {
+@SuppressWarnings("ParameterNameDiffersFromOverriddenParameter")
+public final class StorageImpl implements Storage {
 
     private final Log out, err;
     private final String root;
 
-    public StorageImpl(@NotNull String root, @NotNull Log out, @NotNull Log err) {
+    private StorageImpl(@NotNull String root, @NotNull Log out, @NotNull Log err) {
+        super();
         this.root = root;
         this.out = out;
         this.err = err;
-        try {
-            Files.createDirectory(Path.of(root));
-        } catch (IOException e) {
-            err.log("FAILED TO CREATE DIRECTORY: " + root);
-        }
     }
 
-    public StorageImpl(@NotNull String root, @NotNull String out, @NotNull String err) {
-        this(root, Log.fromFile(out, System.out), Log.fromFile(err, System.err));
+    public static Storage of(@NotNull String root, @NotNull Log out, @NotNull Log err) {
+        return new StorageImpl(FunctionalUtil.SupplierMayFail.getSafe(() -> FileUtil.touch(root), ""), out, err);
     }
 
-    public StorageImpl(@NotNull String name) {
-        this("db/" + name, "db/" + name + "/log/OUT.LOG", "db/" + name + "/log/ERR.LOG");
+    @SuppressWarnings("UseOfSystemOutOrSystemErr")
+    public static Storage of(@NotNull String root, @NotNull String out, @NotNull String err) {
+        return of(root, Log.fromFile(out, System.out), Log.fromFile(err, System.err));
+    }
+
+    public static Storage of(@NotNull String name) {
+        return of("db/" + name, "db/" + name + "/log/OUT.LOG", "db/" + name + "/log/ERR.LOG");
     }
 
     @Override
@@ -79,19 +83,24 @@ public class StorageImpl implements Storage {
     @Override
     public void deleteAll() {
         out.log("DELETING ALL FILES");
-        final Stream<Path> files;
         try {
-            files = Files.list(Path.of(root));
+            try (Stream<Path> files = Files.list(Path.of(root))) {
+                for (Path file : files.collect(Collectors.toList())) {
+                    try {
+                        Files.delete(file);
+                    } catch (IOException e) {
+                        err.log("FAILED TO DELETE: " + file);
+                    }
+                }
+            }
         } catch (IOException e) {
             err.log("FAILED TO GET A LIST OF ALL FILES");
-            return;
-        }
-        for (Path file : files.collect(Collectors.toList())) {
-            try {
-                Files.delete(file);
-            } catch (IOException e) {
-                err.log("FAILED TO DELETE: " + file);
-            }
         }
     }
+
+    @Override
+    public String toString() {
+        return "Storage@" + root;
+    }
+
 }

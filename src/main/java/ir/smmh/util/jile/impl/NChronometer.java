@@ -9,13 +9,15 @@ import ir.smmh.util.jile.Chronometer;
  */
 public class NChronometer implements Chronometer {
 
-    private double n = 0;
+    private double n;
 
-    public void reset() {
+    @Override
+    public final void reset() {
         n = System.nanoTime();
     }
 
-    public double stop() {
+    @Override
+    public final double stop() {
         return (System.nanoTime() - n) / 10e6;
     }
 }

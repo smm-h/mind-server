@@ -8,6 +8,7 @@ public class APIBotImpl extends SimpleBotImpl implements APIBot {
     private final API api;
 
     public APIBotImpl(API api) {
+        super();
         this.api = api;
     }
 

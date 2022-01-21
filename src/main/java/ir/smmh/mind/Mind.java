@@ -11,13 +11,14 @@ import org.json.JSONObject;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@SuppressWarnings("ClassNamePrefixedWithPackageName")
 public interface Mind extends Named {
 
-    Iterable<String> overIdeaNames();
+    @NotNull Iterable<String> overIdeaNames();
 
-    Iterable<Idea> overIdeas();
+    @NotNull Iterable<? extends Idea> overIdeas();
 
-    @Nullable Idea findIdeaByName(String name);
+    @Nullable Idea findIdeaByName(String ideaName);
 
     Supplier<Value> makeValueGenerator(@NotNull JSONObject source);
 
@@ -30,15 +31,16 @@ public interface Mind extends Named {
          * Finds and returns an idea with a given name. It creates the
          * idea if none with that name exists.
          *
-         * @param name The name of an idea
+         * @param ideaName The name of an idea
          * @return A mutable idea in this mind with that name
          */
-        @NotNull Idea.Mutable imagine(String name);
+        @NotNull Idea.Mutable imagine(String ideaName);
 
         @NotNull Function<String, MutableIdeaImpl> getIdeaLookup();
 
-        default @Nullable Idea.Mutable findIdeaByName(String name) {
-            return getIdeaLookup().apply(name);
+        @Override
+        default @Nullable Idea.Mutable findIdeaByName(String ideaName) {
+            return getIdeaLookup().apply(ideaName);
         }
     }
 
@@ -46,8 +48,9 @@ public interface Mind extends Named {
 
         @NotNull Function<String, Idea.Immutable> getIdeaLookup();
 
-        default @Nullable Idea.Immutable findIdeaByName(String name) {
-            return getIdeaLookup().apply(name);
+        @Override
+        default @Nullable Idea.Immutable findIdeaByName(String ideaName) {
+            return getIdeaLookup().apply(ideaName);
         }
     }
 }

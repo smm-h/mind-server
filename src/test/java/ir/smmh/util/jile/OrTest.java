@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 abstract class OrTest {
 
     @NotNull
-    DoubleOrString add(DoubleOrString a, DoubleOrString b) {
+    final DoubleOrString add(DoubleOrString a, DoubleOrString b) {
         if (a.sameTypeAs(b)) {
             return (a.isThis())
                     ? newDoubleOrString(a.getThis() + b.getThis())
@@ -23,7 +23,7 @@ abstract class OrTest {
     abstract DoubleOrString newDoubleOrString(String value);
 
     @Test
-    void addStrings() {
+    final void addStrings() {
         assertEquals(add(
                 newDoubleOrString(5.0),
                 newDoubleOrString(6.0)
@@ -31,7 +31,7 @@ abstract class OrTest {
     }
 
     @Test
-    void addDoubles() {
+    final void addDoubles() {
         assertEquals(add(
                 newDoubleOrString("Hello, "),
                 newDoubleOrString("World!")

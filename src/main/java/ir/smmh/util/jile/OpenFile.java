@@ -22,11 +22,11 @@ import static ir.smmh.util.StringUtil.RADIX_MAX;
 public interface OpenFile {
 
     static OpenFile of(String filename) throws InvalidPathException {
-        return new OpenFileImpl(filename);
+        return OpenFileImpl.of(filename);
     }
 
     static OpenFile of(String contents, String ext) {
-        return new OpenFileImpl(contents, ext);
+        return OpenFileImpl.of(contents, ext);
     }
 
     /**
@@ -183,11 +183,11 @@ public interface OpenFile {
     interface Writeable extends OpenFile, Mutable {
 
         static Writeable of(String filename) {
-            return new OpenFileImpl.Writeable(filename);
+            return OpenFileImpl.Writeable.of(filename);
         }
 
         static Writeable of(String contents, String ext) {
-            return new OpenFileImpl.Writeable(contents, ext);
+            return OpenFileImpl.Writeable.of(contents, ext);
         }
 
         default void write(String contents) {

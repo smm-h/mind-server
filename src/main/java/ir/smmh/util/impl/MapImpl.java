@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.StringJoiner;
 
 import static ir.smmh.util.FunctionalUtil.with;
@@ -17,7 +17,7 @@ import static ir.smmh.util.FunctionalUtil.with;
 public abstract class MapImpl<K> implements Map<K> {
 
     @Override
-    public String toString() {
+    public final String toString() {
         StringJoiner joiner = new StringJoiner(", ", "Lookup: {", "}");
         for (K key : overKeys()) {
             joiner.add(key.toString());
@@ -30,46 +30,46 @@ public abstract class MapImpl<K> implements Map<K> {
         protected final java.util.Map<K, V> map = new HashMap<>();
 
         @Override
-        public int getSize() {
+        public final int getSize() {
             return map.size();
         }
 
         @Override
-        public boolean isEmpty() {
+        public final boolean isEmpty() {
             return map.isEmpty();
         }
 
         @Override
-        public @NotNull Iterable<K> overKeys() {
+        public final @NotNull Iterable<K> overKeys() {
             return map.keySet();
         }
 
         @Override
-        public @Nullable V getAtPlace(K key) {
+        public final @Nullable V getAtPlace(K key) {
             return map.get(key);
         }
 
         @Override
-        public boolean contains(K key) {
+        public final boolean contains(K key) {
             return map.containsKey(key);
         }
 
         @Override
-        public @NotNull Iterable<V> overValues() {
+        public final @NotNull Iterable<V> overValues() {
             return map.values();
         }
 
         public static class Mutable<K, V> extends MapImpl.SingleValue<K, V> implements Map.SingleValue.Mutable<K, V>, ir.smmh.util.Mutable.Injected {
 
-            private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
+            private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
 
             @Override
-            public void setAtPlace(K place, V toSet) {
+            public final void setAtPlace(K place, V toSet) {
                 map.put(place, toSet);
             }
 
             @Override
-            public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+            public final @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
                 return injectedMutable;
             }
         }
@@ -79,41 +79,41 @@ public abstract class MapImpl<K> implements Map<K> {
         protected final java.util.Map<K, Sequential.Mutable.VariableSize<V>> map = new HashMap<>();
 
         @Override
-        public boolean contains(K toCheck) {
+        public final boolean contains(K toCheck) {
             return map.containsKey(toCheck);
         }
 
         @Override
-        public boolean isEmpty() {
+        public final boolean isEmpty() {
             return map.isEmpty();
         }
 
         @Override
-        public @NotNull Iterable<K> overKeys() {
+        public final @NotNull Iterable<K> overKeys() {
             return map.keySet();
         }
 
         @Override
-        public @NotNull Sequential<V> getAtPlace(K key) {
+        public final @NotNull Sequential<V> getAtPlace(K key) {
             return with(map.get(key), Sequential.empty());
         }
 
         @Override
-        public int getSize() {
+        public final int getSize() {
             return map.size();
         }
 
         public static class Mutable<K, V> extends MapImpl.MultiValue<K, V> implements Map.MultiValue.Mutable<K, V>, ir.smmh.util.Mutable.Injected {
-            private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
+            private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
 
             @Override
-            public void setAtPlace(K place, V toSet) {
+            public final void setAtPlace(K place, V toSet) {
                 Sequential.Mutable.VariableSize<V> s = map.computeIfAbsent(place, k -> new SequentialImpl<>(new ArrayList<>()));
                 s.append(toSet);
             }
 
             @Override
-            public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+            public final @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
                 return injectedMutable;
             }
         }

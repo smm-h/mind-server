@@ -6,19 +6,21 @@ import org.jetbrains.annotations.NotNull;
 
 public class BinarySequentialImpl<T> extends Sequential.AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
 
-    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
+    private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
     private T first, second;
 
     public BinarySequentialImpl() {
+        super();
     }
 
     public BinarySequentialImpl(T first, T second) {
+        super();
         this.first = first;
         this.second = second;
     }
 
     @Override
-    public void setAtIndex(int index, T toSet) {
+    public final void setAtIndex(int index, T toSet) {
         validateIndex(index);
         preMutate();
         if (index == 0) first = toSet;
@@ -27,18 +29,18 @@ public class BinarySequentialImpl<T> extends Sequential.AbstractSequential<T> im
     }
 
     @Override
-    public T getAtIndex(int index) throws IndexOutOfBoundsException {
+    public final T getAtIndex(int index) throws IndexOutOfBoundsException {
         validateIndex(index);
         return index == 0 ? first : second;
     }
 
     @Override
-    public int getSize() {
+    public final int getSize() {
         return 2;
     }
 
     @Override
-    public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+    public final @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
         return injectedMutable;
     }
 }

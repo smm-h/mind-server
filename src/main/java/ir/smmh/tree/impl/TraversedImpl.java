@@ -7,16 +7,17 @@ import org.jetbrains.annotations.NotNull;
 public class TraversedImpl<DataType, NodeType extends NodedTree.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> implements NodedTree.Traversed<DataType, NodeType, TreeType> {
 
     private final Sequential<NodeType> sequential;
+    private final NodedTree.Traversal<DataType, NodeType, TreeType> type;
     private Sequential<DataType> data;
-    private final NodedTree.Traversal type;
 
-    public TraversedImpl(Sequential<NodeType> sequential, NodedTree.Traversal type) {
+    public TraversedImpl(Sequential<NodeType> sequential, NodedTree.Traversal<DataType, NodeType, TreeType> type) {
+        super();
         this.sequential = sequential;
         this.type = type;
     }
 
     @Override
-    public @NotNull Sequential<DataType> getData() {
+    public final @NotNull Sequential<DataType> getData() {
         if (data == null) {
             data = sequential.applyOutOfPlace(NodeType::getData);
         }
@@ -24,12 +25,12 @@ public class TraversedImpl<DataType, NodeType extends NodedTree.Node<DataType, N
     }
 
     @Override
-    public @NotNull Sequential<NodeType> getNodes() {
+    public final @NotNull Sequential<NodeType> getNodes() {
         return sequential;
     }
 
     @Override
-    public @NotNull NodedTree.Traversal getType() {
+    public final @NotNull NodedTree.Traversal<DataType, NodeType, TreeType> getType() {
         return type;
     }
 }

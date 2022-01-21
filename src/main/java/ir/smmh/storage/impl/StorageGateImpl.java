@@ -15,48 +15,49 @@ public abstract class StorageGateImpl<T extends Stored> implements StorageGate<T
 
     private final Storage storage;
 
-    public StorageGateImpl(Storage storage) {
+    protected StorageGateImpl(Storage storage) {
+        super();
         this.storage = storage;
     }
 
     @Override
-    public boolean existsInMemory(@NotNull String id) {
+    public final boolean existsInMemory(@NotNull String id) {
         return memory.containsKey(id);
     }
 
     @Override
-    public @Nullable T findInMemory(@NotNull String id) {
+    public final @Nullable T findInMemory(@NotNull String id) {
         return memory.get(id);
     }
 
     @Override
-    public boolean existsOnDisk(@NotNull String id) {
+    public final boolean existsOnDisk(@NotNull String id) {
         return getStorage().exists(id);
     }
 
     @Nullable
     @Override
-    public T findOnDisk(@NotNull String id) {
+    public final T findOnDisk(@NotNull String id) {
         return deserialize(id, getStorage().read(id));
     }
 
     @Override
-    public void addToMemory(@NotNull T object) {
+    public final void addToMemory(@NotNull T object) {
         memory.put(object.getName(), object);
     }
 
     @Override
-    public void clearMemory() {
+    public final void clearMemory() {
         memory.clear();
     }
 
     @Override
-    public void clearDisk() {
+    public final void clearDisk() {
         getStorage().deleteAll();
     }
 
     @Override
-    public @NotNull Storage getStorage() {
+    public final @NotNull Storage getStorage() {
         return storage;
     }
 }

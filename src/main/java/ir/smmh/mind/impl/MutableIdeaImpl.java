@@ -4,7 +4,7 @@ import ir.smmh.mind.*;
 import ir.smmh.storage.Storage;
 import ir.smmh.storage.impl.StorageImpl;
 import ir.smmh.util.*;
-import ir.smmh.util.impl.MutableHashSet;
+import ir.smmh.util.impl.MutableCollectionImpl;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,41 +17,44 @@ import java.util.function.Supplier;
 
 import static java.util.Map.entry;
 
-public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializable.JSON {
+@SuppressWarnings("ThrowsRuntimeException")
+public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Injected, Serializable.JSON {
 
     private static final Comprehension.Map<PropertyImpl, String, PropertyImpl> c = p -> entry(p.getName(), p);
     private static final Comprehension.Map<StaticPropertyImpl, String, StaticPropertyImpl> sc = p -> entry(p.getName(), p);
     private final Mind mind;
     private final String name;
-    private final MutableSet<String> intensions;
+    private final MutableCollection<String> intensions;
     private final Map<String, PropertyImpl> properties;
     private final Map<String, StaticPropertyImpl> staticProperties;
-    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
+    private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
     private final Storage storage;
     private java.util.Set<Idea> intensionsCache;
 
-    public MutableIdeaImpl(@NotNull Mind mind, @NotNull String name, @NotNull MutableSet<String> intensions, @NotNull Iterable<PropertyImpl> properties, @NotNull Iterable<StaticPropertyImpl> staticProperties) {
+    public MutableIdeaImpl(@NotNull Mind mind, @NotNull String name, @NotNull MutableCollection<String> intensions, @NotNull Iterable<PropertyImpl> properties, @NotNull Iterable<StaticPropertyImpl> staticProperties) {
+        super();
         this.mind = mind;
         this.name = name;
         this.intensions = intensions;
         this.properties = c.comprehend(properties);
         this.staticProperties = sc.comprehend(staticProperties);
-        this.storage = new StorageImpl(mind.getName());
+        storage = StorageImpl.of(mind.getName());
         setup();
     }
 
     public MutableIdeaImpl(Mind mind, JSONObject object) throws JSONException {
+        super();
         this.mind = mind;
-        this.name = object.getString("name");
-        this.intensions = JSONUtil.arrayOfStrings(object, "intensions", new MutableHashSet<>());
-        this.properties = c.comprehend(JSONUtil.arrayOfObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
-        this.staticProperties = sc.comprehend(JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new StaticPropertyImpl(this, o)));
-        this.storage = new StorageImpl(mind.getName());
+        name = object.getString("name");
+        intensions = JSONUtil.arrayOfStrings(object, "intensions", MutableCollectionImpl.of(new HashSet<>()));
+        properties = c.comprehend(JSONUtil.arrayOfObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
+        staticProperties = sc.comprehend(JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new StaticPropertyImpl(this, o)));
+        storage = StorageImpl.of(mind.getName());
         setup();
     }
 
     @Override
-    public @NotNull JSONObject serializeJSON() throws JSONException {
+    public final @NotNull JSONObject serializeJSON() throws JSONException {
         JSONObject object = new JSONObject();
         try {
             object.put("name", name);
@@ -70,50 +73,50 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     }
 
     @Override
-    public Mind getMind() {
+    public final Mind getMind() {
         return mind;
     }
 
     @Override
-    public boolean hasDirectly(@NotNull String propertyName) {
+    public final boolean hasDirectly(@NotNull String propertyName) {
         return properties.containsKey(propertyName);
     }
 
     @Override
-    public @NotNull String getName() {
+    public final @NotNull String getName() {
         return name;
     }
 
     @Override
-    public @Nullable java.util.Set<Idea> getDirectIntensions() {
+    public final @Nullable java.util.Set<Idea> getDirectIntensions() {
         intensions.clean();
         return intensionsCache;
     }
 
     @Override
-    public java.util.Set<Property> getDirectProperties() {
+    public final java.util.Set<Property> getDirectProperties() {
         return new HashSet<>(properties.values());
         // TODO optimize with caching
     }
 
     @Override
-    public @NotNull Instance instantiate() {
+    public final @NotNull Instance instantiate() {
         return new InstanceImpl(this);
     }
 
     @NotNull
     @Override
-    public String toString() {
+    public final String toString() {
         return name;
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return name.hashCode();
     }
 
     @Override
-    public void become(String ideaName) {
+    public final void become(String ideaName) {
         if (!intensions.contains(ideaName)) {
             preMutate();
             intensions.add(ideaName);
@@ -122,34 +125,34 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.Injected, Serializ
     }
 
     @Override
-    public PropertyImpl possess(String name, String type, Supplier<Value> defaultValue) {
-        if (!properties.containsKey(name)) {
+    public final Property possess(String propertyName, String type, Supplier<Value> defaultValue) {
+        if (!properties.containsKey(propertyName)) {
             preMutate();
-            PropertyImpl property = new PropertyImpl(this, name, type, defaultValue);
-            properties.put(name, property);
+            PropertyImpl property = new PropertyImpl(this, propertyName, type, defaultValue);
+            properties.put(propertyName, property);
             postMutate();
         }
-        return properties.get(name);
+        return properties.get(propertyName);
     }
 
     @Override
-    public StaticPropertyImpl reify(String name, String type, Value value) {
-        if (!staticProperties.containsKey(name)) {
+    public final StaticProperty reify(String propertyName, String type, Value value) {
+        if (!staticProperties.containsKey(propertyName)) {
             preMutate();
-            StaticPropertyImpl property = new StaticPropertyImpl(this, name, type, value);
-            staticProperties.put(name, property);
+            StaticPropertyImpl property = new StaticPropertyImpl(this, propertyName, type, value);
+            staticProperties.put(propertyName, property);
             postMutate();
         }
-        return staticProperties.get(name);
+        return staticProperties.get(propertyName);
     }
 
     @Override
-    public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+    public final @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
         return injectedMutable;
     }
 
     @Override
-    public @NotNull Storage getStorage() {
+    public final @NotNull Storage getStorage() {
         return storage;
     }
 }

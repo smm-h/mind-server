@@ -25,7 +25,7 @@ public interface Idea extends Named {
             return true;
 
         // If I have no direct intensions, I am not it
-        final Set<Idea> d = getDirectIntensions();
+        Set<Idea> d = getDirectIntensions();
         if (d == null)
             return false;
 
@@ -65,7 +65,7 @@ public interface Idea extends Named {
             return true;
 
         // If I have no direct intensions, I do not have it
-        final Set<Idea> d = getDirectIntensions();
+        Set<Idea> d = getDirectIntensions();
         if (d == null)
             return false;
 
@@ -84,14 +84,14 @@ public interface Idea extends Named {
 
     @Nullable
     default Set<Idea> getAllIntensions() {
-        final Set<Idea> set = getDirectIntensions();
+        Set<Idea> set = getDirectIntensions();
         if (set == null) {
             return null;
         } else {
-            final Set<Idea> d = getDirectIntensions();
+            Set<Idea> d = getDirectIntensions();
             if (d != null) {
                 for (Idea intension : d) {
-                    final Set<Idea> all = intension.getAllIntensions();
+                    Set<Idea> all = intension.getAllIntensions();
                     if (all != null) {
                         set.addAll(all);
                     }
@@ -105,14 +105,14 @@ public interface Idea extends Named {
 
     @Nullable
     default Set<Property> getAllProperties() {
-        final Set<Property> set = getDirectProperties();
+        Set<Property> set = getDirectProperties();
         if (set == null) {
             return null;
         } else {
-            final Set<Idea> allIntensions = getAllIntensions();
+            Set<Idea> allIntensions = getAllIntensions();
             if (allIntensions != null) {
                 for (Idea intension : allIntensions) {
-                    final Set<Property> allProperties = intension.getAllProperties();
+                    Set<Property> allProperties = intension.getAllProperties();
                     if (allProperties != null) {
                         set.addAll(allProperties);
                     }
@@ -123,7 +123,7 @@ public interface Idea extends Named {
     }
 
     default boolean canBeDeserialized(JSONObject serialization) {
-        final Set<Idea> d = getDirectIntensions();
+        Set<Idea> d = getDirectIntensions();
         if (d != null) {
             for (Idea idea : d) {
                 if (!serialization.has(idea.getName())) {
@@ -133,7 +133,7 @@ public interface Idea extends Named {
                 }
             }
         }
-        final Set<Property> p = getDirectProperties();
+        Set<Property> p = getDirectProperties();
         if (p != null) {
             for (Property property : p) {
                 if (!serialization.has(property.getName())) {
@@ -146,13 +146,13 @@ public interface Idea extends Named {
 
     default Instance deserialize(JSONObject serialization) {
         Instance instance = instantiate();
-        final Set<Idea> d = getDirectIntensions();
+        Set<Idea> d = getDirectIntensions();
         if (d != null) {
             for (Idea idea : d) {
                 instance.setLink(idea, idea.deserialize(serialization.getJSONObject(idea.getName())));
             }
         }
-        final Set<Property> p = getDirectProperties();
+        Set<Property> p = getDirectProperties();
         if (p != null) {
             for (Property property : p) {
                 instance.set(property, Value.of(serialization.getJSONObject(property.getName()), getMind()::findIdeaByName));
@@ -173,10 +173,10 @@ public interface Idea extends Named {
     }
 
     default String encode() {
-        final StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         builder.append(getName());
-        final Set<Idea> d = getDirectIntensions();
-        final Set<Property> p = getDirectProperties();
+        Set<Idea> d = getDirectIntensions();
+        Set<Property> p = getDirectProperties();
         if ((d == null || d.isEmpty()) && (p == null || p.isEmpty())) {
             builder.append(" {}");
         } else {
@@ -206,13 +206,13 @@ public interface Idea extends Named {
 
         void become(String ideaName);
 
-        default Property possess(String name, String type) {
-            return possess(name, type, null);
+        default Property possess(String propertyName, String type) {
+            return possess(propertyName, type, null);
         }
 
-        Property possess(String name, String type, Supplier<Value> defaultValue);
+        Property possess(String propertyName, String type, Supplier<Value> defaultValue);
 
-        StaticProperty reify(String name, String type, Value value);
+        StaticProperty reify(String propertyName, String type, Value value);
     }
 
     interface Immutable extends Idea {

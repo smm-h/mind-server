@@ -13,7 +13,7 @@ public interface StandardAPIBot extends APIBot {
 
     @Override
     default void process(long chatId, String text, int messageId) {
-        final JSONObject response = processRequest(chatId, text);
+        JSONObject response = processRequest(chatId, text);
         if (response.has("results")) {
             sendMessage(chatId, processResults(response.getJSONObject("results")), messageId);
         } else if (response.has("error_message")) {

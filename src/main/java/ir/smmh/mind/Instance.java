@@ -10,9 +10,10 @@ import java.util.Set;
 public interface Instance extends Value {
     @NotNull Idea getType();
 
+    @Override
     @NotNull
     default JSONObject serializeJSON() {
-        final JSONObject object = new JSONObject();
+        JSONObject object = new JSONObject();
         try {
             Idea type = getType();
             object.put("~", type.getName());

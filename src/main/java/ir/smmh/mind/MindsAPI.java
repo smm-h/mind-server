@@ -7,15 +7,17 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings({"ClassNamePrefixedWithPackageName", "MagicNumber"})
 public class MindsAPI extends StandardAPI {
 
-    private final Map<String, Mind.Mutable> minds = new HashMap<>();
+    private final Map<String, Mind.Mutable> minds = new HashMap<>(8);
 
     public MindsAPI() {
+        super();
         defineMethod("mind", (Method) (p) -> {
-            final String name = p.getString("name");
+            String name = p.getString("name");
             if (!minds.containsKey(name)) {
-                minds.put(name, new MutableMindImpl(name, null));
+                minds.put(name, MutableMindImpl.createBlank(name, null));
             }
             return respond(NO_ERROR);
         });
@@ -27,6 +29,7 @@ public class MindsAPI extends StandardAPI {
         });
 
         defineMethod("imagine", (Method) (p) -> {
+            //noinspection resource
             getMind(p).imagine(p.getString("name"));
             return respond(NO_ERROR);
         });
@@ -49,13 +52,13 @@ public class MindsAPI extends StandardAPI {
         int INSTANTIATION_FAILED = defineError(126, "Instantiation failed");
 
         defineMethod("instantiate", (Method) (p) -> {
-            final Idea.Mutable i = getIdea(p);
+            Idea.Mutable idea = getIdea(p);
             if (p.has("serialization")) {
-                if (i.instantiate(p.getJSONObject("serialization")) == null) {
+                if (idea.instantiate(p.getJSONObject("serialization")) == null) {
                     return respond(INSTANTIATION_FAILED);
                 }
             } else {
-                i.instantiate();
+                idea.instantiate();
             }
             return respond(NO_ERROR);
         });
@@ -85,6 +88,7 @@ public class MindsAPI extends StandardAPI {
         return getIdea(p, "idea");
     }
 
-    public interface Method extends ir.smmh.api.Method.Plain {
+    @FunctionalInterface
+    interface Method extends ir.smmh.api.Method.Plain {
     }
 }

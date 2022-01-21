@@ -4,40 +4,29 @@ import ir.smmh.util.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-import java.util.Stack;
 
 @ParametersAreNonnullByDefault
-public class MutableImpl implements Mutable {
+public final class MutableImpl implements Mutable.WithListeners {
 
-    private static final Stack<MutableImpl> stack = new Stack<>();
     private final Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>>
-            onCleanListeners = new ListenersImpl<>();
+            onCleanListeners = ListenersImpl.blank();
     private final Listeners<FunctionalUtil.OnEventListener>
-            onPostMutateListeners = new ListenersImpl<>(),
-            onPreMutateListeners = new ListenersImpl<>();
-    private final Mutable.Injected injected;
+            onPostMutateListeners = ListenersImpl.blank(),
+            onPreMutateListeners = ListenersImpl.blank();
     private boolean dirty = true;
 
-    public MutableImpl(Mutable.Injected injected) {
-        this.injected = injected;
-        stack.push(this);
+//    private static final ReferenceQueue<Mutable> q = new ReferenceQueue<>();
+
+    private MutableImpl() {
+        super();
     }
 
-    public static void cleanEverything() {
-        while (!stack.isEmpty()) {
-            MutableImpl mutable = stack.pop();
-            String name = Named.nameOf(mutable.injected);
-            System.out.println("CLEANING: " + name);
-            try {
-                mutable.clean();
-            } catch (Throwable e) {
-                System.err.println("FAILED TO CLEAN: " + name);
-            }
-        }
+    public static Mutable.WithListeners blank() {
+        return new MutableImpl();
     }
 
     @Override
-    public final boolean isDirty() {
+    public boolean isDirty() {
         return dirty;
     }
 

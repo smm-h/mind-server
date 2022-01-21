@@ -15,12 +15,12 @@ class SequentialViewTest {
     Sequential.Mutable.VariableSize<String> data;
 
     @BeforeEach
-    void beforeEach() {
+    final void beforeEach() {
         data = Sequential.Mutable.VariableSize.of(array);
     }
 
     @Test
-    void viewTest() {
+    final void viewTest() {
         System.out.println(data);
         AtomicReference<Sequential<String>> view = new AtomicReference<>();
         Sequential.View.Conditional<String> originalView = new Sequential.View.Conditional<>(data, s -> (is(s.charAt(0), VOWEL)));

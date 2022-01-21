@@ -6,10 +6,18 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.*;
 
 @ParametersAreNonnullByDefault
-public class ListenersImpl<L> implements Listeners<L>, Mutable.Injected {
+public final class ListenersImpl<L> implements Listeners<L> {
 
-    private final List<L> listeners = new ArrayList<>(); // new ConcurrentSkipListSet<>(Comparator.comparingInt(Object::hashCode)); // new LinkedHashSet<>(); //
-    private final Set<L> disposables = new LinkedHashSet<>();
+    private final List<L> listeners = new ArrayList<>(8);
+    private final Collection<L> disposables = new LinkedHashSet<>(8);
+
+    private ListenersImpl() {
+        super();
+    }
+
+    public static <L> Listeners<L> blank() {
+        return new ListenersImpl<>();
+    }
 
     @Override
     public int getSize() {
@@ -37,10 +45,11 @@ public class ListenersImpl<L> implements Listeners<L>, Mutable.Injected {
         listeners.remove(listener);
     }
 
+    @SuppressWarnings("ReturnOfInnerClass")
     @Override
     public @NotNull Iterator<L> iterator() {
         return new Iterator<>() {
-            private int index = 0;
+            private int index;
 
             @Override
             public boolean hasNext() {
@@ -50,9 +59,11 @@ public class ListenersImpl<L> implements Listeners<L>, Mutable.Injected {
             @Override
             public L next() {
                 L listener = listeners.get(index);
-                if (disposables.contains(listener))
-                    return listeners.remove(index);
-                index++;
+                if (disposables.contains(listener)) {
+                    listeners.remove(index);
+                } else {
+                    index++;
+                }
                 return listener;
             }
         };
@@ -65,11 +76,5 @@ public class ListenersImpl<L> implements Listeners<L>, Mutable.Injected {
             joiner.add(Integer.toString(listener.hashCode()));
         }
         return joiner.toString();
-    }
-
-    @Override
-    public @NotNull Mutable getInjectedMutable() {
-        //noinspection ConstantConditions
-        return null;
     }
 }

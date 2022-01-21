@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 abstract class OrGeneralizationTest {
 
     @Test
-    void generalize() {
+    final void generalize() {
         Number[] n = new Number[4];
         n[0] = Or.generalize(make(4));
         n[1] = Or.generalize(make(4.52));
@@ -16,7 +16,7 @@ abstract class OrGeneralizationTest {
         assertEquals(sum(n), 18.70);
     }
 
-    double sum(Number... numbers) {
+    final double sum(Number... numbers) {
         double sum = 0;
         for (Number number : numbers)
             sum += number.doubleValue();

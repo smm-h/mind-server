@@ -10,8 +10,8 @@ import ir.smmh.util.Map;
 import ir.smmh.util.Mutable;
 import ir.smmh.util.Serializable;
 import ir.smmh.util.impl.MapImpl;
-import ir.smmh.util.impl.MutableHashSet;
 import ir.smmh.util.impl.MutableImpl;
+import ir.smmh.util.impl.MutableCollectionImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -22,14 +22,16 @@ import java.util.HashSet;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializable.JSON {
+@SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "StaticMethodOnlyUsedInOneClass", "ThrowsRuntimeException"})
+public final class MutableMindImpl implements Mind.Mutable, Mutable.WithListeners.Injected, Serializable.JSON {
 
     private final String name;
     private final @NotNull Map.SingleValue.Mutable<String, MutableIdeaImpl> ideas = new MapImpl.SingleValue.Mutable<>();
-    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
-    private final Storage storage = new StorageImpl("minds");
+    private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
+    private final Storage storage = StorageImpl.of("minds");
 
-    public MutableMindImpl(String name, @Nullable Iterable<MutableIdeaImpl> ideas) {
+    private MutableMindImpl(String name, @Nullable Iterable<MutableIdeaImpl> ideas) {
+        super();
         this.name = name;
         if (ideas != null) {
             for (MutableIdeaImpl idea : ideas) {
@@ -39,9 +41,10 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
         setup();
     }
 
-    public MutableMindImpl(JSONObject object) throws JSONException {
-        this.name = object.getString("name");
-        for (MutableIdeaImpl idea : JSONUtil.arrayOfObjects(object, "ideas", new HashSet<>(), o -> {
+    private MutableMindImpl(JSONObject object) throws JSONException {
+        super();
+        name = object.getString("name");
+        for (MutableIdeaImpl idea : JSONUtil.arrayOfObjects(object, "ideas", new HashSet<>(8), o -> {
             try {
                 return new MutableIdeaImpl(this, o);
             } catch (JSONException e) {
@@ -50,24 +53,47 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
                 return null;
             }
         })) {
-            this.ideas.setAtPlace(idea.getName(), idea);
+            ideas.setAtPlace(idea.getName(), idea);
         }
         setup();
     }
 
+    @NotNull
+    public static Mind.Mutable createBlank(String name, @Nullable Iterable<MutableIdeaImpl> ideas) {
+        return new MutableMindImpl(name, ideas);
+    }
+
+    @Nullable
+    public static Mind.Mutable parse(String identifier, String serialization) {
+        try {
+            return parse(identifier, JSONUtil.parse(serialization));
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    @Nullable
+    public static Mind.Mutable parse(String identifier, JSONObject object) {
+        try {
+            return new MutableMindImpl(object);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
     @Override
-    public Iterable<String> overIdeaNames() {
+    public @NotNull Iterable<String> overIdeaNames() {
         return ideas.overKeys();
     }
 
     @Override
-    public Iterable<Idea> overIdeas() {
-        return null;
+    public @NotNull Iterable<MutableIdeaImpl> overIdeas() {
+        return ideas.overValues();
     }
 
     @Override
-    public @Nullable MutableIdeaImpl findIdeaByName(String name) {
-        return ideas.getAtPlace(name);
+    public @Nullable Idea.Mutable findIdeaByName(String ideaName) {
+        return ideas.getAtPlace(ideaName);
     }
 
     private void setup() {
@@ -90,11 +116,12 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
     }
 
     @Override
-    public @NotNull MutableIdeaImpl imagine(@NotNull String name) {
-        @Nullable MutableIdeaImpl idea = ideas.getAtPlace(name);
+    public @NotNull Idea.Mutable imagine(@NotNull String ideaName) {
+        @Nullable MutableIdeaImpl idea = ideas.getAtPlace(ideaName);
         if (idea == null) {
             preMutate();
-            idea = new MutableIdeaImpl(this, name, new MutableHashSet<>(), new HashSet<>(), new HashSet<>());
+            idea = new MutableIdeaImpl(this, ideaName, MutableCollectionImpl.of(new HashSet<>()), new HashSet<>(8),
+                    new HashSet<>(8));
             ideas.setAtPlace(idea.getName(), idea);
             postMutate();
         }
@@ -107,7 +134,7 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
     }
 
     @Override
-    public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+    public @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
         return injectedMutable;
     }
 
@@ -116,14 +143,13 @@ public class MutableMindImpl implements Mind.Mutable, Mutable.Injected, Serializ
         JSONObject object = new JSONObject();
         if (clean()) {
             try {
-                JSONArray ideas = new JSONArray();
-                for (MutableIdeaImpl idea : this.ideas.overValues()) {
-                    ideas.put(idea.serializeJSON());
+                JSONArray array = new JSONArray();
+                for (MutableIdeaImpl idea : ideas.overValues()) {
+                    array.put(idea.serializeJSON());
                 }
                 object.put("name", name);
-                object.put("ideas", ideas);
-            } catch (JSONException e) {
-                e.printStackTrace();
+                object.put("ideas", array);
+            } catch (JSONException ignored) {
             }
         }
         return object;

@@ -6,7 +6,7 @@ public interface Bot {
 
     Predicate<Bot> RUNNING = Bot::isRunning;
 
-    void start(String token);
+    void start(String withToken);
 
     void stop();
 

@@ -7,7 +7,7 @@ class APIBotMain {
 
     public static void main(String[] args) {
 
-        final Bot bot = new StandardAPIBotImpl(new MindsAPI());
+        Bot bot = new StandardAPIBotImpl(new MindsAPI());
 
         bot.start("5069967929:AAFz5Wr5UfGwraPDQuKafouHnE6mLEATnQQ");
 

@@ -7,21 +7,22 @@ import ir.smmh.tree.NodedTree;
 import ir.smmh.util.FunctionalUtil;
 import ir.smmh.util.Listeners;
 import ir.smmh.util.ListenersImpl;
+import ir.smmh.util.Mutable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
-
 import java.util.Objects;
 
 import static ir.smmh.util.FunctionalUtil.with;
 
 @SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
-public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<DataType, NodedBinaryTreeImpl<DataType>.Node, NodedBinaryTreeImpl<DataType>> {
-    private final Listeners<FunctionalUtil.OnEventListener> onPreMutateListeners = new ListenersImpl<>();
-    private final Listeners<FunctionalUtil.OnEventListener> onPostMutateListeners = new ListenersImpl<>();
-    private final Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>> onCleanListeners = new ListenersImpl<>();
+public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<DataType,
+        NodedBinaryTreeImpl<DataType>.Node, NodedBinaryTreeImpl<DataType>>, Mutable.WithListeners {
+    private final Listeners<FunctionalUtil.OnEventListener> onPreMutateListeners = ListenersImpl.blank();
+    private final Listeners<FunctionalUtil.OnEventListener> onPostMutateListeners = ListenersImpl.blank();
+    private final Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>> onCleanListeners = ListenersImpl.blank();
     private @Nullable Node root;
     private final CanContain<Node> nodeContainer = new CanContain<>() {
         @Override
@@ -41,12 +42,12 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
     };
 
     @Override
-    public String toString() {
+    public final String toString() {
         return with(root, Node::nodeToString, "{empty}");
     }
 
     @Override
-    public boolean contains(DataType data) {
+    public final boolean contains(DataType data) {
         return root != null && contains(root, data);
     }
 
@@ -67,42 +68,42 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
     }
 
     @Override
-    public boolean isEmpty() {
+    public final boolean isEmpty() {
         return root == null;
     }
 
     @Override
-    public @NotNull CanContain<Node> nodes() {
+    public final @NotNull CanContain<Node> nodes() {
         return nodeContainer;
     }
 
     @Override
-    public @Nullable Node getRootNode() {
+    public final @Nullable Node getRootNode() {
         return root;
     }
 
     @Override
-    public void setRootNode(@Nullable Node node) {
-        this.root = node;
+    public final void setRootNode(@Nullable Node node) {
+        root = node;
     }
 
     @Override
-    public DataType getRootData() {
+    public final DataType getRootData() {
         return root == null ? null : root.getData();
     }
 
     @Override
-    public void setRootData(DataType data) {
+    public final void setRootData(DataType data) {
         setRootNode(new Node(data, null));
     }
 
     @Override
-    public NodedBinaryTreeImpl<DataType> specificThis() {
+    public final NodedBinaryTreeImpl<DataType> specificThis() {
         return this;
     }
 
     @Override
-    public boolean isDirty() {
+    public final boolean isDirty() {
         return false;
     }
 
@@ -112,23 +113,23 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
     }
 
     @Override
-    public @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPreMutateListeners() {
+    public final @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPreMutateListeners() {
         return onPreMutateListeners;
     }
 
     @Override
-    public @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPostMutateListeners() {
+    public final @NotNull Listeners<FunctionalUtil.OnEventListener> getOnPostMutateListeners() {
         return onPostMutateListeners;
     }
 
     @Override
-    public @NotNull Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>> getOnCleanListeners() {
+    public final @NotNull Listeners<FunctionalUtil.OnEventListenerWithException<CleaningException>> getOnCleanListeners() {
         return onCleanListeners;
     }
 
     @Override
-    public @NotNull String serialize() {
-        return null;
+    public final @NotNull String serialize() {
+        return null; // TODO serialize binary tree
     }
 
     class Node implements NodedTree.Binary.Mutable.Node<DataType, Node, NodedBinaryTreeImpl<DataType>> {
@@ -139,12 +140,13 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
         private @Nullable Node parent;
 
         Node(DataType data, @Nullable Node parent) {
+            super();
             this.data = data;
             this.parent = parent;
         }
 
         @Override
-        public String toString() {
+        public final String toString() {
             return "<" + data + ">[" + leftChild + "|" + rightChild + "]";
         }
 
@@ -160,7 +162,7 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
         }
 
         @Override
-        public @NotNull NodedBinaryTreeImpl<DataType> asTree() {
+        public final @NotNull NodedBinaryTreeImpl<DataType> asTree() {
             NodedBinaryTreeImpl<DataType> subtree = new NodedBinaryTreeImpl<>();
             subtree.setRootNode(this);
             // handle mutation and/or viewing
@@ -168,12 +170,12 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
         }
 
         @Override
-        public @NotNull Sequential<Node> getChildren() {
+        public final @NotNull Sequential<Node> getChildren() {
             return new BinarySequentialImpl<>(leftChild, rightChild);
         }
 
         @Override
-        public int getIndexInParent() {
+        public final int getIndexInParent() {
             if (parent != null) {
                 if (this == parent.leftChild)
                     return 0;
@@ -184,52 +186,52 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
         }
 
         @Override
-        public @Nullable DataType getData() {
+        public final @Nullable DataType getData() {
             return data;
         }
 
         @Override
-        public void setData(DataType data) {
+        public final void setData(DataType data) {
             this.data = data;
         }
 
         @Override
-        public @Nullable Node getParent() {
+        public final @Nullable Node getParent() {
             return parent;
         }
 
         @Override
-        public void setParent(Node parent) {
+        public final void setParent(Node parent) {
             this.parent = parent;
         }
 
         @Override
-        public @NotNull NodedBinaryTreeImpl<DataType> getTree() {
+        public final @NotNull NodedBinaryTreeImpl<DataType> getTree() {
             return NodedBinaryTreeImpl.this;
         }
 
         @Override
-        public Node specificThis() {
+        public final Node specificThis() {
             return this;
         }
 
         @Override
-        public @Nullable Node getLeftChild() {
+        public final @Nullable Node getLeftChild() {
             return leftChild;
         }
 
         @Override
-        public void setLeftChild(@Nullable Node leftChild) {
+        public final void setLeftChild(@Nullable Node leftChild) {
             this.leftChild = leftChild;
         }
 
         @Override
-        public @Nullable Node getRightChild() {
+        public final @Nullable Node getRightChild() {
             return rightChild;
         }
 
         @Override
-        public void setRightChild(@Nullable Node rightChild) {
+        public final void setRightChild(@Nullable Node rightChild) {
             this.rightChild = rightChild;
         }
     }

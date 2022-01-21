@@ -3,30 +3,35 @@ package ir.smmh.util;
 import ir.smmh.Backward;
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("StaticMethodOnlyUsedInOneClass")
 public interface StringUtil {
     byte RADIX_MAX = 36;
     byte RADIX_HEX = 16;
     byte RADIX_DEC = 10;
     byte RADIX_OCT = 8;
     byte RADIX_BIN = 2;
+    char DECIMAL_POINT = '.';
+    String LINEBREAK = "\n";
+    char SPACE = ' ';
+    char TAB = '\t';
 
     static String tabIn(String string) {
-        return shiftRight(string, 1, '\t');
+        return shiftRight(string, 1, TAB);
     }
 
     static String shiftRight(String string, int length) {
-        return shiftRight(string, length, ' ');
+        return shiftRight(string, length, SPACE);
     }
 
     static String shiftRight(String string, int length, char ch) {
-        final String prefix = repeat(ch, length);
-        final StringBuilder builder = new StringBuilder();
-        boolean notFirstTime = false;
-        for (String line : string.split("\n")) {
-            if (notFirstTime) {
-                builder.append("\n");
+        String prefix = repeat(ch, length);
+        StringBuilder builder = new StringBuilder(string.length() * 2);
+        boolean firstTime = true;
+        for (String line : string.split(LINEBREAK)) {
+            if (firstTime) {
+                firstTime = false;
             } else {
-                notFirstTime = true;
+                builder.append(LINEBREAK);
             }
             builder.append(prefix);
             builder.append(line);
@@ -118,7 +123,7 @@ public interface StringUtil {
     }
 
     /**
-     * <table>
+     * <table summary="Examples for values of a given string in radix 10">
      * <tr>
      * <th>Input as {@code String}</th>
      * <th>Output as {@code Number}</th>
@@ -142,7 +147,7 @@ public interface StringUtil {
     }
 
     /**
-     * <table>
+     * <table summary="Examples for values of a given string in various radices">
      * <tr>
      * <th>Input as {@code String}</th>
      * <th>Radix as {@code int}</th>
@@ -165,12 +170,13 @@ public interface StringUtil {
      * </tr>
      * </table>
      */
+    @SuppressWarnings("SpellCheckingInspection")
     static Number valueOfString(@NotNull String string, byte radix) {
 
-        if (string.length() == 0)
+        if (string.isEmpty())
             throw new IllegalArgumentException("empty string has no numeric value");
 
-        int point = string.indexOf('.');
+        int point = string.indexOf(DECIMAL_POINT);
 
         int whole;
         if (point == -1)
@@ -191,15 +197,15 @@ public interface StringUtil {
             return value;
         } else {
 
-            double subvalue = 0;
+            double subValue = 0;
 
             for (int i = string.length() - 1; i > point; i--) {
-                subvalue += valueOfSymbol(string.charAt(i));
-                subvalue /= radix;
+                subValue += valueOfSymbol(string.charAt(i));
+                subValue /= radix;
             }
 
             // return double
-            return subvalue + value;
+            return subValue + value;
         }
     }
 

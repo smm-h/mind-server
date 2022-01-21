@@ -11,16 +11,16 @@ import java.net.UnknownHostException;
 public class ClientImpl implements Client {
 
     public static void main(String[] args) {
-        final Client client = new ClientImpl();
-        final BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        Client client = new ClientImpl();
+        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Type in your requests as JSON to process them; or type in '.' to stop.");
         while (true) {
             try {
                 System.out.print(">>> ");
-                final String request = input.readLine();
-                if (request.equals("."))
+                String request = input.readLine();
+                if (".".equals(request))
                     break;
-                final String response = client.connectToLocalHost(request);
+                String response = client.connectToLocalHost(request);
                 System.out.print("=== ");
                 System.out.println(response);
             } catch (IOException e) {
@@ -35,18 +35,18 @@ public class ClientImpl implements Client {
     }
 
     @Override
-    public int getDefaultPort() {
+    public final int getDefaultPort() {
         return 7000;
     }
 
     @Nullable
     @Override
-    public String connectToHost(@NotNull final String address, int port, @NotNull final String request) {
+    public final String connectToHost(@NotNull String address, int port, @NotNull String request) {
         String response = null;
         try {
-            final Socket socket = new Socket(address, port);
-            final DataInputStream res = new DataInputStream(socket.getInputStream());
-            final DataOutputStream req = new DataOutputStream(socket.getOutputStream());
+            Socket socket = new Socket(address, port);
+            DataInputStream res = new DataInputStream(socket.getInputStream());
+            DataOutputStream req = new DataOutputStream(socket.getOutputStream());
             try {
                 req.writeUTF(request);
                 try {

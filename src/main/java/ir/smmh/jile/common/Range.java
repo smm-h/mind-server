@@ -9,13 +9,14 @@ public class Range {
         private final int min, max;
 
         public Integer(int min, int max) {
+            super();
             if (min > max)
                 throw new IllegalArgumentException();
             this.min = min;
             this.max = max;
         }
 
-        public boolean contains(int number) {
+        public final boolean contains(int number) {
             return number >= min && number <= max;
         }
     }

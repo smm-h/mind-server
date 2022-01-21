@@ -5,30 +5,32 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@SuppressWarnings({"AbstractClassWithoutAbstractMethods", "PackageVisibleInnerClass"})
 abstract class SequentialCloneTest<T> {
 
-    final Sequential<T> data;
+    private final Sequential<T> data;
 
-    protected SequentialCloneTest(Sequential<T> data) {
+    SequentialCloneTest(Sequential<T> data) {
+        super();
         this.data = data;
     }
 
     @Test
-    void cloneTest() {
+    final void cloneTest() {
         System.out.println(data);
         Sequential<T> clonedData = data.clone(false);
         System.out.println(clonedData);
-        assertEquals(data, clonedData);
+        assertEquals(data, clonedData, "Cloned data not equal to data");
     }
 
     static class Int extends SequentialCloneTest<Integer> {
-        protected Int() {
+        Int() {
             super(Sequential.of(RandomUtil.generateRandomIntArray(10, 40)));
         }
     }
 
     static class Char extends SequentialCloneTest<Character> {
-        protected Char() {
+        Char() {
             super(Sequential.of("Hello, World!".toCharArray()));
         }
     }
@@ -37,7 +39,7 @@ abstract class SequentialCloneTest<T> {
 
         private static final String[] stringArray = {"apples", "oranges", "bananas"};
 
-        protected Str() {
+        Str() {
             super(Sequential.of(stringArray));
         }
     }

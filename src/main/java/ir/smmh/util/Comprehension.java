@@ -8,38 +8,38 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 @FunctionalInterface
-public interface Comprehension<I, O> {
-    O forEach(I i);
+public interface Comprehension<Input, Output> {
+    Output forEach(Input input);
 
     @FunctionalInterface
-    interface List<I, O> extends Comprehension<I, O> {
-        default @NotNull java.util.List<O> comprehend(@Nullable Iterable<I> iterable) {
-            final java.util.List<O> list = new ArrayList<>();
+    interface List<Input, Output> extends Comprehension<Input, Output> {
+        default @NotNull java.util.List<Output> comprehend(@Nullable Iterable<? extends Input> iterable) {
+            java.util.List<Output> list = new ArrayList<>();
             if (iterable != null)
-                for (final I i : iterable)
-                    list.add(forEach(i));
+                for (Input input : iterable)
+                    list.add(forEach(input));
             return list;
         }
     }
 
     @FunctionalInterface
-    interface Set<I, O> extends Comprehension<I, O> {
-        default @NotNull java.util.Set<O> comprehend(@Nullable Iterable<I> iterable) {
-            final java.util.Set<O> set = new HashSet<>();
+    interface Set<Input, Output> extends Comprehension<Input, Output> {
+        default @NotNull java.util.Set<Output> comprehend(@Nullable Iterable<? extends Input> iterable) {
+            java.util.Set<Output> set = new HashSet<>();
             if (iterable != null)
-                for (final I i : iterable)
-                    set.add(forEach(i));
+                for (Input input : iterable)
+                    set.add(forEach(input));
             return set;
         }
     }
 
     @FunctionalInterface
-    interface Map<I, K, V> extends Comprehension<I, java.util.Map.Entry<K, V>> {
-        default @NotNull java.util.Map<K, V> comprehend(@Nullable Iterable<I> iterable) {
-            final java.util.Map<K, V> map = new HashMap<>();
+    interface Map<Input, K, V> extends Comprehension<Input, java.util.Map.Entry<K, V>> {
+        default @NotNull java.util.Map<K, V> comprehend(@Nullable Iterable<? extends Input> iterable) {
+            java.util.Map<K, V> map = new HashMap<>();
             if (iterable != null) {
-                for (final I i : iterable) {
-                    final java.util.Map.Entry<K, V> entry = forEach(i);
+                for (Input input : iterable) {
+                    java.util.Map.Entry<K, V> entry = forEach(input);
                     map.put(entry.getKey(), entry.getValue());
                 }
             }

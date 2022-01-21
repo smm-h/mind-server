@@ -1,18 +1,23 @@
 package ir.smmh.util.jile.impl;
 
+import ir.smmh.util.jile.Or;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Takes double the size in memory, but is checked
  *
  * @see SlimOr
  */
+@SuppressWarnings("SuspiciousGetterSetter")
 public class FatOr<This, That> extends AbstractOr<This, That> {
 
-    private final This thisObject;
-    private final That thatObject;
+    private final @Nullable This thisObject;
+    private final @Nullable That thatObject;
     private final boolean isThis;
 
     @SuppressWarnings("unchecked")
-    public FatOr(Object object, boolean isThis) {
+    protected FatOr(Object object, boolean isThis) {
+        super();
         this.isThis = isThis;
         if (isThis) {
             thisObject = (This) object;
@@ -23,26 +28,31 @@ public class FatOr<This, That> extends AbstractOr<This, That> {
         }
     }
 
-    public static <This, That> FatOr<This, That> makeThis(This object) {
-        return new FatOr<>(object, true);
+    public static <This, That> Or<This, That> makeThis(This object) {
+        return either(object, true);
     }
 
-    public static <This, That> FatOr<This, That> makeThat(That object) {
-        return new FatOr<>(object, false);
+    public static <This, That> Or<This, That> makeThat(That object) {
+        return either(object, false);
+    }
+
+    @SuppressWarnings("BooleanParameter")
+    public static <This, That> Or<This, That> either(Object object, boolean isThis) {
+        return new FatOr<>(object, isThis);
     }
 
     @Override
-    public boolean isThis() {
+    public final boolean isThis() {
         return isThis;
     }
 
     @Override
-    public This getThis() {
+    public final This getThis() {
         return thisObject;
     }
 
     @Override
-    public That getThat() {
+    public final That getThat() {
         return thatObject;
     }
 }

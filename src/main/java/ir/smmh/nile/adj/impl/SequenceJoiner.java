@@ -1,7 +1,6 @@
 package ir.smmh.nile.adj.impl;
 
 import ir.smmh.nile.adj.Sequential;
-import ir.smmh.util.Mutable;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,13 +8,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 
 // TODO TEST
-public class SequenceJoiner<T> extends Sequential.AbstractMutableSequential<T> implements Sequential.Mutable.VariableSize<T>, Mutable.Injected {
+public class SequenceJoiner<T> extends Sequential.AbstractMutableSequential<T> implements Sequential.Mutable.VariableSize<T> {
 
     private final Sequential.Mutable<Sequential<? extends T>> subSequences = new SequentialImpl<>(new ArrayList<>());
-    private final ir.smmh.util.Mutable injectedMutable = new MutableImpl(this);
+    private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
 
     @Override
-    public T getAtIndex(int index) throws IndexOutOfBoundsException {
+    public final T getAtIndex(int index) throws IndexOutOfBoundsException {
         for (Sequential<? extends T> s : subSequences) {
             int n = s.getSize();
             if (index < n) {
@@ -28,7 +27,7 @@ public class SequenceJoiner<T> extends Sequential.AbstractMutableSequential<T> i
     }
 
     @Override
-    public int getSize() {
+    public final int getSize() {
         int n = 0;
         for (Sequential<? extends T> s : subSequences) {
             n += s.getSize();
@@ -52,12 +51,12 @@ public class SequenceJoiner<T> extends Sequential.AbstractMutableSequential<T> i
     }
 
     @Override
-    public @NotNull ir.smmh.util.Mutable getInjectedMutable() {
+    public final @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
         return injectedMutable;
     }
 
     @Override
-    public Sequential<T> clone(boolean deepIfPossible) {
+    public final Sequential<T> clone(boolean deepIfPossible) {
         return null;
     }
 }

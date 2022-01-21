@@ -7,45 +7,46 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MindTest {
+@SuppressWarnings({"StandardVariableNames", "ClassWithoutConstructor", "ClassNamePrefixedWithPackageName"})
+class MindTest {
 
     @SuppressWarnings("FieldCanBeLocal")
-    private Mind.Mutable m;
+    private Mind.Mutable mind;
     private Idea.Mutable a, b, c;
     private String t;
 
     @BeforeEach
-    void beforeEach() {
-        m = new MutableMindImpl("test" + RandomUtil.generateRandomHex(6), null);
-        a = m.imagine("a");
-        b = m.imagine("b");
-        c = m.imagine("c");
-        m.imagine(t = "t");
+    final void beforeEach() {
+        mind = MutableMindImpl.createBlank("test" + RandomUtil.generateRandomHex(6), null);
+        a = mind.imagine("a");
+        b = mind.imagine("b");
+        c = mind.imagine("c");
+        mind.imagine(t = "t");
     }
 
     @Test
-    public void testIntension() {
+    final void testIntension() {
         a.become(b);
-        assertTrue(a.is(b));
+        assertTrue(a.is(b), "a is not b");
     }
 
     @Test
-    public void testTransitivity() {
+    final void testTransitivity() {
         a.become(b);
         b.become(c);
-        assertTrue(a.is(c));
+        assertTrue(a.is(c), "a is not c");
     }
 
     @Test
-    public void testPossession() {
-        final Property p = a.possess("p", t);
-        assertTrue(a.has(p));
+    final void testPossession() {
+        Property p = a.possess("p", t);
+        assertTrue(a.has(p), "a does not have p");
     }
 
     @Test
-    public void testTransitivePossession() {
+    final void testTransitivePossession() {
         a.become(b);
-        final Property p = b.possess("p", t);
-        assertTrue(a.has(p));
+        Property p = b.possess("p", t);
+        assertTrue(a.has(p), "a does not have p");
     }
 }

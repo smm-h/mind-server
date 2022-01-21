@@ -2,7 +2,6 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MindStorageGate;
 import ir.smmh.util.JSONUtil;
-import ir.smmh.util.impl.MutableImpl;
 import org.json.JSONObject;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,26 +10,27 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SuppressWarnings({"ClassNamePrefixedWithPackageName", "ClassWithoutConstructor"})
 class MindSerializationTest {
 
-    private static final MindStorageGate g = new MindStorageGate("test");
-    private Mind.Mutable m;
+    private static final MindStorageGate gate = new MindStorageGate("test");
+    private Mind.Mutable mind;
 
     @AfterAll
     static void afterAll() {
-        MutableImpl.cleanEverything();
+        // TODO gate.cleanEverything();
     }
 
     @BeforeEach
-    void beforeEach() {
-        m = g.createBlank("test-mind");
+    final void beforeEach() {
+        mind = gate.createBlank("test-mind");
     }
 
     @Test
-    public void testSerialization() {
-        m.imagine("a");
-        JSONObject object = JSONUtil.parse(m.serialize());
-        assertNotNull(object);
-        assertEquals(1, object.getJSONArray("ideas").length());
+    final void testSerialization() {
+        mind.imagine("a");
+        JSONObject object = JSONUtil.parse(mind.serialize());
+        assertNotNull(object, "JSON parse returned null");
+        assertEquals(1, object.getJSONArray("ideas").length(), "There was expected to be a single idea.");
     }
 }

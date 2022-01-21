@@ -11,13 +11,15 @@ import java.time.Instant;
  */
 public class SystemClockChronometer implements Chronometer {
 
-    private Instant then = null;
+    private Instant then;
 
-    public void reset() {
+    @Override
+    public final void reset() {
         then = Instant.now();
     }
 
-    public double stop() {
+    @Override
+    public final double stop() {
         Instant now = Instant.now();
         long difference = then.toEpochMilli() - now.toEpochMilli();
         return difference / 10e6;

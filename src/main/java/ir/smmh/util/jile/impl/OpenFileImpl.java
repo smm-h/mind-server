@@ -20,108 +20,127 @@ public class OpenFileImpl implements OpenFile {
     private @Nullable Path path;
     private long lastSynchronized;
 
-    public OpenFileImpl(String contents, String ext) {
+    private OpenFileImpl(String contents, String ext) {
         this(contents, ext, null);
     }
 
-    public OpenFileImpl(String filename) throws InvalidPathException {
+    private OpenFileImpl(String filename) {
         this(null, null, filename);
     }
 
     private OpenFileImpl(@Nullable String contents, @Nullable String ext, @Nullable String filename) {
+        super();
         this.contents = contents;
         this.ext = ext;
         if (filename == null) {
-            this.path = null;
+            path = null;
         } else {
-            this.path = Path.of(filename);
+            path = Path.of(filename);
             if (this.ext == null)
-                this.ext = FileUtil.getExt(this.path.getFileName().toString());
+                this.ext = FileUtil.getExt(path.getFileName().toString());
             forceRead();
         }
     }
 
+    public static OpenFile of(String contents, String ext) {
+        return new OpenFileImpl(contents, ext);
+    }
+
+    /**
+     * @param filename the full path of the file as a string
+     * @return a file object open for reading
+     * @throws InvalidPathException the given path was invalid
+     */
+    public static OpenFile of(String filename) {
+        return new OpenFileImpl(filename);
+    }
+
     @Override
-    public boolean exists() {
+    public final boolean exists() {
         return path != null && Files.exists(path);
     }
 
     @Override
-    public boolean forceRead() {
-        if (path == null)
-            return false;
-        try {
-            contents = Files.readString(path);
-            lastSynchronized = System.currentTimeMillis();
-            return true;
-        } catch (IOException e) {
-            return false;
+    public final boolean forceRead() {
+        if (path != null) {
+            try {
+                contents = Files.readString(path);
+                lastSynchronized = System.currentTimeMillis();
+                return true;
+            } catch (IOException ignored) {
+            }
         }
+        return false;
     }
 
     @Override
-    public boolean forceWrite() {
-        if (path == null)
-            return false;
-        try {
-            Files.writeString(path, contents == null ? "" : contents);
-            lastSynchronized = System.currentTimeMillis();
-            return true;
-        } catch (IOException e) {
-            return false;
+    public final boolean forceWrite() {
+        if (path != null) {
+            try {
+                Files.writeString(path, contents == null ? "" : contents);
+                lastSynchronized = System.currentTimeMillis();
+                return true;
+            } catch (IOException ignored) {
+            }
         }
+        return false;
     }
 
     @Override
-    public @Nullable String getFullName() {
+    public final @Nullable String getFullName() {
         return path == null ? null : path.toString();
     }
 
+    /**
+     * @param fullName the new full path of the file as a string
+     * @throws InvalidPathException if the given path was invalid
+     */
     @Override
-    public void setFullName(String fullName) throws InvalidPathException {
-        this.path = Path.of(fullName);
+    public final void setFullName(String fullName) {
+        path = Path.of(fullName);
     }
 
     @Override
-    public @Nullable String getExt() {
+    public final @Nullable String getExt() {
         return ext;
     }
 
     @Override
-    public @Nullable String getContents() {
+    public final @Nullable String getContents() {
         return contents;
     }
 
+    @SuppressWarnings("NestedConditionalExpression")
     @Override
-    public String getTitle() {
+    public final String getTitle() {
         return path == null ? "Untitled" + (ext == null ? "" : "." + ext) : path.getFileName().toString();
     }
 
     @Override
-    public boolean dump(String filename) {
-        if (contents == null)
-            return false;
-        try {
-            Files.writeString(Path.of(filename), contents);
-            return true;
-        } catch (IOException | InvalidPathException e) {
-            return false;
+    public final boolean dump(String filename) {
+        if (contents != null) {
+            try {
+                Files.writeString(Path.of(filename), contents);
+                return true;
+            } catch (IOException | InvalidPathException ignored) {
+            }
         }
+        return false;
     }
 
     @Override
-    public long getSize() {
-        if (path == null)
-            return -1;
-        try {
-            return Files.size(path);
-        } catch (IOException e) {
-            return -1;
+    public final long getSize() {
+        if (path != null) {
+            try {
+                return Files.size(path);
+            } catch (IOException ignored) {
+            }
         }
+        return -1;
     }
 
     @Override
-    public long getLastModifiedExternally() {
+    public final long getLastModifiedExternally() {
         try {
             return path == null ? -1 : Files.getLastModifiedTime(path).toMillis();
         } catch (IOException e) {
@@ -130,26 +149,40 @@ public class OpenFileImpl implements OpenFile {
     }
 
     @Override
-    public long getLastSynchronized() {
+    public final long getLastSynchronized() {
         return lastSynchronized;
     }
 
-    public static class Writeable extends OpenFileImpl implements OpenFile.Writeable, Mutable.Injected {
+    @SuppressWarnings("MethodOverridesStaticMethodOfSuperclass")
+    public static final class Writeable extends OpenFileImpl implements OpenFile.Writeable, Mutable.WithListeners.Injected {
 
-        private final Mutable injectedMutable = new MutableImpl(this);
+        private final Mutable.WithListeners injectedMutable = MutableImpl.blank();
         private long lastSetContents = -1;
 
-        public Writeable(String contents, String ext) {
+        private Writeable(String contents, String ext) {
             this(contents, ext, null);
         }
 
-        public Writeable(String filename) throws InvalidPathException {
+        private Writeable(String filename) {
             this(null, null, filename);
         }
 
         private Writeable(@Nullable String contents, @Nullable String ext, @Nullable String filename) {
             super(contents, ext, filename);
             getOnCleanListeners().add(this::synchronize);
+        }
+
+        public static OpenFile.Writeable of(String contents, String ext) {
+            return new OpenFileImpl.Writeable(contents, ext);
+        }
+
+        /**
+         * @param filename the full path of the file as a string
+         * @return a file object open for reading and writing
+         * @throws InvalidPathException if the given path was invalid
+         */
+        public static OpenFile.Writeable of(String filename) {
+            return new OpenFileImpl.Writeable(filename);
         }
 
         @Override
@@ -164,7 +197,7 @@ public class OpenFileImpl implements OpenFile {
         }
 
         @Override
-        public @NotNull Mutable getInjectedMutable() {
+        public @NotNull Mutable.WithListeners getInjectedMutable() {
             return injectedMutable;
         }
     }

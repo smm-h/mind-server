@@ -13,7 +13,7 @@ public interface Map<K> extends CanContain<K> {
 
     @NotNull Iterable<K> overKeys();
 
-    interface Mutable<K, V> extends Map<K>, CanSetAtPlace<K, V>, ir.smmh.util.Mutable {
+    interface Mutable<K, V> extends Map<K>, CanSetAtPlace<K, V> {
 
     }
 
@@ -32,6 +32,7 @@ public interface Map<K> extends CanContain<K> {
 
     interface MultiValue<K, V> extends Map<K>, CanGetAtPlace<K, Sequential<V>> {
 
+        @Override
         @NotNull Sequential<V> getAtPlace(K key);
 
         default int count(K key) {

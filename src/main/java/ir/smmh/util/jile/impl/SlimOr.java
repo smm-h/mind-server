@@ -11,6 +11,7 @@ public class SlimOr<This, That> extends AbstractOr<This, That> {
     private final boolean isThis;
 
     public SlimOr(Object object, boolean isThis) {
+        super();
         this.object = object;
         this.isThis = isThis;
     }
@@ -24,19 +25,19 @@ public class SlimOr<This, That> extends AbstractOr<This, That> {
     }
 
     @Override
-    public boolean isThis() {
+    public final boolean isThis() {
         return isThis;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public This getThis() {
+    public final This getThis() {
         return (This) object;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public That getThat() {
+    public final That getThat() {
         return (That) object;
     }
 }

@@ -19,22 +19,22 @@ public abstract class AuthenticatedStandardAPI<A> extends StandardAPI {
     public abstract A authenticate(JSONObject authentication);
 
     @SuppressWarnings("unchecked")
-    public @NotNull JSONObject processAuthenticatedMethod(@NotNull Method.AuthenticatedMethod<?> uncheckedMethod, @Nullable JSONObject authentication, @NotNull JSONObject parameters) {
-        final Method.AuthenticatedMethod<A> method;
+    public final @NotNull JSONObject processAuthenticatedMethod(@NotNull Method.AuthenticatedMethod<?> uncheckedMethod, @Nullable JSONObject authentication, @NotNull JSONObject parameters) {
+        Method.AuthenticatedMethod<A> method;
         try {
             method = (Method.AuthenticatedMethod<A>) uncheckedMethod;
         } catch (ClassCastException e) {
             System.err.println("Failed to cast an unchecked authenticated method");
             return respond(BUG);
         }
-        @Nullable final A authenticated = authenticate(authentication);
+        @Nullable A authenticated = authenticate(authentication);
         if (method instanceof Method.AuthenticationRequired) {
-            final Method.AuthenticationRequired<A> required = (Method.AuthenticationRequired<A>) method;
+            Method.AuthenticationRequired<A> required = (Method.AuthenticationRequired<A>) method;
             if (authenticated == null)
                 return respond(AUTHENTICATION_FAILED);
             return required.process(authenticated, parameters);
         } else if (method instanceof Method.AuthenticationOptional) {
-            final Method.AuthenticationOptional<A> optional = (Method.AuthenticationOptional<A>) method;
+            Method.AuthenticationOptional<A> optional = (Method.AuthenticationOptional<A>) method;
             return optional.process(authenticated, parameters);
         } else {
             System.err.println("You must not extend/implement Method.Authenticated directly");

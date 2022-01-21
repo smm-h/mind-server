@@ -18,6 +18,7 @@ public class PropertyImpl implements Property, Serializable.JSON {
     private final Supplier<Value> defaultValue;
 
     public PropertyImpl(Idea origin, String name, String type, Supplier<Value> defaultValue) {
+        super();
         this.origin = origin;
         this.name = name;
         this.type = type;
@@ -29,7 +30,7 @@ public class PropertyImpl implements Property, Serializable.JSON {
     }
 
     @Override
-    public @NotNull JSONObject serializeJSON() {
+    public final @NotNull JSONObject serializeJSON() {
         JSONObject object = new JSONObject();
         try {
             object.put("name", name);
@@ -42,32 +43,32 @@ public class PropertyImpl implements Property, Serializable.JSON {
     }
 
     @Override
-    public Idea getOrigin() {
+    public final Idea getOrigin() {
         return origin;
     }
 
     @Override
-    public @NotNull String getName() {
+    public final @NotNull String getName() {
         return name;
     }
 
     @Override
-    public String getType() {
+    public final String getType() {
         return type;
     }
 
     @Override
-    public Supplier<Value> getDefaultValue() {
+    public final Supplier<Value> getDefaultValue() {
         return defaultValue;
     }
 
     @Override
-    public String toString() {
+    public final String toString() {
         return name;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
         if (this == o)
             return true;
         if (!(o instanceof PropertyImpl))
@@ -83,7 +84,7 @@ public class PropertyImpl implements Property, Serializable.JSON {
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return name.hashCode();
     }
 }

@@ -5,30 +5,37 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 @ParametersAreNonnullByDefault
-public class ViewImpl<T> implements View<T> {
+public final class ViewImpl<T> implements View<T> {
 
-    private final Listeners<FunctionalUtil.OnEventListener> onExpireListeners = new ListenersImpl<>();
-    private T core;
+    private final Listeners<FunctionalUtil.OnEventListener> onExpireListeners = ListenersImpl.blank();
+    private final @NotNull WeakReference<T> core;
     private boolean expired;
 
-    public ViewImpl(T core) {
-        this.core = core;
-        if (core instanceof Mutable) {
-            ((Mutable) core).getOnPostMutateListeners().addDisposable(this::expire);
+    private ViewImpl(T core) {
+        super();
+        this.core = new WeakReference<>(core);
+        if (core instanceof Mutable.WithListeners) {
+            ((Mutable.WithListeners) core).getOnPostMutateListeners().addDisposable(this::expire);
         }
+    }
+
+    public static <T> View<T> of(T core) {
+        return new ViewImpl<>(core);
     }
 
     @Nullable
     @Override
     public T getCore() {
-        return core;
+        return core.get();
     }
 
     @Override
     public void nullifyCore() {
-        this.core = null;
+        core.clear();
     }
 
     @Override
@@ -38,7 +45,7 @@ public class ViewImpl<T> implements View<T> {
 
     @Override
     public void setExpired() {
-        this.expired = true;
+        expired = true;
     }
 
     @Override
@@ -53,6 +60,11 @@ public class ViewImpl<T> implements View<T> {
 
     @Override
     public int hashCode() {
-        return expired ? -1 : core.hashCode();
+        return Objects.hashCode(core.get());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof View && Objects.equals(((View) obj).getCore(), core.get());
     }
 }

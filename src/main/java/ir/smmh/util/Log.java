@@ -7,13 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
 import java.nio.file.InvalidPathException;
 import java.time.Instant;
 
+@FunctionalInterface
+@SuppressWarnings({"UseOfSystemOutOrSystemErr", "CallToPrintStackTrace"})
 public interface Log {
     static Log fromFile(@NotNull String filename, @NotNull PrintStream defaultStream) {
         try {
-            return new LogImpl(new PrintStream(new FileOutputStream(FileUtil.touch(filename), true)));
+            return new LogImpl(new PrintStream(new FileOutputStream(FileUtil.touch(filename), true), false, Charset.defaultCharset()));
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + filename);
         } catch (InvalidPathException e) {
@@ -37,14 +40,14 @@ public interface Log {
         getPrintStream().println();
     }
 
-    default void log(@NotNull final String text) {
-        final PrintStream log = getPrintStream();
+    default void log(@NotNull String text) {
+        PrintStream log = getPrintStream();
         log.print(Instant.now());
         log.print(" \t ");
         log.println(text);
     }
 
-    default void log(@NotNull final Throwable error) {
+    default void log(@NotNull Throwable error) {
         String message = error.getMessage();
         if (message != null)
             log(message);

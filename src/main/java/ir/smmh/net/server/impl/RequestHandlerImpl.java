@@ -10,22 +10,23 @@ import java.util.function.Function;
 public class RequestHandlerImpl extends Thread implements RequestHandler {
 
     private final Socket socket;
-    private final Function<@NotNull String, @NotNull String> requestProcessor;
+    private final Function<? super @NotNull String, @NotNull String> requestProcessor;
 
-    public RequestHandlerImpl(@NotNull final Socket socket, Function<@NotNull String, @NotNull String> requestProcessor) {
+    public RequestHandlerImpl(@NotNull Socket socket, Function<? super @NotNull String, @NotNull String> requestProcessor) {
+        super();
         this.socket = socket;
         this.requestProcessor = requestProcessor;
     }
 
     @Override
-    public @NotNull String request(@NotNull String request) {
+    public final @NotNull String request(@NotNull String request) {
         return requestProcessor.apply(request);
     }
 
     @Override
-    public void run() {
-        final DataInputStream req;
-        final DataOutputStream res;
+    public final void run() {
+        DataInputStream req;
+        DataOutputStream res;
         try {
             req = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
             res = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
@@ -33,11 +34,11 @@ public class RequestHandlerImpl extends Thread implements RequestHandler {
             System.err.println("Failed to communicate with the socket");
             return;
         }
-        final String request;
+        String request;
         try {
             request = req.readUTF();
             System.out.println(request);
-            final String response;
+            String response;
             try {
                 response = request(request);
                 System.out.println(response);

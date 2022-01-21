@@ -10,26 +10,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class OrderConstructorTest {
 
     @Test
-    void pre1() {
+    final void pre1() {
         pre("ABCDEFGH", "CBADHGFE", "EDABCFGH");
     }
 
     @Test
-    void pre2() {
+    final void pre2() {
         pre("GFHKDLAWRQPZ", "FGHDALPQRZWK", "KHGFWLDAZRQP");
     }
 
     @Test
-    void post1() {
+    final void post1() {
         post("124536", "425136", "452631");
     }
 
     @Test
-    void in1() {
+    final void in1() {
         in("124895367", "894526731", "849251637");
     }
 
-    void pre(String inOrder, String postOrder, String expectedPreOrder) {
+    final void pre(String inOrder, String postOrder, String expectedPreOrder) {
         assertEquals(
                 of(expectedPreOrder), targetPreOrder(
                         of(inOrder),
@@ -37,7 +37,7 @@ class OrderConstructorTest {
                         .getTarget());
     }
 
-    void post(String preOrder, String inOrder, String expectedPostOrder) {
+    final void post(String preOrder, String inOrder, String expectedPostOrder) {
         assertEquals(
                 of(expectedPostOrder), targetPostOrder(
                         of(preOrder),
@@ -45,7 +45,7 @@ class OrderConstructorTest {
                         .getTarget());
     }
 
-    void in(String preOrder, String postOrder, String expectedInOrder) {
+    final void in(String preOrder, String postOrder, String expectedInOrder) {
         assertEquals(
                 of(expectedInOrder), targetInOrder(
                         of(preOrder),

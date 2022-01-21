@@ -41,6 +41,7 @@ public interface View<T> {
 
     @NotNull Listeners<FunctionalUtil.OnEventListener> getOnExpireListeners();
 
+    @FunctionalInterface
     interface Injected<T> extends View<T> {
 
         @NotNull View<T> getInjectedView();

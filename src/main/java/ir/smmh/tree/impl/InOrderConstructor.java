@@ -13,27 +13,28 @@ public class InOrderConstructor<DataType> implements Tree.Binary.OrderConstructo
     private int preOrderIndex;
 
     public InOrderConstructor(Sequential<DataType> preOrder, Sequential<DataType> postOrder) {
+        super();
         this.preOrder = preOrder;
         this.postOrder = postOrder;
     }
 
     @Override
-    public @NotNull Sequential<DataType> getFirstSource() {
+    public final @NotNull Sequential<DataType> getFirstSource() {
         return preOrder;
     }
 
     @Override
-    public @NotNull Sequential<DataType> getSecondSource() {
+    public final @NotNull Sequential<DataType> getSecondSource() {
         return postOrder;
     }
 
     @Override
-    public @NotNull Sequential<DataType> getTarget() {
+    public final @NotNull Sequential<DataType> getTarget() {
         return getTree().traverseDataInOrder();
     }
 
     @Override
-    public @NotNull NodedBinaryTreeImpl<DataType> getTree() {
+    public final @NotNull NodedBinaryTreeImpl<DataType> getTree() {
         if (tree == null) {
             tree = new NodedBinaryTreeImpl<>();
             size = preOrder.getSize();
