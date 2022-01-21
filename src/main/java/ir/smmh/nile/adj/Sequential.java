@@ -16,7 +16,8 @@ import static ir.smmh.util.FunctionalUtil.with;
 
 @SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
-public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone<Sequential<T>>, CanGetAtIndex<T> {
+public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone<Sequential<T>>, CanGetAtIndex<T>,
+        CanContain<T> {
 
     static <T> Sequential<T> of(List<? extends T> list) {
 
@@ -857,7 +858,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
         public final String toString() {
             StringJoiner joiner = new StringJoiner(", ", "[", "]");
             for (T element : this)
-                joiner.add(element.toString());
+                joiner.add(Objects.toString(element));
             return joiner.toString();
         }
 

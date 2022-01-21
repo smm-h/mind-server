@@ -1,11 +1,11 @@
 package ir.smmh.mind;
 
+import ir.smmh.nile.verbs.CanSerialize;
 import ir.smmh.util.Named;
-import ir.smmh.util.Serializable;
 
 import java.util.function.Supplier;
 
-public interface Property extends Serializable, Named {
+public interface Property extends CanSerialize, Named {
 
     Idea getOrigin();
 

@@ -1,9 +1,9 @@
 package ir.smmh.mind;
 
+import ir.smmh.nile.verbs.CanSerialize;
 import ir.smmh.util.Named;
-import ir.smmh.util.Serializable;
 
-public interface StaticProperty extends Serializable, Named {
+public interface StaticProperty extends CanSerialize, Named {
 
     Idea getOrigin();
 

@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import static ir.smmh.util.FunctionalUtil.with;
 
@@ -126,18 +127,42 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
         return null; // TODO serialize tree
     }
 
-    class Node implements NodedTree.Mutable.Node<DataType, Node, NodedTreeImpl<DataType>> {
-        private final Sequential.Mutable<Node> children = new SequentialImpl<>();
+    @Override
+    public final String toString() {
+        return with(root, NodedTreeImpl.Node::nodeToString, "{empty}");
+    }
+
+    public class Node implements NodedTree.Mutable.Node<DataType, Node, NodedTreeImpl<DataType>> {
+
+        // TODO Tree.VariableDegree
+        private final Sequential.Mutable.VariableSize<Node> children = new SequentialImpl<>();
         private @Nullable DataType data;
         private @Nullable Node parent;
 
-        Node(DataType data, @Nullable Node parent) {
+        public Node(DataType data, @Nullable Node parent) {
             super();
             this.data = data;
             this.parent = parent;
         }
 
-        final Node makeNode(DataType data) {
+        @Override
+        public final String toString() {
+            return "<" + data + ">" + (children.isEmpty() ? "" : children.toString());
+        }
+
+        private String nodeToString() {
+            String childrenString = "";
+            if (!children.isEmpty()) {
+                StringJoiner joiner = new StringJoiner(", ", ":(", ")");
+                for (Node child : children) {
+                    joiner.add(child == null ? "-" : child.nodeToString());
+                }
+                childrenString = joiner.toString();
+            }
+            return with(data, Object::toString, "~") + childrenString;
+        }
+
+        private Node makeNode(DataType data) {
             return new Node(data, this);
         }
 
@@ -150,7 +175,7 @@ public class NodedTreeImpl<DataType> implements NodedTree.Mutable<DataType, Node
         }
 
         @Override
-        public final @NotNull Sequential.Mutable<Node> getChildren() {
+        public final @NotNull Sequential.Mutable.VariableSize<Node> getChildren() {
             return children;
         }
 

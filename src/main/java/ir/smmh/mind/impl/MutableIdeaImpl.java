@@ -1,9 +1,13 @@
 package ir.smmh.mind.impl;
 
 import ir.smmh.mind.*;
+import ir.smmh.nile.verbs.CanSerialize;
 import ir.smmh.storage.Storage;
 import ir.smmh.storage.impl.StorageImpl;
-import ir.smmh.util.*;
+import ir.smmh.util.Comprehension;
+import ir.smmh.util.JSONUtil;
+import ir.smmh.util.Mutable;
+import ir.smmh.util.MutableCollection;
 import ir.smmh.util.impl.MutableCollectionImpl;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +22,7 @@ import java.util.function.Supplier;
 import static java.util.Map.entry;
 
 @SuppressWarnings("ThrowsRuntimeException")
-public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Injected, Serializable.JSON {
+public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Injected, CanSerialize.JSON {
 
     private static final Comprehension.Map<PropertyImpl, String, PropertyImpl> c = p -> entry(p.getName(), p);
     private static final Comprehension.Map<StaticPropertyImpl, String, StaticPropertyImpl> sc = p -> entry(p.getName(), p);

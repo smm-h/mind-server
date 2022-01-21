@@ -3,14 +3,14 @@ package ir.smmh.mind.impl;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Property;
 import ir.smmh.mind.Value;
-import ir.smmh.util.Serializable;
+import ir.smmh.nile.verbs.CanSerialize;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.function.Supplier;
 
-public class PropertyImpl implements Property, Serializable.JSON {
+public class PropertyImpl implements Property, CanSerialize.JSON {
 
     private final Idea origin;
     private final String name;

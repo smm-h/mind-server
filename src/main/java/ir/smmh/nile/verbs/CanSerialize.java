@@ -1,12 +1,12 @@
-package ir.smmh.util;
+package ir.smmh.nile.verbs;
 
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
-public interface Serializable {
+public interface CanSerialize {
     @NotNull String serialize();
 
-    interface JSON extends Serializable {
+    interface JSON extends CanSerialize {
         @NotNull JSONObject serializeJSON();
 
         @Override

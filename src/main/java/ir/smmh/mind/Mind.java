@@ -1,9 +1,9 @@
 package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MutableIdeaImpl;
+import ir.smmh.nile.verbs.CanSerialize;
 import ir.smmh.storage.Stored;
 import ir.smmh.util.Named;
-import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -44,7 +44,7 @@ public interface Mind extends Named {
         }
     }
 
-    interface Immutable extends Mind, Serializable {
+    interface Immutable extends Mind, CanSerialize {
 
         @NotNull Function<String, Idea.Immutable> getIdeaLookup();
 

@@ -8,6 +8,7 @@ class OntologueMain {
 
         Bot bot = new Ontologue();
 
+        //noinspection SpellCheckingInspection
         bot.start("5069967929:AAFz5Wr5UfGwraPDQuKafouHnE6mLEATnQQ");
 
     }

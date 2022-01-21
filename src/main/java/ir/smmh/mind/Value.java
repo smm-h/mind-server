@@ -2,14 +2,14 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.NumberValue;
 import ir.smmh.mind.impl.StringValue;
-import ir.smmh.util.Serializable;
+import ir.smmh.nile.verbs.CanSerialize;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.function.Function;
 
-public interface Value extends Serializable.JSON {
+public interface Value extends CanSerialize.JSON {
     static Value of(JSONObject object, Function<java.lang.String, ? extends Idea> lookup) {
         try {
             java.lang.String name = object.getString("~");

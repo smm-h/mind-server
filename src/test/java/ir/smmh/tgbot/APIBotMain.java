@@ -9,6 +9,7 @@ class APIBotMain {
 
         Bot bot = new StandardAPIBotImpl(new MindsAPI());
 
+        //noinspection SpellCheckingInspection
         bot.start("5069967929:AAFz5Wr5UfGwraPDQuKafouHnE6mLEATnQQ");
 
     }

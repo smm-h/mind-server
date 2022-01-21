@@ -1,6 +1,9 @@
 package ir.smmh.tree;
 
+import ir.smmh.nile.adj.Order;
 import ir.smmh.nile.adj.Sequential;
+import ir.smmh.nile.adj.impl.FIFO;
+import ir.smmh.nile.adj.impl.LIFO;
 import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.nile.verbs.CanAppendTo;
 import ir.smmh.nile.verbs.CanContain;
@@ -33,6 +36,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         return traverse(new Traversal.LeafOnly<>());
     }
 
+
     default @NotNull Sequential<NodeType> getLeafNodes() {
         return traverseLeafOnly().getNodes();
     }
@@ -41,6 +45,24 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
     @Override
     default @NotNull Sequential<DataType> getLeafData() {
         return traverseLeafOnly().getData();
+    }
+
+    @Override
+    default @NotNull Sequential<DataType> getBreadthFirstData() {
+        return traverseBreadthFirst().getData();
+    }
+
+    @Override
+    default @NotNull Sequential<DataType> getDepthFirstData() {
+        return traverseDepthFirst().getData();
+    }
+
+    default @NotNull Traversed<DataType, NodeType, TreeType> traverseBreadthFirst() {
+        return traverse((Traversal.ByOrder<DataType, NodeType, TreeType>) FIFO::new);
+    }
+
+    default @NotNull Traversed<DataType, NodeType, TreeType> traverseDepthFirst() {
+        return traverse((Traversal.ByOrderReverseChildren<DataType, NodeType, TreeType>) LIFO::new);
     }
 
     @Override
@@ -292,6 +314,49 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
                     canAppendTo.add(node);
                 }
             }
+        }
+
+        @FunctionalInterface
+        interface ByOrder<DataType, NodeType extends NodedTree.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> extends Traversal<DataType, NodeType, TreeType> {
+
+            @Override
+            default @NotNull Traversed<DataType, NodeType, TreeType> traverse(@NotNull NodeType root) {
+                Sequential.Mutable.VariableSize<NodeType> seq = Sequential.Mutable.VariableSize.of(new ArrayList<>());
+                Order<NodeType> order = makeOrder(root.getCount());
+                order.enter(root);
+                while (true) {
+                    NodeType node = order.poll();
+                    if (node == null) break;
+                    seq.append(node);
+                    for (NodeType child : node.getChildren()) {
+                        order.enter(child);
+                    }
+                }
+                return Traversed.of(seq, this);
+            }
+
+            Order<NodeType> makeOrder(int capacity);
+        }
+        @FunctionalInterface
+        interface ByOrderReverseChildren<DataType, NodeType extends NodedTree.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> extends Traversal<DataType, NodeType, TreeType> {
+
+            @Override
+            default @NotNull Traversed<DataType, NodeType, TreeType> traverse(@NotNull NodeType root) {
+                Sequential.Mutable.VariableSize<NodeType> seq = Sequential.Mutable.VariableSize.of(new ArrayList<>());
+                Order<NodeType> order = makeOrder(root.getCount());
+                order.enter(root);
+                while (true) {
+                    NodeType node = order.poll();
+                    if (node == null) break;
+                    seq.append(node);
+                    for (NodeType child : node.getChildren().inReverse()) {
+                        order.enter(child);
+                    }
+                }
+                return Traversed.of(seq, this);
+            }
+
+            Order<NodeType> makeOrder(int capacity);
         }
 
         class LeafOnly<DataType, NodeType extends NodedTree.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> implements Conditional<DataType, NodeType, TreeType> {

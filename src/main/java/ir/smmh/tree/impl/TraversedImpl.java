@@ -33,4 +33,9 @@ public class TraversedImpl<DataType, NodeType extends NodedTree.Node<DataType, N
     public final @NotNull NodedTree.Traversal<DataType, NodeType, TreeType> getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return sequential.toString();
+    }
 }

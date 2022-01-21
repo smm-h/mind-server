@@ -14,7 +14,7 @@ import java.util.StringJoiner;
 import static ir.smmh.util.FunctionalUtil.with;
 
 @ParametersAreNonnullByDefault
-public abstract class MapImpl<K> implements Map<K> {
+public abstract class MapImpl<K, V> implements Map<K, V> {
 
     @Override
     public final String toString() {
@@ -25,7 +25,7 @@ public abstract class MapImpl<K> implements Map<K> {
         return joiner.toString();
     }
 
-    public static class SingleValue<K, V> extends MapImpl<K> implements Map.SingleValue<K, V> {
+    public static class SingleValue<K, V> extends MapImpl<K, V> implements Map.SingleValue<K, V> {
 
         protected final java.util.Map<K, V> map = new HashMap<>();
 
@@ -50,8 +50,13 @@ public abstract class MapImpl<K> implements Map<K> {
         }
 
         @Override
-        public final boolean contains(K key) {
+        public final boolean containsPlace(K key) {
             return map.containsKey(key);
+        }
+
+        @Override
+        public final boolean contains(V value) {
+            return map.containsValue(value);
         }
 
         @Override
@@ -75,11 +80,21 @@ public abstract class MapImpl<K> implements Map<K> {
         }
     }
 
-    public static class MultiValue<K, V> extends MapImpl<K> implements Map.MultiValue<K, V> {
+    public static class MultiValue<K, V> extends MapImpl<K, V> implements Map.MultiValue<K, V> {
         protected final java.util.Map<K, Sequential.Mutable.VariableSize<V>> map = new HashMap<>();
 
         @Override
-        public final boolean contains(K toCheck) {
+        public boolean contains(V toCheck) {
+            for (K key : map.keySet()) {
+                if (map.get(key).contains(toCheck)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public final boolean containsPlace(K toCheck) {
             return map.containsKey(toCheck);
         }
 

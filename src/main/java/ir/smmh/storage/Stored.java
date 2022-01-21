@@ -1,8 +1,8 @@
 package ir.smmh.storage;
 
+import ir.smmh.nile.verbs.CanSerialize;
 import ir.smmh.util.Mutable;
 import ir.smmh.util.Named;
-import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
  * change on it is ever lost. So do not forget to call mutate upon
  * every change, which is usually just the setters.
  */
-public interface Stored extends Serializable, Mutable.WithListeners, Named {
+public interface Stored extends CanSerialize, Mutable.WithListeners, Named {
 
     default void setupStored() {
         getOnCleanListeners().add(() -> getStorage().write(getName(), serialize()));

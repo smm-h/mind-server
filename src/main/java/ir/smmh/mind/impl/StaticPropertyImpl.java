@@ -3,12 +3,12 @@ package ir.smmh.mind.impl;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.StaticProperty;
 import ir.smmh.mind.Value;
-import ir.smmh.util.Serializable;
+import ir.smmh.nile.verbs.CanSerialize;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class StaticPropertyImpl implements StaticProperty, Serializable.JSON {
+public class StaticPropertyImpl implements StaticProperty, CanSerialize.JSON {
 
     private final Idea origin;
     private final String name;

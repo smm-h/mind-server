@@ -3,14 +3,17 @@ package ir.smmh.tree;
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.verbs.CanClear;
 import ir.smmh.nile.verbs.CanContain;
+import ir.smmh.nile.verbs.CanSerialize;
 import ir.smmh.tree.impl.InOrderConstructor;
 import ir.smmh.tree.impl.PostOrderConstructor;
 import ir.smmh.tree.impl.PreOrderConstructor;
-import ir.smmh.util.Serializable;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
-public interface Tree<DataType> extends CanContain<DataType>, Serializable {
+public interface Tree<DataType> extends
+        CanContain<DataType>,
+//        CanGetAtPlace<Sequential<DataType>, DataType>,
+        CanSerialize {
 
     @NotNull Sequential<?> getImmediateSubtrees();
 
@@ -22,9 +25,16 @@ public interface Tree<DataType> extends CanContain<DataType>, Serializable {
 
     @NotNull Sequential<DataType> getLeafData();
 
+    @NotNull Sequential<DataType> getBreadthFirstData();
+
+    @NotNull Sequential<DataType> getDepthFirstData();
+
     DataType getRootData();
 
-    interface Mutable<DataType> extends Tree<DataType>, CanClear {
+    interface Mutable<DataType> extends
+            Tree<DataType>,
+//            CanSetAtPlace<Sequential<DataType>, DataType>,
+            CanClear {
         void setRootData(DataType data);
     }
 

@@ -3,15 +3,15 @@ package ir.smmh.mind.impl;
 import ir.smmh.mind.Idea;
 import ir.smmh.mind.Mind;
 import ir.smmh.mind.Value;
+import ir.smmh.nile.verbs.CanSerialize;
 import ir.smmh.storage.Storage;
 import ir.smmh.storage.impl.StorageImpl;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.Map;
 import ir.smmh.util.Mutable;
-import ir.smmh.util.Serializable;
 import ir.smmh.util.impl.MapImpl;
-import ir.smmh.util.impl.MutableImpl;
 import ir.smmh.util.impl.MutableCollectionImpl;
+import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
@@ -23,7 +23,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"WeakerAccess", "UnusedReturnValue", "StaticMethodOnlyUsedInOneClass", "ThrowsRuntimeException"})
-public final class MutableMindImpl implements Mind.Mutable, Mutable.WithListeners.Injected, Serializable.JSON {
+public final class MutableMindImpl implements Mind.Mutable, Mutable.WithListeners.Injected, CanSerialize.JSON {
 
     private final String name;
     private final @NotNull Map.SingleValue.Mutable<String, MutableIdeaImpl> ideas = new MapImpl.SingleValue.Mutable<>();
