@@ -3,10 +3,11 @@ package ir.smmh.lingu.settings;
 import ir.smmh.jile.common.Range;
 import ir.smmh.lingu.CodeProcess;
 import ir.smmh.lingu.Token;
-import ir.smmh.util.jile.Quality;
+
+import java.util.function.Predicate;
 
 public interface FormalSettings {
-    Quality<FormalSettings> COMPLETE = FormalSettings::isComplete;
+    Predicate<FormalSettings> COMPLETE = FormalSettings::isComplete;
 
     CodeProcess getWrapping();
 

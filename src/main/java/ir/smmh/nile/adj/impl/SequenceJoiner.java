@@ -1,17 +1,20 @@
 package ir.smmh.nile.adj.impl;
 
 import ir.smmh.nile.adj.Sequential;
-import ir.smmh.util.impl.MutableImpl;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
-// TODO TEST
-public class SequenceJoiner<T> extends Sequential.AbstractMutableSequential<T> implements Sequential.Mutable.VariableSize<T> {
+public class SequenceJoiner<T> extends Sequential.AbstractSequential<T> implements Sequential<T> {
 
-    private final Sequential.Mutable<Sequential<? extends T>> subSequences = new SequentialImpl<>(new ArrayList<>());
-    private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
+    private final Sequential.Mutable.VariableSize<Sequential<? extends T>> subSequences = new SequentialImpl<>(new ArrayList<>());
+
+    public void join(Sequential<? extends T> sequential) {
+        subSequences.append(sequential);
+    }
+
+    public void startOver() {
+        subSequences.clear();
+    }
 
     @Override
     public final T getAtIndex(int index) throws IndexOutOfBoundsException {
@@ -33,30 +36,5 @@ public class SequenceJoiner<T> extends Sequential.AbstractMutableSequential<T> i
             n += s.getSize();
         }
         return n;
-    }
-
-    @Override
-    public void setAtIndex(int index, @Nullable T toSet) {
-        // TODO pre and post mutate
-    }
-
-    @Override
-    public void append(T toAppend) {
-
-    }
-
-    @Override
-    public void removeIndexFrom(int toRemove) throws IndexOutOfBoundsException {
-
-    }
-
-    @Override
-    public final @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
-        return injectedMutable;
-    }
-
-    @Override
-    public final Sequential<T> clone(boolean deepIfPossible) {
-        return null;
     }
 }

@@ -1,7 +1,7 @@
 package ir.smmh.lingu;
 
-import ir.smmh.tree.jile.Tree;
-import ir.smmh.tree.jile.impl.LinkedTree;
+import ir.smmh.tree.Tree;
+import ir.smmh.tree.impl.NodedTreeImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedList;
@@ -28,6 +28,7 @@ public class CollectiveTokenType implements Token.Type.Collective {
 
         // private final LinkedList<Cell> cells = new LinkedList<>();
         private final List<Token> children = new LinkedList<>();
+        private NodedTreeImpl<Token>.Node treeMakingPointer;
 
         public CollectiveToken(Token.Individual opener, Token.Individual closer) {
             this.opener = opener;
@@ -88,11 +89,6 @@ public class CollectiveTokenType implements Token.Type.Collective {
             return closer;
         }
 
-        @Override
-        public Individual getOpener() {
-            return opener;
-        }
-
         // public Group(LinkedTree<Group> tree) {
         // this(0, 0);
         // // vtree.add(token);
@@ -105,23 +101,28 @@ public class CollectiveTokenType implements Token.Type.Collective {
         // }
         // }
 
+        @Override
+        public Individual getOpener() {
+            return opener;
+        }
+
         public Tree<Token> toTree() {
-            LinkedTree<Token> tree = new LinkedTree<>();
+            NodedTreeImpl<Token> tree = new NodedTreeImpl<>();
             toTree(tree);
             // System.out.println(tree);
             return tree;
         }
 
-        private void toTree(LinkedTree<Token> tree) {
-            tree.addAndGoTo(this);
+        private void toTree(NodedTreeImpl<Token> tree) {
+            treeMakingPointer = tree.new Node(this, treeMakingPointer);
             for (Token child : children) {
                 if (child instanceof CollectiveToken) {
                     ((CollectiveToken) child).toTree(tree);
                 } else {
-                    tree.add(child);
+                    treeMakingPointer.getChildren().append(tree.new Node(child, treeMakingPointer));
                 }
             }
-            tree.goBack();
+            treeMakingPointer = treeMakingPointer.getParent();
         }
 
         // public void split() {

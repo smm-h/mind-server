@@ -7,5 +7,5 @@ import java.lang.annotation.RetentionPolicy;
 
 @TypeQualifierDefault(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
-@interface MutatingMethod {
+public @interface MutatingMethod {
 }

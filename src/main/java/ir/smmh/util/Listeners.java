@@ -10,7 +10,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * @param <L> Type of listeners
  */
 @ParametersAreNonnullByDefault
-public interface Listeners<L> extends Iterable<L> {
+public interface Listeners<L> extends Iterable<L> { // TODO make simple mutable
     void add(L listener);
 
     void addDisposable(L listener);

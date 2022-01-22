@@ -10,7 +10,7 @@ import ir.smmh.lingu.processors.impl.MultiprocessorImpl;
 import ir.smmh.lingu.settings.*;
 import ir.smmh.lingu.settings.err.BothPrefixAndSuffix;
 import ir.smmh.lingu.settings.err.Unbalanced;
-import ir.smmh.tree.jile.impl.LinkedTree;
+import ir.smmh.tree.impl.NodedTreeImpl;
 
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -20,7 +20,7 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
 
     // Graph Out of A Tree = GOAT
 
-    public static final Maker<LinkedTree<InformalSettings>> treeMaker = code -> {
+    public static final Maker<NodedTreeImpl<InformalSettings>> treeMaker = code -> {
 
         CodeProcess making = new CodeProcessImpl(code, "making a settings tree");
 
@@ -32,7 +32,8 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
         for (Token.Individual token : tokens)
             array[index++] = token;
 
-        LinkedTree<InformalSettings> tree = new LinkedTree<>();
+        NodedTreeImpl<InformalSettings> tree = new NodedTreeImpl<>();
+        NodedTreeImpl<InformalSettings>.Node node = null;
 
         int i = 0;
 
@@ -43,7 +44,7 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
             // closing a settings node
             if (array[i].is("verbatim <}>")) {
 
-                tree.goBack();
+                node = node.getParent();
                 balance.pop();
                 i++;
 
@@ -59,7 +60,9 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
                 }
                 i++;
 
-                InformalSettings r = tree.getPointer();
+                assert node != null;
+                InformalSettings r = node.getData();
+                assert r != null;
 
                 // boolean referring;
                 // if (array[i].is("verbatim <@>")) {
@@ -140,7 +143,7 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
                     continue;
                 }
                 balance.push(openedAt);
-                tree.addAndGoTo(new InformalSettingsImpl(type, name));
+                node = tree.new Node(new InformalSettingsImpl(type, name), node);
             }
         }
 
@@ -170,7 +173,8 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
     public Maker<Map<T, FormalSettings>> getMapMaker() {
         return code -> {
 
-            LinkedTree<InformalSettings> tree = treeMaker.makeFromCode(code);
+            NodedTreeImpl<InformalSettings> tree = treeMaker.makeFromCode(code);
+
 
             CodeProcess formalizing = new CodeProcessImpl(code, "formalizing those settings");
 
@@ -184,7 +188,7 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
 
             Queue<InformalSettings> q = new LinkedList<>();
 
-            q.add(tree.getRoot());
+            q.add(tree.getRootData());
 
             while (!q.isEmpty()) {
 
@@ -195,13 +199,13 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
                     continue;
 
                 // Enqueue my children so they may also be born
-                for (InformalSettings child : tree.getChildren(informal))
+                for (InformalSettings child : tree.findByData(informal).getSingleton().getChildrenData())
                     q.add(child);
 
                 // If I am referring to anyone else in my values, load them all before me
 
                 // Find my syntactically immediate parent in the settings tree
-                InformalSettings parent = tree.getParent(informal);
+                InformalSettings parent = tree.findByData(informal).getSingleton().getParent().getData();
 
                 // I will inherit values, either from my syntactical parent, or from my
                 // semantical parent, whom I may be "like"
@@ -234,7 +238,7 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
                 // unless their name does not matter, in which case I will take THEIR
                 // syntactical parent's name, so forth.
                 while (parent != null && nameParent != null && nameParent.getType() != null && !nameParent.getType().doesNameMatter()) {
-                    parent = tree.getParent(parent);
+                    parent = tree.findByData(parent).getSingleton().getParent().getData();
                     nameParent = informalToFormal.get(parent);
                 }
 

@@ -3,8 +3,6 @@ package ir.smmh.tree;
 import ir.smmh.tree.impl.NodedTreeImpl;
 import org.junit.jupiter.api.BeforeEach;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class NodedTreeTest {
 
     NodedTree<Character, ?, ?> tree;

@@ -16,4 +16,17 @@ public interface CanGetAtIndex<T> extends Indexible, IntFunction<T> {
     }
 
     T getAtIndex(int index) throws IndexOutOfBoundsException;
+
+    default T getAtIndexWrapAround(int index) {
+        return getAtIndex(index % getSize());
+    }
+
+    default T getAtLastIndex() {
+        return getAtIndexWrapAround(-1);
+    }
+
+    default T getSingleton() {
+        assertSingleton();
+        return getAtIndex(0);
+    }
 }

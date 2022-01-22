@@ -92,7 +92,7 @@ class TraversalTest {
     void getLeafCount() {
         assertEquals(
                 9,
-                tree.getLeafCount(),
+                tree.getBreadth(),
                 "Unexpected tree leaf count");
     }
 

@@ -21,7 +21,20 @@ public interface Tree<DataType> extends
 
     int getHeight();
 
-    int getLeafCount();
+
+    /**
+     * @return the number of leaves
+     */
+    int getBreadth();
+
+    /**
+     * Returns the width of the tree in a given level which is the number
+     * of all the nodes that have the same distance from root.
+     *
+     * @param level the exact distance between root and nodes
+     * @return the width of the tree in a given level
+     */
+    int getWidth(int level);
 
     @NotNull Sequential<DataType> getLeafData();
 

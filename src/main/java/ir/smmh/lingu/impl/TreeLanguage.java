@@ -1,7 +1,8 @@
 package ir.smmh.lingu.impl;
 
 import ir.smmh.lingu.*;
-import ir.smmh.tree.jile.impl.LinkedTree;
+import ir.smmh.tree.Tree;
+import ir.smmh.tree.impl.NodedTreeImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
@@ -9,7 +10,7 @@ import java.util.List;
 
 import static ir.smmh.lingu.settings.impl.SettingsFormalizerImpl.treeMaker;
 
-public class TreeLanguage extends LanguageImpl implements Maker<LinkedTree<String>> {
+public class TreeLanguage extends LanguageImpl implements Maker<Tree<String>> {
 
     public TreeLanguage() throws FileNotFoundException, Maker.MakingException {
         super("Tree Language", "tlg", Languages.getInstance().getTokenizerMaker().makeFromTestFile("tree-language"));
@@ -18,26 +19,29 @@ public class TreeLanguage extends LanguageImpl implements Maker<LinkedTree<Strin
     }
 
     @Override
-    public @NotNull LinkedTree<String> makeFromCode(@NotNull Code code) throws MakingException {
-
+    public @NotNull Tree<String> makeFromCode(@NotNull Code code) throws MakingException {
         CodeProcess process = new CodeProcessImpl(code, "making a tree");
-        LinkedTree<String> tree = new LinkedTree<>();
+        NodedTreeImpl<String> tree = new NodedTreeImpl<>();
         Token.Individual token;
         // Token valueToken;
         // String last;
         List<Token.Individual> tokens = TokenizerImpl.tokenized.read(code);
         // System.out.println(tokens.toString().replaceAll(", ", ""));
+        @NotNull NodedTreeImpl<String>.Node node = tree.new Node("ROOT", null);
+        tree.setRootNode(node);
         for (Token.Individual individual : tokens) {
             token = individual;
             switch (token.getTypeString()) {
                 case "verbatim <{>":
-                    tree.goToLastAdded();
+                    node = node.getChildren().getAtLastIndex();
                     break;
                 case "verbatim <}>":
-                    tree.goBack();
+                    NodedTreeImpl<String>.Node parent = node.getParent();
+                    if (parent == null) throw new NullPointerException();
+                    node = parent;
                     break;
                 case "node":
-                    tree.add(token.getData());
+                    node.getChildren().append(tree.new Node(token.getData(), node));
                     break;
                 // case "verbatim <hide>":
                 // tree.setSelectedNodeVisibility(false);

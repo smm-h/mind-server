@@ -14,6 +14,10 @@ public interface Multitude {
         return getSize() == 0;
     }
 
+    default void assertSingleton() {
+        assert getSize() == 1;
+    }
+
     interface VariableSize extends Multitude, Mutable {
     }
 }

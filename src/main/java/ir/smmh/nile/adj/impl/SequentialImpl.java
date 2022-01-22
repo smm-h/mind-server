@@ -56,4 +56,11 @@ public class SequentialImpl<T> extends Sequential.AbstractMutableSequential<T> i
     public final int getSize() {
         return list.size();
     }
+
+    @Override
+    public void clear() {
+        preMutate();
+        list.clear();
+        postMutate();
+    }
 }

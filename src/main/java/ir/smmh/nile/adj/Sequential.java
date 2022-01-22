@@ -169,7 +169,17 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
     }
 
     static Sequential<Character> of(String string) {
-        return of(string.toCharArray()); // TODO optimize
+        return new AbstractSequential<>() {
+            @Override
+            public Character getAtIndex(int index) {
+                return string.charAt(index);
+            }
+
+            @Override
+            public int getSize() {
+                return string.length();
+            }
+        };
     }
 
     @Override
@@ -380,7 +390,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
     interface Mutable<T> extends Sequential<T>, CanSwapAtIndices<T> {
         static Sequential.Mutable<Character> of(String string) {
-            return of(string.toCharArray()); // TODO optimize
+            return of(string.toCharArray());
         }
 
         static <T> Sequential.Mutable<T> of(List<T> list) {
@@ -623,7 +633,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
             return () -> new ReverseIterator.Mutable<>(this);
         }
 
-        interface VariableSize<T> extends Mutable<T>, CanAppendTo<T>, CanRemoveIndexFrom<T> {
+        interface VariableSize<T> extends Mutable<T>, CanAppendTo<T>, CanRemoveIndexFrom<T>, CanClear {
 
             static <T> Sequential.Mutable.VariableSize<T> of(List<T> list) {
                 return new SequentialImpl<>(list);
@@ -828,8 +838,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
         }
     }
 
-    abstract class AbstractMutableSequential<T> extends AbstractSequential<T> implements Sequential.Mutable<T>,
-            ir.smmh.util.Mutable.WithListeners.Injected {
+    abstract class AbstractMutableSequential<T> extends AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.WithListeners.Injected {
 
         private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
 

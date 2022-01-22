@@ -1,9 +1,9 @@
 package ir.smmh.lingu;
 
-import ir.smmh.util.jile.Quality;
+import java.util.function.Predicate;
 
 public interface Mishap {
-    Quality<Mishap> FATAL = Mishap::isFatal;
+    Predicate<Mishap> FATAL = Mishap::isFatal;
 
     CodeProcess getProcess();
 

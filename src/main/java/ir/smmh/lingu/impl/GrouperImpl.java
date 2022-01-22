@@ -7,12 +7,10 @@ import ir.smmh.lingu.groupermaker.GrouperMakerImpl.DefinitionImpl;
 import ir.smmh.lingu.groupermaker.impl.*;
 import ir.smmh.lingu.processors.SingleProcessor;
 import ir.smmh.lingu.settings.FormalSettings;
-import ir.smmh.tree.jile.Tree;
+import ir.smmh.tree.Tree;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-// import ir.smmh.jile.common.Convertor;
-// import ir.smmh.tree.jile.TraversibleTree;
 
 public class GrouperImpl extends SingleProcessor implements Grouper {
 

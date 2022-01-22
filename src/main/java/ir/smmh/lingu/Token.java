@@ -1,7 +1,7 @@
 package ir.smmh.lingu;
 
 import ir.smmh.lingu.impl.Port;
-import ir.smmh.tree.jile.Tree;
+import ir.smmh.tree.Tree;
 
 import java.util.List;
 
