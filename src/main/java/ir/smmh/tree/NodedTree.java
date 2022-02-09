@@ -2,8 +2,8 @@ package ir.smmh.tree;
 
 import ir.smmh.nile.adj.Order;
 import ir.smmh.nile.adj.Sequential;
-import ir.smmh.nile.adj.impl.FIFO;
-import ir.smmh.nile.adj.impl.LIFO;
+import ir.smmh.nile.adj.impl.ArrayQueue;
+import ir.smmh.nile.adj.impl.ArrayStack;
 import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.nile.verbs.CanAppendTo;
 import ir.smmh.nile.verbs.CanClone;
@@ -157,11 +157,11 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
     }
 
     default @NotNull Traversed<DataType, NodeType, TreeType> traverseBreadthFirst() {
-        return traverse((Traversal.ByOrder<DataType, NodeType, TreeType>) FIFO::new);
+        return traverse((Traversal.ByOrder<DataType, NodeType, TreeType>) ArrayQueue::new);
     }
 
     default @NotNull Traversed<DataType, NodeType, TreeType> traverseDepthFirst() {
-        return traverse((Traversal.ByOrderReverseChildren<DataType, NodeType, TreeType>) LIFO::new);
+        return traverse((Traversal.ByOrderReverseChildren<DataType, NodeType, TreeType>) ArrayStack::new);
     }
 
     @Override

@@ -8,22 +8,31 @@ import java.util.List;
 
 public class SequentialImpl<T> extends Sequential.AbstractMutableSequential<T> implements Sequential.Mutable.VariableSize<T> {
 
-    private final List<T> list = new ArrayList<>();
+    private final List<T> list;
+
+    public SequentialImpl(int initialCapacity) {
+        super();
+        list = new ArrayList<>(initialCapacity);
+    }
 
     public SequentialImpl() {
-        super();
+        this(10);
     }
 
     public SequentialImpl(Collection<? extends T> collection) {
-        super();
+        this(collection.size());
         list.addAll(collection);
     }
 
-    public SequentialImpl(Iterable<? extends T> iterable) {
-        super();
+    public SequentialImpl(Iterable<? extends T> iterable, int initialCapacity) {
+        this(initialCapacity);
         for (T element : iterable) {
             list.add(element);
         }
+    }
+
+    public SequentialImpl(Iterable<? extends T> iterable) {
+        this(iterable, 20);
     }
 
     @Override

@@ -7,18 +7,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Circular fixed-size contiguous queue of non-null elements
+ * Fixed-size contiguous stack of non-null elements
  *
  * @param <T> type of data
  */
-public class FIFO<T> implements Order<T>, Mutable.WithListeners.Injected {
+public class ArrayStack<T> implements Order<T>, Mutable.WithListeners.Injected {
 
     private final Mutable.WithListeners injectedMutable = MutableImpl.blank();
     private final T[] array;
-    private int head = 0, tail = 0, size = 0;
+    private int size = 0;
 
     @SuppressWarnings("unchecked")
-    public FIFO(int capacity) {
+    public ArrayStack(int capacity) {
         this.array = (T[]) new Object[capacity];
     }
 
@@ -31,9 +31,7 @@ public class FIFO<T> implements Order<T>, Mutable.WithListeners.Injected {
     public synchronized @Nullable T poll() {
         if (size > 0) {
             preMutate();
-            T data = array[tail++];
-            size--;
-            if (tail >= array.length) tail = 0;
+            T data = array[--size];
             postMutate();
             return data;
         } else {
@@ -44,7 +42,7 @@ public class FIFO<T> implements Order<T>, Mutable.WithListeners.Injected {
     @Override
     public @Nullable T peek() {
         if (size > 0) {
-            return array[tail];
+            return array[size - 1];
         } else {
             return null;
         }
@@ -59,9 +57,7 @@ public class FIFO<T> implements Order<T>, Mutable.WithListeners.Injected {
     public synchronized <S extends T> void enter(@NotNull S toEnter) {
         if (canEnter()) {
             preMutate();
-            array[head++] = toEnter;
-            if (head >= array.length) head = 0;
-            size++;
+            array[size++] = toEnter;
             postMutate();
         }
     }
@@ -69,8 +65,6 @@ public class FIFO<T> implements Order<T>, Mutable.WithListeners.Injected {
     @Override
     public void clear() {
         preMutate();
-        head = 0;
-        tail = 0;
         size = 0;
         postMutate();
     }

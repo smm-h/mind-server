@@ -6,7 +6,7 @@
 
 [`Code.java`](../lang/Code.java)
 
-A code is essentially any plan text file written in a certain [language](languages.md).
+A code is essentially any plain text file written in a certain [language](languages.md).
 
 Instead of directly working with files, a code object internally uses the [resource](#resource) class
 

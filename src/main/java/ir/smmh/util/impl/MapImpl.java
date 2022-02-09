@@ -77,6 +77,11 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
             public final @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
                 return injectedMutable;
             }
+
+            @Override
+            public void removeAtPlace(K toRemove) {
+                map.remove(toRemove);
+            }
         }
     }
 
@@ -130,6 +135,11 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
             @Override
             public final @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
                 return injectedMutable;
+            }
+
+            @Override
+            public void removeAtPlace(K toRemove) {
+                map.remove(toRemove);
             }
         }
     }
