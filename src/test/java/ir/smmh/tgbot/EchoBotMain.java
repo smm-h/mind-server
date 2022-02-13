@@ -1,11 +1,9 @@
 package ir.smmh.tgbot;
 
-import ir.smmh.tgbot.impl.EchoBot;
+import ir.smmh.apps.echobot.EchoBot;
 
 public class EchoBotMain {
     public static void main(String[] args) {
-
-        //noinspection SpellCheckingInspection
-        new EchoBot().start("5069967929:AAFz5Wr5UfGwraPDQuKafouHnE6mLEATnQQ");
+        new EchoBot().start(Bots.r5bot);
     }
 }

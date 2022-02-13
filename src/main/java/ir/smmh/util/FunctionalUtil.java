@@ -80,6 +80,11 @@ public interface FunctionalUtil {
     }
 
     @FunctionalInterface
+    interface ToStringFunction<T> {
+        String applyAsString(T object);
+    }
+
+    @FunctionalInterface
     interface SupplierMayFail<T> extends Supplier<T> {
         @Contract("_, !null -> !null")
         static <T> T getSafe(SupplierMayFail<? extends T> supplier, T valueOnFailure) {

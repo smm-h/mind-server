@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public abstract class SimpleBotImpl implements SimpleBot {
@@ -19,7 +21,7 @@ public abstract class SimpleBotImpl implements SimpleBot {
     private int updateId;
     private boolean running;
 
-    SimpleBotImpl() {
+    public SimpleBotImpl() {
         super();
         client = new OkHttpClient();
     }
@@ -36,12 +38,55 @@ public abstract class SimpleBotImpl implements SimpleBot {
             p.put("chat_id", chatId);
             p.put("text", text);
             p.put("parse_mode", "HTML");
+            /*
+             * <b>bold</b>, <strong>bold</strong>
+             * <i>italic</i>, <em>italic</em>
+             * <u>underline</u>, <ins>underline</ins>
+             * <s>strikethrough</s>, <strike>strikethrough</strike>, <del>strikethrough</del>
+             * <span class="tg-spoiler">spoiler</span>, <tg-spoiler>spoiler</tg-spoiler>
+             * <b>bold <i>italic bold <s>italic bold strikethrough <span class="tg-spoiler">italic bold strikethrough spoiler</span></s> <u>underline italic bold</u></i> bold</b>
+             * <a href="http://www.example.com/">inline URL</a>
+             * <a href="tg://user?id=123456789">inline mention of a user</a>
+             * <code>inline fixed-width code</code>
+             * <pre>pre-formatted fixed-width code block</pre>
+             * <pre><code class="language-python">pre-formatted fixed-width code block written in the Python programming language</code></pre>
+             */
             if (replyToMessageId != null) {
                 p.put("reply_to_message_id", replyToMessageId);
                 p.put("allow_sending_without_reply", true);
             }
             RequestBody body = RequestBody.create(p.toString(), NetworkUtil.JSON);
-            Request request = new Request.Builder().url(makeURL("sendMessage")).addHeader("Content-Type", "application/json").post(body).build();
+            Request request = new Request.Builder()
+                    .url(makeURL("sendMessage"))
+                    .addHeader("Content-Type", "application/json")
+                    .post(body)
+                    .build();
+            client.newCall(request).execute();
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public final void sendPhoto(long chatId, File file, @Nullable String caption, @Nullable Integer replyToMessageId) throws FileNotFoundException {
+        if (!file.exists()) throw new FileNotFoundException();
+        try {
+            MultipartBody.Builder builder = new MultipartBody.Builder()
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("chat_id", String.valueOf(chatId))
+                    .addFormDataPart("photo", file.getName(), RequestBody.create(file, MediaType.parse("image/png")));
+            if (caption != null) {
+                builder.addFormDataPart("caption", caption);
+                builder.addFormDataPart("parse_mode", "HTML");
+            }
+            if (replyToMessageId != null) {
+                builder.addFormDataPart("reply_to_message_id", String.valueOf(replyToMessageId));
+                builder.addFormDataPart("allow_sending_without_reply", String.valueOf(true));
+            }
+            Request request = new Request.Builder()
+                    .url(makeURL("sendPhoto"))
+                    .post(builder.build())
+                    .build();
             client.newCall(request).execute();
         } catch (JSONException | IOException e) {
             e.printStackTrace();
@@ -59,6 +104,8 @@ public abstract class SimpleBotImpl implements SimpleBot {
 
     @Override
     public final void start(String withToken) {
+
+        System.out.println("Bot started...");
 
         if (running)
             stop();

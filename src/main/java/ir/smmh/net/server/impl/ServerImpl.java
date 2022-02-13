@@ -9,23 +9,16 @@ import java.net.ServerSocket;
 public class ServerImpl implements Server {
 
     private final API api;
-    private final int defaultPort;
     private boolean running;
 
-    public ServerImpl(API api, int defaultPort) {
+    public ServerImpl(API api) {
         super();
         this.api = api;
-        this.defaultPort = defaultPort;
     }
 
     @Override
     public final API getAPI() {
         return api;
-    }
-
-    @Override
-    public final int getDefaultPort() {
-        return defaultPort;
     }
 
     @Override

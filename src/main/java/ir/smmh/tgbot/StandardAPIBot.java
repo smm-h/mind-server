@@ -1,11 +1,11 @@
 package ir.smmh.tgbot;
 
-import ir.smmh.api.StandardAPI;
+import ir.smmh.api.JSONAPIImpl;
 import org.json.JSONObject;
 
 public interface StandardAPIBot extends APIBot {
     @Override
-    StandardAPI getAPI();
+    JSONAPIImpl getAPI();
 
     default JSONObject processRequest(long chatId, String request) {
         return getAPI().processJSON(request);

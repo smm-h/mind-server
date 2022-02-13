@@ -1,4 +1,6 @@
-package ir.smmh.tgbot.impl;
+package ir.smmh.apps.echobot;
+
+import ir.smmh.tgbot.impl.SimpleBotImpl;
 
 public class EchoBot extends SimpleBotImpl {
     @Override

@@ -7,74 +7,78 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collection;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
+@ParametersAreNonnullByDefault
 @SuppressWarnings({"unused", "ThrowsRuntimeException", "ClassWithTooManyMethods"})
 public interface JSONUtil {
 
-    static @NotNull JSONObject parse(@NotNull String string) throws JSONException {
+    static @NotNull JSONObject parse(String string) throws JSONException {
         return new JSONObject(new JSONTokener(string));
     }
 
-    static <C extends CanAddTo<Boolean>> @NotNull C arrayOfBooleans(@NotNull JSONObject object, @NotNull String key, @NotNull C canAddTo) throws JSONException {
+    static <C extends CanAddTo<Boolean>> @NotNull C arrayOfBooleans(JSONObject object, String key, C canAddTo) throws JSONException {
         return arrayOfBooleans(object, key, canAddTo, FunctionalUtil::itself);
     }
 
-    static <T, C extends CanAddTo<T>> @NotNull C arrayOfBooleans(@NotNull JSONObject object, @NotNull String key, @NotNull C canAddTo, @NotNull Function<Boolean, T> convertor) throws JSONException {
+    static <T, C extends CanAddTo<T>> @NotNull C arrayOfBooleans(JSONObject object, String key, C canAddTo, Function<Boolean, T> convertor) throws JSONException {
         addFromBooleans(canAddTo::add, object, key, convertor);
         return canAddTo;
     }
 
-    static <T, C extends CanAddTo<T>> @NotNull C arrayOfNumbers(@NotNull JSONObject object, @NotNull String key, @NotNull C canAddTo, @NotNull Function<Number, T> convertor) throws JSONException {
+    static <T, C extends CanAddTo<T>> @NotNull C arrayOfNumbers(JSONObject object, String key, C canAddTo, Function<Number, T> convertor) throws JSONException {
         addFromNumbers(canAddTo::add, object, key, convertor);
         return canAddTo;
     }
 
-    static <C extends CanAddTo<String>> @NotNull C arrayOfStrings(@NotNull JSONObject object, @NotNull String key, @NotNull C canAddTo) throws JSONException {
+    static <C extends CanAddTo<String>> @NotNull C arrayOfStrings(JSONObject object, String key, C canAddTo) throws JSONException {
         return arrayOfStrings(object, key, canAddTo, FunctionalUtil::itself);
     }
 
-    static <T, C extends CanAddTo<T>> @NotNull C arrayOfStrings(@NotNull JSONObject object, @NotNull String key, @NotNull C canAddTo, @NotNull Function<String, T> convertor) throws JSONException {
+    static <T, C extends CanAddTo<T>> @NotNull C arrayOfStrings(JSONObject object, String key, C canAddTo, Function<String, T> convertor) throws JSONException {
         addFromStrings(canAddTo::add, object, key, convertor);
         return canAddTo;
     }
 
-    static <T, C extends CanAddTo<T>> @NotNull C arrayOfObjects(@NotNull JSONObject object, @NotNull String key, @NotNull C canAddTo, @NotNull Function<JSONObject, T> convertor) throws JSONException {
+    static <T, C extends CanAddTo<T>> @NotNull C arrayOfObjects(JSONObject object, String key, C canAddTo, Function<JSONObject, T> convertor) throws JSONException {
         addFromJSONObjects(canAddTo::add, object, key, convertor);
         return canAddTo;
     }
 
-    static <C extends Collection<Boolean>> @NotNull C arrayOfBooleans(@NotNull JSONObject object, @NotNull String key, @NotNull C destination) throws JSONException {
+    static <C extends Collection<Boolean>> @NotNull C arrayOfBooleans(JSONObject object, String key, C destination) throws JSONException {
         return arrayOfBooleans(object, key, destination, FunctionalUtil::itself);
     }
 
-    static <T, C extends Collection<T>> @NotNull C arrayOfBooleans(@NotNull JSONObject object, @NotNull String key, @NotNull C destination, @NotNull Function<Boolean, T> convertor) throws JSONException {
+    static <T, C extends Collection<T>> @NotNull C arrayOfBooleans(JSONObject object, String key, C destination, Function<Boolean, T> convertor) throws JSONException {
         addFromBooleans(destination::add, object, key, convertor);
         return destination;
     }
 
-    static <T, C extends Collection<T>> @NotNull C arrayOfNumbers(@NotNull JSONObject object, @NotNull String key, @NotNull C destination, @NotNull Function<Number, T> convertor) throws JSONException {
+    static <T, C extends Collection<T>> @NotNull C arrayOfNumbers(JSONObject object, String key, C destination, Function<Number, T> convertor) throws JSONException {
         addFromNumbers(destination::add, object, key, convertor);
         return destination;
     }
 
-    static <C extends Collection<String>> @NotNull C arrayOfStrings(@NotNull JSONObject object, @NotNull String key, @NotNull C destination) throws JSONException {
+    static <C extends Collection<String>> @NotNull C arrayOfStrings(JSONObject object, String key, C destination) throws JSONException {
         return arrayOfStrings(object, key, destination, FunctionalUtil::itself);
     }
 
-    static <T, C extends Collection<T>> @NotNull C arrayOfStrings(@NotNull JSONObject object, @NotNull String key, @NotNull C destination, @NotNull Function<String, T> convertor) throws JSONException {
+    static <T, C extends Collection<T>> @NotNull C arrayOfStrings(JSONObject object, String key, C destination, Function<String, T> convertor) throws JSONException {
         addFromStrings(destination::add, object, key, convertor);
         return destination;
     }
 
-    static <T, C extends Collection<T>> @NotNull C arrayOfObjects(@NotNull JSONObject object, @NotNull String key, @NotNull C destination, @NotNull Function<JSONObject, T> convertor) throws JSONException {
+    static <T, C extends Collection<T>> @NotNull C arrayOfObjects(JSONObject object, String key, C destination, Function<JSONObject, T> convertor) throws JSONException {
         addFromJSONObjects(destination::add, object, key, convertor);
         return destination;
     }
 
-    static <T> void addFromBooleans(@NotNull Consumer<? super T> add, @NotNull JSONObject object, @NotNull String key, @NotNull Function<? super Boolean, T> convertor) throws JSONException {
+    static <T> void addFromBooleans(Consumer<? super T> add, JSONObject object, String key, Function<? super Boolean, T> convertor) throws JSONException {
         if (object.has(key)) {
             JSONArray array = object.getJSONArray(key);
             for (int i = 0; i < array.length(); i++)
@@ -82,7 +86,7 @@ public interface JSONUtil {
         }
     }
 
-    static <T> void addFromNumbers(@NotNull Consumer<? super T> add, @NotNull JSONObject object, @NotNull String key, @NotNull Function<? super Number, T> convertor) throws JSONException {
+    static <T> void addFromNumbers(Consumer<? super T> add, JSONObject object, String key, Function<? super Number, T> convertor) throws JSONException {
         if (object.has(key)) {
             JSONArray array = object.getJSONArray(key);
             for (int i = 0; i < array.length(); i++)
@@ -90,7 +94,7 @@ public interface JSONUtil {
         }
     }
 
-    static <T> void addFromStrings(@NotNull Consumer<? super T> add, @NotNull JSONObject object, @NotNull String key, @NotNull Function<? super String, T> convertor) throws JSONException {
+    static <T> void addFromStrings(Consumer<? super T> add, JSONObject object, String key, Function<? super String, T> convertor) throws JSONException {
         if (object.has(key)) {
             JSONArray array = object.getJSONArray(key);
             for (int i = 0; i < array.length(); i++)
@@ -98,11 +102,73 @@ public interface JSONUtil {
         }
     }
 
-    static <T> void addFromJSONObjects(@NotNull Consumer<? super T> add, @NotNull JSONObject object, @NotNull String key, @NotNull Function<? super JSONObject, T> convertor) throws JSONException {
+    static <T> void addFromJSONObjects(Consumer<? super T> add, JSONObject object, String key, Function<? super JSONObject, T> convertor) throws JSONException {
         if (object.has(key)) {
             JSONArray array = object.getJSONArray(key);
             for (int i = 0; i < array.length(); i++)
                 add.accept(convertor.apply(array.getJSONObject(i)));
         }
+    }
+
+    static <T> JSONArray toArrayOfBoolean(Iterable<T> iterable, Predicate<? super T> function) {
+        JSONArray array = new JSONArray();
+        for (T item : iterable) {
+            array.put(function.test(item));
+        }
+        return array;
+    }
+
+    static <T> JSONArray toArrayOfInt(Iterable<T> iterable, ToIntFunction<? super T> function) {
+        JSONArray array = new JSONArray();
+        for (T item : iterable) {
+            array.put(function.applyAsInt(item));
+        }
+        return array;
+    }
+
+    static <T> JSONArray toArrayOfString(Iterable<T> iterable, FunctionalUtil.ToStringFunction<? super T> function) {
+        JSONArray array = new JSONArray();
+        for (T item : iterable) {
+            array.put(function.applyAsString(item));
+        }
+        return array;
+    }
+
+    static <T> JSONArray toArray(Iterable<T> iterable) {
+        JSONArray array = new JSONArray();
+        for (T item : iterable) {
+            array.put(item);
+        }
+        return array;
+    }
+
+    static JSONObject map(String key, Object value) {
+        JSONObject object = new JSONObject();
+        object.put(key, value);
+        return object;
+    }
+
+    static JSONObject map(String key1, Object value1, String key2, Object value2) {
+        JSONObject object = new JSONObject();
+        object.put(key1, value1);
+        object.put(key2, value2);
+        return object;
+    }
+
+    static JSONObject map(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
+        JSONObject object = new JSONObject();
+        object.put(key1, value1);
+        object.put(key2, value2);
+        object.put(key3, value3);
+        return object;
+    }
+
+    static JSONObject map(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4) {
+        JSONObject object = new JSONObject();
+        object.put(key1, value1);
+        object.put(key2, value2);
+        object.put(key3, value3);
+        object.put(key4, value4);
+        return object;
     }
 }

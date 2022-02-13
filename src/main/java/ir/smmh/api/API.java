@@ -13,6 +13,7 @@ public interface API {
         try {
             return process(request);
         } catch (Throwable throwable) {
+            throwable.printStackTrace();
             return "";
         }
     }

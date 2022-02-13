@@ -6,28 +6,26 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * A standard API is an API whose requests are JSON maps that contain the
- * 'method', 'parameters', and optionally 'authentication' keys, and whose
- * responses are JSON maps that contain the 'error_code', 'description', and
- * optionally 'results' keys.
- */
 @SuppressWarnings({"NonConstantFieldWithUpperCaseName", "UseOfSystemOutOrSystemErr"})
-public abstract class StandardAPI implements API {
+@ParametersAreNonnullByDefault
+public abstract class JSONAPIImpl implements JSONAPI {
 
     private final Map<String, Method> methods = new HashMap<>(16);
     private final Map<Integer, String> errorCodes = new HashMap<>(16);
-    public final int BUG = defineError(-1, "Internal bug encountered");
-    public final int NO_ERROR = defineError(0, "Successful");
-    public final int COULD_NOT_PARSE_REQUEST = defineError(1, "Missing keys or bad values in request");
-    public final int METHOD_NOT_FOUND = defineError(2, "Method not found");
-    public final int UNEXPECTED_ERROR = defineError(99, "Unexpected error occurred");
+    private int lastErrorCode = 0;
+    public final int BUG = defineError("Internal bug encountered");
+    public final int NO_ERROR = defineError("Successful");
+    public final int COULD_NOT_PARSE_REQUEST = defineError("Missing keys or bad values in request");
+    public final int METHOD_NOT_FOUND = defineError("Method not found");
+    public final int UNEXPECTED_ERROR = defineError("Unexpected error occurred");
 
-    protected final void defineMethod(@NotNull String name, @NotNull Method method) {
+    @Override
+    public final void defineMethod(String name, Method method) {
         if (methods.containsKey(name)) {
             throw new IllegalArgumentException("method name already exists: " + name);
         } else {
@@ -35,33 +33,29 @@ public abstract class StandardAPI implements API {
         }
     }
 
-    // TODO defineError should not take an int
-    protected final int defineError(int code, @NotNull String description) {
-        if (errorCodes.containsKey(code)) {
-            throw new IllegalArgumentException("error code already exists: " + code);
-        } else {
-            errorCodes.put(code, description);
-        }
+    @Override
+    public final int defineError(String description) {
+        int code = lastErrorCode++;
+        errorCodes.put(code, description);
         return code;
     }
 
-    @NotNull
-    public final JSONObject respond(int errorCode) {
+    @Override
+    public final @NotNull JSONObject respond(int errorCode) {
         return respond(errorCode, null, null);
     }
 
-    @NotNull
-    public final JSONObject respond(int errorCode, Throwable thrown) {
+    @Override
+    public final @NotNull JSONObject respond(int errorCode, Throwable thrown) {
         return respond(errorCode, thrown, null);
     }
 
-    @NotNull
-    public final JSONObject respond(JSONObject results) {
+    @Override
+    public final @NotNull JSONObject respond(JSONObject results) {
         return respond(NO_ERROR, null, results);
     }
 
-    @NotNull
-    private JSONObject respond(int errorCode, Throwable thrown, JSONObject results) {
+    private @NotNull JSONObject respond(int errorCode, @Nullable Throwable thrown, @Nullable JSONObject results) {
         JSONObject response = new JSONObject();
         try {
             response.put("error_code", errorCode);
@@ -79,12 +73,7 @@ public abstract class StandardAPI implements API {
     }
 
     @Override
-    public final @NotNull String process(@NotNull String request) {
-        return processJSON(request).toString();
-    }
-
-    @NotNull
-    public final JSONObject processJSON(@NotNull String request) {
+    public final @NotNull JSONObject processJSON(String request) {
         System.out.println("\n>>> " + request);
         JSONObject response;
         PrintStream log;
@@ -99,8 +88,7 @@ public abstract class StandardAPI implements API {
         return response;
     }
 
-    @NotNull
-    private JSONObject processJSON(@NotNull JSONObject request) {
+    private @NotNull JSONObject processJSON(JSONObject request) {
         try {
             String methodName;
             try {
@@ -120,8 +108,8 @@ public abstract class StandardAPI implements API {
                 }
                 if (method instanceof Method.AuthenticatedMethod) {
                     @SuppressWarnings("rawtypes") Method.AuthenticatedMethod am = (Method.AuthenticatedMethod) method;
-                    if (this instanceof AuthenticatedStandardAPI) {
-                        AuthenticatedStandardAPI<?> me = ((AuthenticatedStandardAPI<?>) this);
+                    if (this instanceof UserManagingJSONAPIImpl) {
+                        UserManagingJSONAPIImpl<?, ?> me = ((UserManagingJSONAPIImpl<?, ?>) this);
                         @Nullable JSONObject authentication;
                         try {
                             authentication = request.has("authentication") ? request.getJSONObject("authentication") : null;

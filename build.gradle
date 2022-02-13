@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'org.example'
+group 'ir.smmh'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -16,6 +16,7 @@ dependencies {
     implementation 'org.json:json:20211205'
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+    implementation 'org.python:jython-slim:2.7.2'
 }
 
 test {

@@ -1,6 +1,6 @@
 package ir.smmh.mind;
 
-import ir.smmh.api.StandardAPI;
+import ir.smmh.api.JSONAPIImpl;
 import ir.smmh.mind.impl.MutableMindImpl;
 import org.json.JSONObject;
 
@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings({"ClassNamePrefixedWithPackageName", "MagicNumber"})
-public class MindsAPI extends StandardAPI {
+public class MindsAPI extends JSONAPIImpl {
 
     private final Map<String, Mind.Mutable> minds = new HashMap<>(8);
 
@@ -49,7 +49,7 @@ public class MindsAPI extends StandardAPI {
             return respond(NO_ERROR);
         });
 
-        int INSTANTIATION_FAILED = defineError(126, "Instantiation failed");
+        int INSTANTIATION_FAILED = defineError("Instantiation failed");
 
         defineMethod("instantiate", (Method) (p) -> {
             Idea.Mutable idea = getIdea(p);

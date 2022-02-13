@@ -1,15 +1,9 @@
 package ir.smmh.mind;
 
-import ir.smmh.tgbot.Bot;
+import ir.smmh.tgbot.Bots;
 
 class OntologueMain {
-
     public static void main(String[] args) {
-
-        Bot bot = new Ontologue();
-
-        //noinspection SpellCheckingInspection
-        bot.start("5069967929:AAFz5Wr5UfGwraPDQuKafouHnE6mLEATnQQ");
-
+        new Ontologue().start(Bots.ontologue);
     }
 }
