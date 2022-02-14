@@ -4,6 +4,6 @@ import ir.smmh.tgbot.Bots;
 
 class OntologueMain {
     public static void main(String[] args) {
-        new Ontologue().start(Bots.ontologue);
+        new Ontologue().start(Bots.OntologueBot);
     }
 }

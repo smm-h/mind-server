@@ -4,6 +4,7 @@ import ir.smmh.tgbot.SimpleBot;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.NetworkUtil;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,13 +18,24 @@ public abstract class SimpleBotImpl implements SimpleBot {
 
     private static final String BASE = "https://api.telegram.org/bot%s/%s";
     private final OkHttpClient client;
+    private final Markup markup;
     private String token;
     private int updateId;
     private boolean running;
 
     public SimpleBotImpl() {
+        this(Markup.HTML);
+    }
+
+    public SimpleBotImpl(Markup markup) {
         super();
         client = new OkHttpClient();
+        this.markup = markup;
+    }
+
+    @Override
+    public @NotNull Markup getMarkupMode() {
+        return markup;
     }
 
     @Override
@@ -61,7 +73,7 @@ public abstract class SimpleBotImpl implements SimpleBot {
                     .addHeader("Content-Type", "application/json")
                     .post(body)
                     .build();
-            client.newCall(request).execute();
+            client.newCall(request).execute().close();
         } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
@@ -87,7 +99,7 @@ public abstract class SimpleBotImpl implements SimpleBot {
                     .url(makeURL("sendPhoto"))
                     .post(builder.build())
                     .build();
-            client.newCall(request).execute();
+            client.newCall(request).execute().close();
         } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
@@ -117,12 +129,16 @@ public abstract class SimpleBotImpl implements SimpleBot {
 
         while (running) {
             try {
-
                 RequestBody requestBody = RequestBody.create(String.format(params, updateId), NetworkUtil.JSON);
                 Request request = new Request.Builder().url(makeURL("getUpdates")).addHeader("Content-Type", "application/json").post(requestBody).build();
                 Response response = client.newCall(request).execute();
                 ResponseBody responseBody = response.body();
-                handle(JSONUtil.parse(responseBody == null ? "{}" : responseBody.string()));
+                if (responseBody != null) {
+                    handle(JSONUtil.parse(responseBody.string()));
+                    responseBody.close();
+                } else {
+                    handle(new JSONObject());
+                }
             } catch (JSONException | IOException e) {
                 System.err.println(e.getMessage());
             }

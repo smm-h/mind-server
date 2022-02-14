@@ -5,12 +5,12 @@ import ir.smmh.lingu.Processor;
 import ir.smmh.lingu.processors.Multiprocessor;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MultiprocessorImpl implements Multiprocessor {
 
-    private final List<Processor> processors = new LinkedList<>();
+    private final List<Processor> processors = new ArrayList<>();
 
     private boolean sealed = false;
 

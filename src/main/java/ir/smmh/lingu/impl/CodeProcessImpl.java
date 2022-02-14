@@ -10,7 +10,7 @@ public class CodeProcessImpl implements CodeProcess {
 
     private final @NotNull Code code;
     private final @NotNull String name;
-    private final List<Mishap> myMishaps = new LinkedList<>();
+    private final List<Mishap> myMishaps = new ArrayList<>();
     private boolean safe = true;
 
     private boolean finished = false;

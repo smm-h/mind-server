@@ -13,7 +13,7 @@ import static ir.smmh.lingu.settings.impl.SettingsFormalizerImpl.treeMaker;
 public class TreeLanguage extends LanguageImpl implements Maker<Tree<String>> {
 
     public TreeLanguage() throws FileNotFoundException, Maker.MakingException {
-        super("Tree Language", "tlg", Languages.getInstance().getTokenizerMaker().makeFromTestFile("tree-language"));
+        super("Tree Language", "tlg", TokenizerMaker.getInstance().makeFromTestFile("tree-language"));
 
         setMainMaker(treeMaker);
     }

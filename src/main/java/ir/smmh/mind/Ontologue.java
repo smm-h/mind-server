@@ -3,9 +3,11 @@ package ir.smmh.mind;
 import ir.smmh.tgbot.impl.StandardAPIBotImpl;
 import org.json.JSONObject;
 
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Locale;
 
 @SuppressWarnings("SpellCheckingInspection")
+@ParametersAreNonnullByDefault
 public class Ontologue extends StandardAPIBotImpl {
 
     final String mindName = "shared";

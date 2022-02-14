@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class TokenizerMakerImpl extends LanguageImpl implements TokenizerMaker {
+    private static TokenizerMaker instance;
 
     public TokenizerMakerImpl() {
         super("Tokenizer Maker", "nlx", new MultiprocessorImpl());
@@ -65,6 +66,10 @@ public class TokenizerMakerImpl extends LanguageImpl implements TokenizerMaker {
                 CodeImpl.links.write(code, links);
             }
         });
+    }
+
+    public static TokenizerMaker getInstance() {
+        return instance == null ? (instance = new TokenizerMakerImpl()) : instance;
     }
 
     // TODO get rid of this

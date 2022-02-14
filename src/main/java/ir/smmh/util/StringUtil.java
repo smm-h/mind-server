@@ -3,7 +3,12 @@ package ir.smmh.util;
 import ir.smmh.Backward;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.HashSet;
+import java.util.Set;
+
 @SuppressWarnings("StaticMethodOnlyUsedInOneClass")
+@ParametersAreNonnullByDefault
 public interface StringUtil {
     byte RADIX_MAX = 36;
     byte RADIX_HEX = 16;
@@ -266,5 +271,13 @@ public interface StringUtil {
         }
 
         return array;
+    }
+
+    static @NotNull Set<Character> characterSet(String chars) {
+        Set<Character> set = new HashSet<>();
+        char[] array = chars.toCharArray();
+        for (char c : array)
+            set.add(c);
+        return set;
     }
 }

@@ -4,7 +4,7 @@ import ir.smmh.tree.Tree;
 import ir.smmh.tree.impl.NodedTreeImpl;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CollectiveTokenType implements Token.Type.Collective {
@@ -26,8 +26,8 @@ public class CollectiveTokenType implements Token.Type.Collective {
 
         public final Token.Individual opener, closer;
 
-        // private final LinkedList<Cell> cells = new LinkedList<>();
-        private final List<Token> children = new LinkedList<>();
+        // private final LinkedList<Cell> cells = new ArrayList<>();
+        private final List<Token> children = new ArrayList<>();
         private NodedTreeImpl<Token>.Node treeMakingPointer;
 
         public CollectiveToken(Token.Individual opener, Token.Individual closer) {
@@ -135,7 +135,7 @@ public class CollectiveTokenType implements Token.Type.Collective {
         }
 
         // private class Cell {
-        // private final LinkedList<Token> tokens = new LinkedList<Token>();
+        // private final LinkedList<Token> tokens = new ArrayList<Token>();
 
         // public void add(Token token) {
         // tokens.add(token);

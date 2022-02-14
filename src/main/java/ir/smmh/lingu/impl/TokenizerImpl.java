@@ -23,7 +23,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
     private final HashMap<String, TreeSet<Verbatim>> verbatims = new HashMap<>();
     private final HashSet<String> ignorableNames = new HashSet<>();
     private final PriorityQueue<Definition> schedule = new PriorityQueue<>(Comparator.comparingInt(Definition::getPriority));
-    private final LinkedList<String> namesToIgnore = new LinkedList<>();
+    private final List<String> namesToIgnore = new ArrayList<>();
 
     public boolean ignore(String name) {
         if (ignorableNames.contains(name)) {
@@ -38,8 +38,8 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
 
     public void process(@NotNull Code code) {
 
-        List<Token.Individual> stripped = new LinkedList<>();
-        List<Token.Individual> drawable = new LinkedList<>();
+        List<Token.Individual> stripped = new ArrayList<>();
+        List<Token.Individual> drawable = new ArrayList<>();
 
         for (Token.Individual token : tokenize(code)) {
             drawable.add(token);
@@ -123,7 +123,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
             }
         }
 
-        String key = type.pattern.getFirst().data;
+        String key = type.pattern.get(0).data;
         if (!verbatims.containsKey(key)) {
             verbatims.put(key, new TreeSet<>());
         }
@@ -152,7 +152,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         String string = code.getOpenFile().read();
 
         // create a new list to put the tokens in
-        List<Token.Individual> tokens = new LinkedList<>();
+        List<Token.Individual> tokens = new ArrayList<>();
 
         // keep track of where (in which kept, if any) we are in the code
         Kept where = null;
@@ -287,7 +287,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         return tokens;
     }
 
-    public LinkedList<IndividualToken> makeupVerbatims(LinkedList<IndividualToken> tokens) {
+    public List<IndividualToken> makeupVerbatims(List<IndividualToken> tokens) {
         int index = 0, length;
         IndividualToken token;
         PriorityQueue<Verbatim> possibles;
@@ -368,14 +368,14 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
         return nsc.new IndividualToken(Character.toString(nsc.data), position);
     }
 
-    private LinkedList<IndividualToken> makeupStreaks(int offset, String string) {
+    private List<IndividualToken> makeupStreaks(int offset, String string) {
         // String report = "\t" + "[" + string + "]===";
         string += (char) 0;
         char character;
         StringBuilder data = new StringBuilder();
         TreeSet<Streak> last, curr = new TreeSet<>();
         int index = 0;
-        LinkedList<IndividualToken> tokens = new LinkedList<>();
+        List<IndividualToken> tokens = new ArrayList<>();
         while (index < string.length()) {
             character = string.charAt(index);
 
@@ -411,7 +411,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
 
             index++;
         }
-        tokens.removeLast();
+        tokens.remove(tokens.size() - 1);
         // System.out.println(report);
         return tokens;
     }
@@ -429,9 +429,9 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
     public static class Verbatim extends IndividualTokenType implements Comparable<Verbatim> {
 
         public final String data;
-        public final LinkedList<IndividualToken> pattern;
+        public final List<IndividualToken> pattern;
 
-        public Verbatim(TokenizerMakerImpl.Verbatim definition, LinkedList<IndividualToken> pattern) {
+        public Verbatim(TokenizerMakerImpl.Verbatim definition, List<IndividualToken> pattern) {
             super(definition.title);
             this.data = definition.data;
             this.pattern = pattern;
@@ -481,10 +481,12 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
 
         public String getReport() {
             int cp = token.getData().codePointAt(0);
-            if (cp > 32)
-                return "Unknown character `" + token.getData() + "`";
-            else
+            if (cp < 32)
                 return "Unknown non-printable character `" + StringUtil.codepointToText(token.getData().codePointAt(0)) + "`";
+            else if (cp > 128)
+                return "Unknown non-ASCII character `" + StringUtil.codepointToText(token.getData().codePointAt(0)) + "`";
+            else
+                return "Unknown character `" + token.getData() + "`";
         }
     }
 

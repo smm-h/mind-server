@@ -8,9 +8,9 @@ import org.jetbrains.annotations.Nullable;
 public class PlayerImpl implements Player {
     private final String id;
     private final String joinedOn;
+    private final String passwordHash;
     private World world;
     private String lastOnlineOn;
-    private final String passwordHash;
 
     public PlayerImpl(String id, String passwordHash) {
         this.id = id;

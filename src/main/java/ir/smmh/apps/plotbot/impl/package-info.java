@@ -1,4 +1,4 @@
 @ParametersAreNonnullByDefault
-package ir.smmh.tgbot;
+package ir.smmh.apps.plotbot.impl;
 
 import javax.annotation.ParametersAreNonnullByDefault;

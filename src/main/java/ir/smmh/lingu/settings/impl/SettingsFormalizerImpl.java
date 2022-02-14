@@ -2,9 +2,9 @@ package ir.smmh.lingu.settings.impl;
 
 import ir.smmh.lingu.CodeProcess;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
-import ir.smmh.lingu.Languages;
 import ir.smmh.lingu.Maker;
 import ir.smmh.lingu.Token;
+import ir.smmh.lingu.TokenizerMaker;
 import ir.smmh.lingu.impl.*;
 import ir.smmh.lingu.processors.impl.MultiprocessorImpl;
 import ir.smmh.lingu.settings.*;
@@ -163,7 +163,7 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
     public SettingsFormalizerImpl(String name, String langPath, String primaryExt) throws FileNotFoundException, Maker.MakingException {
         super(name, langPath, primaryExt, new MultiprocessorImpl());
 
-        TokenizerImpl tokenizer = Languages.getInstance().getTokenizerMaker().makeFromTestFile("settings-formalizer");
+        TokenizerImpl tokenizer = TokenizerMaker.getInstance().makeFromTestFile("settings-formalizer");
         getProcessor().extend(tokenizer);
 
         setDefaultValues();
@@ -186,7 +186,7 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
 
             FormalSettings nameParent, valuesParent;
 
-            Queue<InformalSettings> q = new LinkedList<>();
+            Queue<InformalSettings> q = new ArrayDeque<>();
 
             q.add(tree.getRootData());
 

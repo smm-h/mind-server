@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface Languages {
     static @NotNull Languages getInstance() {
-        return LanguagesImpl.singleton;
+        return LanguagesImpl.getInstance();
     }
 
     @NotNull Log getOut();
@@ -17,6 +17,4 @@ public interface Languages {
     void associateExtWithLanguage(@NotNull String ext, @NotNull Language language);
 
     @Nullable Language getLanguageByExt(@NotNull String ext);
-
-    TokenizerMaker getTokenizerMaker();
 }

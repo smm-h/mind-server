@@ -1,12 +1,12 @@
 package ir.smmh.lingu.impl;
 
-import ir.smmh.lingu.Languages;
 import ir.smmh.lingu.Maker;
+import ir.smmh.lingu.TokenizerMaker;
 
 import java.io.FileNotFoundException;
 
 public class TextLanguage extends LanguageImpl {
     public TextLanguage() throws FileNotFoundException, Maker.MakingException {
-        super("Text Language", "txt", Languages.getInstance().getTokenizerMaker().makeFromTestFile("text-language"));
+        super("Text Language", "txt", TokenizerMaker.getInstance().makeFromTestFile("text-language"));
     }
 }

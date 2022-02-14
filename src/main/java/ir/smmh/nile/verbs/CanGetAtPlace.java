@@ -1,6 +1,7 @@
 package ir.smmh.nile.verbs;
 
 import ir.smmh.nile.adj.Multitude;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -15,5 +16,5 @@ public interface CanGetAtPlace<P, T> extends CanContainPlace<P>, Function<P, T>,
         return getAtPlace(place);
     }
 
-    T getAtPlace(P place);
+    @Nullable T getAtPlace(P place);
 }
