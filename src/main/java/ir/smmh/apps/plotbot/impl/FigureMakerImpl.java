@@ -1,9 +1,6 @@
 package ir.smmh.apps.plotbot.impl;
 
-import ir.smmh.apps.plotbot.Expression;
-import ir.smmh.apps.plotbot.MarkupWriter;
-import ir.smmh.apps.plotbot.Operator;
-import ir.smmh.apps.plotbot.PlotParser;
+import ir.smmh.apps.plotbot.*;
 import ir.smmh.lingu.Code;
 import ir.smmh.lingu.Mishap;
 import ir.smmh.lingu.Token;
@@ -19,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class PlotParserImpl extends LanguageImpl implements PlotParser {
+public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
 
     private final Map.SingleValue.Mutable<String, Operator> builtinOps = new MapImpl.SingleValue.Mutable<>();
     private final Map.SingleValue.Mutable<String, Operator> userDefinedOps = new MapImpl.SingleValue.Mutable<>();
@@ -28,9 +25,13 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
     private final Stack<String> debug = new Stack<>();
     private final Set<String> reserved = new HashSet<>();
     private final MarkupWriter markup = MarkupWriter.getInstance();
+    private final PlotByXBotStyles styles = PlotByXBotStyles.getInstance();
+    private String color = "black";
+    private String stroke = "thin";
+    private double alpha = 0.7;
 
     @SuppressWarnings("SpellCheckingInspection")
-    public PlotParserImpl() {
+    public FigureMakerImpl() {
         super("PlotLang", "plt", new MultiprocessorImpl());
         TokenizerImpl tokenizer = new TokenizerImpl();
         tokenizer.define(new TokenizerMakerImpl.Streak("whitespace", " \n\t\r"));
@@ -67,17 +68,12 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
         defineBuiltinOperator("log", (UnaryOperator) (arg) -> (x -> Math.log(arg.evaluate(x))));
         defineBuiltinOperator("min", (BinaryOperator) (lhs, rhs) -> (x -> Math.min(lhs.evaluate(x), rhs.evaluate(x))));
         defineBuiltinOperator("max", (BinaryOperator) (lhs, rhs) -> (x -> Math.max(lhs.evaluate(x), rhs.evaluate(x))));
-        defineBuiltinOperator("append", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) + rhs.evaluate(x)));
+        defineBuiltinOperator("add", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) + rhs.evaluate(x)));
         defineBuiltinOperator("sub", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) - rhs.evaluate(x)));
         defineBuiltinOperator("mul", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) * rhs.evaluate(x)));
         defineBuiltinOperator("div", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) / rhs.evaluate(x)));
         defineBuiltinOperator("mod", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) % rhs.evaluate(x)));
         defineBuiltinOperator("pow", (BinaryOperator) (lhs, rhs) -> (x -> Math.pow(lhs.evaluate(x), rhs.evaluate(x))));
-    }
-
-    @Override
-    public @NotNull Expression parse(String string) throws MakingException {
-        return makeFromCode(new CodeImpl(string, "plt"));
     }
 
     @Override
@@ -116,12 +112,14 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
     }
 
     @Override
-    public @NotNull Expression makeFromCode(@NotNull Code code) throws MakingException {
+    public @NotNull Figure makeFromCode(@NotNull Code code) throws MakingException {
+        StringJoiner reports = new StringJoiner("\n");
+        List<Figure.Part> figureParts = new ArrayList<>();
         List<Token.Individual> tokens = TokenizerImpl.tokenized.read(code);
 //        System.out.println(((Comprehension.List<Token.Individual, String>) token -> token.getTypeString() + ":" + token.getData()).comprehend(tokens));
         java.util.Map<Token.Individual, Set<Mishap>> mishaps = CodeImpl.mishaps.read(code);
         if (mishaps.isEmpty()) {
-            if (tokens == null) throw new MakingException("tokenized port empty");
+            if (tokens == null) throw new MakingException("Tokenized port empty");
             stack.clear();
             int index = 0;
             int n = tokens.size();
@@ -136,7 +134,7 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
                             stack.push(x -> literalValue);
                             debug.push(data);
                         } catch (NumberFormatException e) {
-                            throw new MakingException("could not parse number: " + markup.code(token.getData()));
+                            throw new MakingException("Could not parse number: " + markup.code(token.getData()));
                         }
                         break;
                     case "id":
@@ -146,28 +144,26 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
                             if (symbol.equals("assign")) {
                                 arity = 2;
                                 StringBuilder builder = new StringBuilder();
-                                builder.append("ASSIGN: ");
                                 Expression identifier = stack.pop();
                                 debug.pop();
                                 if (!(identifier instanceof Identifier)) {
-                                    throw new MakingException("cannot assign value to variable using non-identifier expression");
+                                    throw new MakingException("Cannot assign value to variable using non-identifier expression");
                                 }
                                 Identifier verifiedIdentifier = (Identifier) identifier;
                                 builder.append(verifiedIdentifier.name).append(" = ");
                                 double value = stack.pop().evaluate(Double.NaN);
                                 builder.append(debug.pop()).append(" = ").append(value);
-                                System.out.println(builder);
+                                reports.add(markup.code(builder.toString()).getData());
                                 if (Double.isNaN(value))
-                                    throw new MakingException("expression evaluation failed");
+                                    throw new MakingException("Expression evaluation failed");
                                 verifiedIdentifier.value = value;
                             } else if (symbol.equals("define")) {
                                 arity = 2;
                                 StringBuilder builder = new StringBuilder();
-                                builder.append("DEFINE: ");
                                 Expression identifier = stack.pop();
                                 debug.pop();
                                 if (!(identifier instanceof Identifier)) {
-                                    throw new MakingException("cannot define named function using non-identifier expression");
+                                    throw new MakingException("Cannot define named function using non-identifier expression");
                                 }
                                 Identifier verifiedIdentifier = (Identifier) identifier;
                                 builder.append(verifiedIdentifier.name);
@@ -181,20 +177,16 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
                                     if (argIdentifier instanceof Identifier) {
                                         Identifier verifiedArgIdentifier = (Identifier) argIdentifier;
                                         argJoiner.add(verifiedArgIdentifier.name);
-                                        if (Double.isNaN(verifiedArgIdentifier.value)) {
-                                            identifiers.removeAtPlace(verifiedArgIdentifier.name); // make it a bound variable
-                                            boundVariables[i] = verifiedArgIdentifier;
-                                        } else {
-                                            throw new MakingException("cannot use free identifier as bound:" + markup.code(verifiedArgIdentifier.name));
-                                        }
+                                        verifiedArgIdentifier.bind();
+                                        boundVariables[i] = verifiedArgIdentifier;
                                     } else {
-                                        throw new MakingException("expression must be an identifier");
+                                        throw new MakingException("Expression must be an identifier");
                                     }
                                 }
                                 builder.append(argJoiner).append(" := ");
                                 Expression expression = stack.pop();
-                                builder.append(debug.pop()).append(">");
-                                System.out.println(builder);
+                                builder.append(debug.pop());
+                                reports.add(markup.code(builder.toString()).getData());
                                 defineOperator(verifiedIdentifier.name, new Operator() {
                                     @Override
                                     public int getArity() {
@@ -211,8 +203,61 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
                                         };
                                     }
                                 });
+                            } else if (styles.isColor(symbol)) {
+                                color = symbol;
+                            } else if (symbol.equals("alpha")) {
+                                arity = 1;
+                                Expression e = stack.pop();
+                                debug.pop();
+                                alpha = e.evaluate(0);
+                                if (alpha > 1 || alpha < 0) {
+                                    throw new MakingException("Alpha value must be between 0 and 1");
+                                }
+                            } else if (styles.isStroke(symbol)) {
+                                stroke = symbol;
+                            } else if (symbol.equals("and")) {
+                                if (stack.isEmpty()) {
+                                    throw new MakingException("No expressions were made before " + markup.code("and"));
+                                }
+                                figureParts.add(new FigurePartImpl(color, alpha, stroke, debug.pop(), stack.pop()));
+                                if (!stack.isEmpty()) {
+                                    StringBuilder builder = new StringBuilder("Multiple expressions were made before" + markup.code("and") + " :");
+                                    while (!stack.isEmpty()) {
+                                        stack.pop();
+                                        builder.append("\n").append(markup.code(debug.pop()));
+                                    }
+                                    throw new MakingException(builder.toString());
+                                }
+                            } else if (symbol.equals("iterate")) {
+                                arity = 3;
+                                StringBuilder builder = new StringBuilder();
+                                builder.append("for ");
+                                Expression identifier = stack.pop();
+                                debug.pop();
+                                if (!(identifier instanceof Identifier)) {
+                                    throw new MakingException("Cannot define named function using non-identifier expression");
+                                }
+                                Identifier verifiedIdentifier = (Identifier) identifier;
+                                builder.append(verifiedIdentifier.name);
+                                verifiedIdentifier.bind();
+                                Expression limitExpression = stack.pop();
+                                debug.pop();
+                                int limit = (int) limitExpression.evaluate(Double.NaN);
+                                Expression e = stack.pop();
+                                String es = debug.pop();
+                                builder.append(" in range(").append(limit).append("): ").append(es);
+                                for (int i = 0; i < limit; i++) {
+                                    int v = i;
+                                    Expression ei = x -> {
+                                        verifiedIdentifier.value = v;
+                                        return e.evaluate(x);
+                                    };
+                                    figureParts.add(new FigurePartImpl(color, alpha, stroke, es + " where i=" + i, ei));
+                                }
+                                reports.add(markup.code(builder.toString()).getData());
                             } else {
                                 Operator op = builtinOps.getAtPlace(symbol);
+                                if (op == null) op = userDefinedOps.getAtPlace(symbol);
                                 if (op == null) {
                                     Identifier v = identifiers.getAtPlace(symbol);
                                     if (v == null) {
@@ -221,49 +266,53 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
                                     stack.push(v);
                                     debug.push(v.name);
                                 } else {
-                                    StringJoiner joiner = new StringJoiner(", ", "(", ")");
                                     arity = op.getArity();
-                                    Expression[] args = new Expression[op.getArity()];
-                                    for (int i = 0; i < args.length; i++) {
-                                        Expression intermediate;
-                                        intermediate = stack.pop();
-                                        joiner.add(debug.pop());
-                                        args[i] = intermediate;
+                                    Expression[] args = new Expression[arity];
+                                    if (arity > 0) {
+                                        StringBuilder builder = new StringBuilder();
+                                        for (int i = 0; i < arity; i++) {
+                                            args[arity - 1 - i] = stack.pop();
+                                            if (i > 0)
+                                                builder.insert(0, ", ");
+                                            builder.insert(0, debug.pop());
+                                        }
+                                        debug.push(symbol + "(" + builder + ")");
+                                    } else {
+                                        debug.push(symbol);
                                     }
                                     stack.push(op.makeExpression(args));
-                                    debug.push(joiner.toString());
                                 }
                             }
                         } catch (EmptyStackException e) {
-                            throw new MakingException("not enough arguments for operation: " + markup.code(symbol) + ", needs " + arity);
+                            throw new MakingException("Not enough arguments for operation: " + markup.code(symbol) + ", needs " + arity);
                         }
                         break;
                     default:
-                        throw new MakingException("unhandled token type: " + markup.code(token.getTypeString()) + "");
+                        throw new MakingException("Unhandled token type: " + markup.code(token.getTypeString()) + "");
                 }
             }
-            if (stack.isEmpty()) {
-                throw new MakingException("no expression made");
-            }
-            Expression made = stack.pop();
-            System.out.println("PLOT: " + debug.pop());
             if (!stack.isEmpty()) {
-                StringBuilder builder = new StringBuilder("extra expressions leftover:");
-                while (!stack.isEmpty()) {
-                    stack.pop();
-                    builder.append("\n").append(markup.code(debug.pop()));
+                figureParts.add(new FigurePartImpl(color, alpha, stroke, debug.pop(), stack.pop()));
+                if (!stack.isEmpty()) {
+                    StringBuilder builder = new StringBuilder("Multiple expressions were made before" + markup.code("and") + " :");
+                    while (!stack.isEmpty()) {
+                        stack.pop();
+                        builder.append("\n").append(markup.code(debug.pop()));
+                    }
+                    throw new MakingException(builder.toString());
                 }
-                throw new MakingException(builder.toString());
             }
-            return made;
+            if (figureParts.isEmpty()) {
+                reports.add("No expressions were made");
+            }
+            return new FigureImpl(figureParts, reports.toString());
         } else {
-            StringJoiner report = new StringJoiner("\n");
             for (Set<Mishap> set : mishaps.values()) {
                 for (Mishap mishap : set) {
-                    report.add(mishap.getReport());
+                    reports.add(mishap.getReport());
                 }
             }
-            throw new MakingException(report.toString());
+            throw new MakingException(reports.toString());
         }
     }
 
@@ -273,7 +322,7 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
 
         private Identifier(String name, double value) throws MakingException {
             if (reserved.contains(name))
-                throw new MakingException("cannot reuse reserved identifier: " + markup.code(name));
+                throw new MakingException("Cannot reuse reserved identifier: " + markup.code(name));
             identifiers.setAtPlace(name, this);
             this.name = name;
             this.value = value;
@@ -282,8 +331,16 @@ public class PlotParserImpl extends LanguageImpl implements PlotParser {
         @Override
         public double evaluate(double x) {
             if (Double.isNaN(value))
-                throw new NullPointerException("variable is not assigned: " + markup.code(name));
+                throw new NullPointerException("Variable is not assigned: " + markup.code(name));
             return value;
+        }
+
+        private void bind() throws MakingException {
+            if (Double.isNaN(value)) {
+                identifiers.removeAtPlace(name);
+            } else {
+                throw new MakingException("Cannot use free identifier as bound:" + markup.code(name));
+            }
         }
     }
 }

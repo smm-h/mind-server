@@ -147,7 +147,11 @@ public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
                         String text = message.getString("text");
                         long chatId = message.getJSONObject("chat").getLong("id");
                         System.out.println("@" + chatId + " #" + messageId + ": " + text);
-                        process(chatId, text, messageId);
+                        try {
+                            process(chatId, text, messageId);
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
+                        }
                     }
                 }
             }

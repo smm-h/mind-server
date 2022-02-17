@@ -11,8 +11,8 @@ public class MarkupWriter extends TelegramBotHTMLWriter {
         Document d = createDocument();
         d
                 .sectionBegin("Welcome to " + italic("PlotByX") + " bot!")
-                .writeParagraph(plain("In this simple bot, you can type in expressions and get their plots in return."))
-                .sectionBegin(plain("Expressions and operations"))
+                .writeParagraph("In this simple bot, you can type in expressions and get their plots in return.")
+                .sectionBegin("Expressions and operations")
                 .writeParagraph("Expressions are written in " + link("post-fix notation", "https://en.wikipedia.org/wiki/Reverse_Polish_notation") + " and consist entirely of numbers and words, no special characters. Words denote operations and variables.")
                 .writeList(createList(false)
                                 .append(code("x"))
@@ -53,5 +53,14 @@ public class MarkupWriter extends TelegramBotHTMLWriter {
 
     public static MarkupWriter getInstance() {
         return instance == null ? (instance = new MarkupWriter()) : instance;
+    }
+
+    public String expressionRequestLine(Figure.Part r, double cps) {
+        String string = "";
+        String color = r.getColor();
+        if (color != null) {
+            string += PlotByXBotStyles.getInstance().getColorEmoji(color) + " ";
+        }
+        return string + code(r.getTitle()); // + " " + italic(String.format("(%d c/ms)", (int) cps));
     }
 }

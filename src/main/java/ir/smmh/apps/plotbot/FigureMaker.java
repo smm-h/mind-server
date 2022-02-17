@@ -5,9 +5,7 @@ import ir.smmh.lingu.Maker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface PlotParser extends Language, Maker<Expression> {
-
-    @NotNull Expression parse(String string) throws MakingException;
+public interface FigureMaker extends Language, Maker<Figure> {
 
     @NotNull Iterable<String> getBuiltinOperators();
 

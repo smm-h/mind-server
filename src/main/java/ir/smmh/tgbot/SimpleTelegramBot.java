@@ -12,5 +12,4 @@ public interface SimpleTelegramBot extends TelegramBot {
     void sendMessage(long chatId, String text, @Nullable Integer replyToMessageId);
 
     void sendPhoto(long chatId, File file, String caption, @Nullable Integer replyToMessageId) throws FileNotFoundException;
-
 }

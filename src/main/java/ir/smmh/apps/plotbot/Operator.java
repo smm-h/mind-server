@@ -23,12 +23,12 @@ interface Operator {
     int getArity();
 
     default @NotNull Expression makeExpression(Expression... args) throws Maker.MakingException {
-        if (this instanceof PlotParser.Constant) {
-            return ((PlotParser.Constant) this).makeNullaryExpression();
-        } else if (this instanceof PlotParser.UnaryOperator) {
-            return ((PlotParser.UnaryOperator) this).makeUnaryExpression(args[0]);
-        } else if (this instanceof PlotParser.BinaryOperator) {
-            return ((PlotParser.BinaryOperator) this).makeBinaryExpression(args[0], args[1]);
+        if (this instanceof FigureMaker.Constant) {
+            return ((FigureMaker.Constant) this).makeNullaryExpression();
+        } else if (this instanceof FigureMaker.UnaryOperator) {
+            return ((FigureMaker.UnaryOperator) this).makeUnaryExpression(args[0]);
+        } else if (this instanceof FigureMaker.BinaryOperator) {
+            return ((FigureMaker.BinaryOperator) this).makeBinaryExpression(args[0], args[1]);
         } else {
             throw new Maker.MakingException("override makeExpression in your operator");
         }
