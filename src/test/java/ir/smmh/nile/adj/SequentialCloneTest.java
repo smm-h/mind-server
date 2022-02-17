@@ -31,7 +31,7 @@ abstract class SequentialCloneTest<T> {
 
     static class Char extends SequentialCloneTest<Character> {
         Char() {
-            super(Sequential.of("Hello, World!".toCharArray()));
+            super(Sequential.of("Hello, World!" .toCharArray()));
         }
     }
 

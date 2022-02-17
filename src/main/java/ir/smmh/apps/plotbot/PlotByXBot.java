@@ -9,7 +9,6 @@ import ir.smmh.util.GraphicsUtil;
 import ir.smmh.util.jile.Chronometer;
 import ir.smmh.util.jile.impl.NChronometer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

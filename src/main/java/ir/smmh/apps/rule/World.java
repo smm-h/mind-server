@@ -1,12 +1,12 @@
 package ir.smmh.apps.rule;
 
+import annotations.MutatingMethod;
 import ir.smmh.nile.adj.Order;
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.ArrayQueue;
 import ir.smmh.nile.adj.impl.ArrayStack;
 import ir.smmh.nile.adj.impl.Priority;
 import ir.smmh.nile.adj.impl.SequentialImpl;
-import annotations.MutatingMethod;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;

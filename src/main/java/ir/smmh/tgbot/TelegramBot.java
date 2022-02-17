@@ -1,7 +1,5 @@
 package ir.smmh.tgbot;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.function.Predicate;
 
 public interface TelegramBot {
