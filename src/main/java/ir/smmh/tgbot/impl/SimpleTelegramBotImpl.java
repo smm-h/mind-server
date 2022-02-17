@@ -36,7 +36,7 @@ public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
     @Override
     public final void sendMessage(long chatId, String text, @Nullable Integer replyToMessageId) {
         JSONObject p = new JSONObject();
-        System.out.println(text);
+//        System.out.println(text);
         try {
             p.put("chat_id", chatId);
             p.put("text", text);
@@ -53,7 +53,9 @@ public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
                     .addHeader("Content-Type", "application/json")
                     .post(body)
                     .build();
-            client.newCall(request).execute().close();
+            Response response = client.newCall(request).execute();
+//            System.out.println(response.body().string());
+            response.close();
         } catch (JSONException | IOException e) {
             e.printStackTrace();
         }

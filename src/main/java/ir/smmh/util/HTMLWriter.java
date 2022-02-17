@@ -134,8 +134,8 @@ public class HTMLWriter implements MarkupWriter {
         }
 
         @Override
-        public @NotNull Section writeParagraph(MarkupFragment item) {
-            write(tag(item, "p"));
+        public @NotNull Section writeParagraph(MarkupFragment fragment) {
+            write(tag(fragment, "p"));
             return this;
         }
 

@@ -62,11 +62,21 @@ public interface MarkupWriter {
         @Contract("_->this")
         @NotNull Section sectionBegin(MarkupFragment title);
 
+        @Contract("_->this")
+        default @NotNull Section sectionBegin(String titleData) {
+            return sectionBegin(new MarkupFragment(titleData));
+        }
+
         @Contract("->this")
         @NotNull Section sectionEnd();
 
         @Contract("_->this")
-        @NotNull Section writeParagraph(MarkupFragment item);
+        @NotNull Section writeParagraph(MarkupFragment fragment);
+
+        @Contract("_->this")
+        default @NotNull Section writeParagraph(String fragmentData) {
+            return writeParagraph(new MarkupFragment(fragmentData));
+        }
 
         @Contract("_->this")
         @NotNull Section writeCodeBlock(String codeString);
@@ -78,11 +88,22 @@ public interface MarkupWriter {
 
         @Contract("_,_->this")
         @NotNull Section writeList(List list, @Nullable MarkupFragment caption);
+
+        @Contract("_,_->this")
+        default @NotNull Section writeList(List list, @Nullable String caption) {
+            //noinspection ConstantConditions
+            return writeList(list, with(caption, MarkupFragment::new, null));
+        }
     }
 
     interface List extends MarkupFragmentBuilder {
         @Contract("_->this")
         @NotNull List append(MarkupFragment item);
+
+        @Contract("_->this")
+        default @NotNull List append(String itemData) {
+            return append(new MarkupFragment(itemData));
+        }
 
         @Contract("_->this")
         @NotNull List nest(List innerList);

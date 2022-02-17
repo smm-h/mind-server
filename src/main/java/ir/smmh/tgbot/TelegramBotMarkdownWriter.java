@@ -7,6 +7,7 @@ import ir.smmh.util.MarkupWriter;
 import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
 import java.util.Set;
 
@@ -54,11 +55,6 @@ public class TelegramBotMarkdownWriter implements TelegramBotMarkupWriter {
     }
 
     @Override
-    public @NotNull List createList(boolean ordered) {
-        return ordered ? new MarkdownNumberedList() : new MarkdownList();
-    }
-
-    @Override
     public MarkupFragment plain(String text) {
         return new MarkupFragment(escape(text, PLAIN));
     }
@@ -99,51 +95,14 @@ public class TelegramBotMarkdownWriter implements TelegramBotMarkupWriter {
         return wrap(fragment, "||");
     }
 
-    private abstract static class AbstractMarkdownList implements MarkupWriter.List {
-
-        private final StringBuilder builder = new StringBuilder();
-
-        @Override
-        public @NotNull MarkupFragment build() {
-            return new MarkupFragment(builder.toString());
-        }
-
-        @Override
-        public @NotNull List append(MarkupFragment item) {
-            builder.append(getBullet()).append(item.getData()).append("\n");
-            return this;
-        }
-
-        protected abstract String getBullet();
-
-        @Override
-        public @NotNull List nest(List innerList) {
-            builder.append(StringUtil.shiftRight(innerList.build().getData(), 2));
-            return this;
-        }
-    }
-
-    private static class MarkdownList extends AbstractMarkdownList {
-        @Override
-        protected String getBullet() {
-            return "- ";
-        }
-    }
-
-    private static class MarkdownNumberedList extends AbstractMarkdownList {
-        private int n = 0;
-
-        @Override
-        protected String getBullet() {
-            return ++n + ". ";
-        }
-    }
-
     private class MarkdownDocument extends MarkdownSection implements MarkupWriter.Document {
 
         @Override
         public @NotNull Code toCode() {
-            return new CodeImpl(build().getData(), "html");
+            return new CodeImpl(new JSONObject()
+                    .put("parse_mode", getParseMode())
+                    .put("text", build().getData())
+                    .toString(), "json");
         }
     }
 
@@ -165,8 +124,8 @@ public class TelegramBotMarkdownWriter implements TelegramBotMarkupWriter {
         }
 
         @Override
-        public @NotNull Section writeParagraph(MarkupFragment item) {
-            write(item);
+        public @NotNull Section writeParagraph(MarkupFragment fragment) {
+            write(fragment);
             write("\n\n");
             return this;
         }
