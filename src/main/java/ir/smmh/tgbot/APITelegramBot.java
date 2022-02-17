@@ -2,7 +2,7 @@ package ir.smmh.tgbot;
 
 import ir.smmh.api.API;
 
-public interface APIBot extends SimpleBot {
+public interface APITelegramBot extends SimpleTelegramBot {
     API getAPI();
 
     @Override

@@ -1,12 +1,15 @@
 package ir.smmh.apps.plotbot;
 
+import annotations.Singleton;
 import ir.smmh.apps.plotbot.impl.PlotParserImpl;
 import ir.smmh.lingu.Maker;
-import ir.smmh.tgbot.Bots;
-import ir.smmh.tgbot.impl.SimpleBotImpl;
+import ir.smmh.tgbot.TelegramBotTokens;
+import ir.smmh.tgbot.impl.UserManagingTelegramBotImpl;
 import ir.smmh.util.GraphicsUtil;
 import ir.smmh.util.jile.Chronometer;
 import ir.smmh.util.jile.impl.NChronometer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -19,14 +22,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringJoiner;
 
-public class PlotBot extends SimpleBotImpl {
+@Singleton
+public class PlotByXBot extends UserManagingTelegramBotImpl<PlotByXBot.UserData> {
+
     private final PlotParser parser = new PlotParserImpl();
     private final Color colorFore = Color.BLACK;
     private final Color colorBack = Color.WHITE;
+    private final Stroke stroke = new BasicStroke(3);
     private final double timeOut = 3000;
+    private final MarkupWriter markup = MarkupWriter.getInstance();
+
+    public PlotByXBot() {
+        super(MarkupWriter.getInstance().getParseMode());
+    }
 
     public static void main(String[] args) {
-        new PlotBot().start(Bots.PlotByXBot);
+        new PlotByXBot().start(TelegramBotTokens.PlotByXBot);
     }
 
     @Override
@@ -51,7 +62,7 @@ public class PlotBot extends SimpleBotImpl {
                                     } catch (Maker.MakingException ignored) {
                                     }
                                 }
-                                list.add(String.format("<b>%s</b> <code>%s</code>", operator.getType(), symbol) + (value == null ? "" : String.format(" <i>(=%f)</i>", value)));
+                                list.add(markup.bold(operator.getType()) + " " + markup.code(symbol) + (value == null ? "" : " " + markup.italic(String.format("(=%f)", value))));
                             }
                             Collections.sort(list);
                             for (String i : list) {
@@ -60,11 +71,11 @@ public class PlotBot extends SimpleBotImpl {
                             sendMessage(chatId, joiner.toString(), messageId);
                             break;
                         case "/help":
-                            sendMessage(chatId, "", messageId);
+                            sendMessage(chatId, markup.helpMessage, messageId);
                             break;
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    sendMessage(chatId, "Command <code>%s</code>", messageId);
+                    sendMessage(chatId, "not enough arguments for command: " + markup.code(command), messageId);
                 }
             }
         } else {
@@ -105,6 +116,7 @@ public class PlotBot extends SimpleBotImpl {
                 g.drawRect(0, 0, w * 2, h * 2);
                 g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g.setColor(GraphicsUtil.changeTransparency(colorFore, 0.1f));
+                g.setStroke(stroke);
                 for (int x = 0; x <= w; x += hScale * hTicks) {
                     g.drawLine(w + x, 0, w + x, h * 2);
                     g.drawLine(w - x, 0, w - x, h * 2);
@@ -145,10 +157,22 @@ public class PlotBot extends SimpleBotImpl {
                 }
             }
             try {
-                sendPhoto(chatId, file, "<pre>" + text + "</pre>", messageId);
+                sendPhoto(chatId, file, markup.code(text).getData(), messageId);
             } catch (FileNotFoundException e) {
                 sendMessage(chatId, "Image file not found", messageId);
             }
         }
     }
+
+    @Override
+    public @NotNull PlotByXBot.UserData createUser(long chatId) {
+        return null;
+    }
+
+    public static class UserData extends UserManagingTelegramBotImpl.UserData {
+        public UserData(long chatId) {
+            super(chatId);
+        }
+    }
+
 }

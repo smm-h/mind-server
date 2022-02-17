@@ -1,4 +1,4 @@
-package ir.smmh.util;
+package annotations;
 
 import com.sun.source.tree.*;
 import com.sun.source.tree.Tree.Kind;
@@ -20,7 +20,7 @@ import java.util.Set;
 @SupportedAnnotationTypes(MutatingMethodProcessor.ANNOTATION_NAME)
 public class MutatingMethodProcessor extends AbstractProcessor {
 
-    static final String ANNOTATION_NAME = "ir.smmh.util.MutatingMethod";
+    static final String ANNOTATION_NAME = "annotations.MutatingMethod";
     static final String REQUIRED_FIRST = "preMutate", REQUIRED_LAST = "postMutate";
 
     @Override

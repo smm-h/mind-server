@@ -25,7 +25,7 @@ public class CodeProcessImpl implements CodeProcess {
     @Override
     public void issue(@NotNull Mishap mishap) {
         if (finished) {
-            System.out.println("Tried to add a mishap.");
+            System.out.println("Tried to append a mishap.");
         } else {
             mishap.setProcess(this);
             if (safe) {

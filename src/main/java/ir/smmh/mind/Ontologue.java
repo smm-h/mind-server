@@ -1,6 +1,6 @@
 package ir.smmh.mind;
 
-import ir.smmh.tgbot.impl.StandardAPIBotImpl;
+import ir.smmh.tgbot.impl.StandardAPITelegramBotImpl;
 import org.json.JSONObject;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -8,12 +8,12 @@ import java.util.Locale;
 
 @SuppressWarnings("SpellCheckingInspection")
 @ParametersAreNonnullByDefault
-public class Ontologue extends StandardAPIBotImpl {
+public class Ontologue extends StandardAPITelegramBotImpl {
 
     final String mindName = "shared";
 
     public Ontologue() {
-        super(new MindsAPI());
+        super(new MindsAPI(), null);
         JSONObject parameters = new JSONObject();
         parameters.put("name", mindName);
         process("mind", parameters);

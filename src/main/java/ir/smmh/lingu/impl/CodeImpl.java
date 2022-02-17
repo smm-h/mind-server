@@ -14,8 +14,8 @@ public class CodeImpl implements Code {
     public static final Port<List<Token.Individual>> syntax = new Port<>("CodeView:syntax");
     public static final Port<Map<Token.Individual, Set<Mishap>>> mishaps = new Port<>("CodeView:mishaps");
     public static final Port<Map<Token.Individual, OpenFile>> links = new Port<>("CodeView:links");
-    private final Language language;
-    private final OpenFile openFile;
+    private final @NotNull Language language;
+    private final @NotNull OpenFile openFile;
 
     public CodeImpl(OpenFile openFile) {
         this(openFile, getLanguage(openFile));
@@ -62,4 +62,8 @@ public class CodeImpl implements Code {
         return openFile.getTitle();
     }
 
+    @Override
+    public @NotNull Language getLanguage() {
+        return language;
+    }
 }

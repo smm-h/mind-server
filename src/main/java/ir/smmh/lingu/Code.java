@@ -5,4 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Code {
     @NotNull OpenFile getOpenFile();
+
+    @NotNull Language getLanguage();
 }

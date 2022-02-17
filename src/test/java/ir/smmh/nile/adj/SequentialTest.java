@@ -55,7 +55,7 @@ class SequentialTest {
         System.out.println(all);
         Sequential<Integer> ref = new Sequential.View.Reference<>(seq, (x) -> all.toIntArray(FunctionalUtil::itself));
         System.out.println(ref);
-        assertEquals(all.getSize(), ref.getSize(), "The number of " + m + "'s do not add up.");
+        assertEquals(all.getSize(), ref.getSize(), "The number of " + m + "'s do not append up.");
         for (int x : ref)
             assertEquals(m, x, () -> "A " + m + " was instead a " + x);
     }

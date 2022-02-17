@@ -1,9 +1,9 @@
 package ir.smmh.tgbot;
 
-import ir.smmh.apps.echobot.EchoBot;
+import ir.smmh.apps.echobot.EchoTelegramBot;
 
 public class EchoBotMain {
     public static void main(String[] args) {
-        new EchoBot().start(Bots.r5bot);
+        new EchoTelegramBot().start(TelegramBotTokens.r5bot);
     }
 }

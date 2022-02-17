@@ -1,10 +1,9 @@
 package ir.smmh.tgbot.impl;
 
-import ir.smmh.tgbot.SimpleBot;
+import ir.smmh.tgbot.SimpleTelegramBot;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.NetworkUtil;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,28 +13,19 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-public abstract class SimpleBotImpl implements SimpleBot {
+public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
 
     private static final String BASE = "https://api.telegram.org/bot%s/%s";
     private final OkHttpClient client;
-    private final Markup markup;
+    private final @Nullable String parseMode;
     private String token;
     private int updateId;
     private boolean running;
 
-    public SimpleBotImpl() {
-        this(Markup.HTML);
-    }
-
-    public SimpleBotImpl(Markup markup) {
+    public SimpleTelegramBotImpl(@Nullable String parseMode) {
         super();
+        this.parseMode = parseMode;
         client = new OkHttpClient();
-        this.markup = markup;
-    }
-
-    @Override
-    public @NotNull Markup getMarkupMode() {
-        return markup;
     }
 
     @Override
@@ -46,26 +36,16 @@ public abstract class SimpleBotImpl implements SimpleBot {
     @Override
     public final void sendMessage(long chatId, String text, @Nullable Integer replyToMessageId) {
         JSONObject p = new JSONObject();
+        System.out.println(text);
         try {
             p.put("chat_id", chatId);
             p.put("text", text);
-            p.put("parse_mode", "HTML");
-            /*
-             * <b>bold</b>, <strong>bold</strong>
-             * <i>italic</i>, <em>italic</em>
-             * <u>underline</u>, <ins>underline</ins>
-             * <s>strikethrough</s>, <strike>strikethrough</strike>, <del>strikethrough</del>
-             * <span class="tg-spoiler">spoiler</span>, <tg-spoiler>spoiler</tg-spoiler>
-             * <b>bold <i>italic bold <s>italic bold strikethrough <span class="tg-spoiler">italic bold strikethrough spoiler</span></s> <u>underline italic bold</u></i> bold</b>
-             * <a href="http://www.example.com/">inline URL</a>
-             * <a href="tg://user?id=123456789">inline mention of a user</a>
-             * <code>inline fixed-width code</code>
-             * <pre>pre-formatted fixed-width code block</pre>
-             * <pre><code class="language-python">pre-formatted fixed-width code block written in the Python programming language</code></pre>
-             */
+            if (parseMode != null) {
+                p.put("parse_mode", parseMode);
+            }
             if (replyToMessageId != null) {
                 p.put("reply_to_message_id", replyToMessageId);
-                p.put("allow_sending_without_reply", true);
+                p.put("allow_sending_without_reply", "true");
             }
             RequestBody body = RequestBody.create(p.toString(), NetworkUtil.JSON);
             Request request = new Request.Builder()
@@ -89,11 +69,13 @@ public abstract class SimpleBotImpl implements SimpleBot {
                     .addFormDataPart("photo", file.getName(), RequestBody.create(file, MediaType.parse("image/png")));
             if (caption != null) {
                 builder.addFormDataPart("caption", caption);
-                builder.addFormDataPart("parse_mode", "HTML");
+                if (parseMode != null) {
+                    builder.addFormDataPart("parse_mode", parseMode);
+                }
             }
             if (replyToMessageId != null) {
                 builder.addFormDataPart("reply_to_message_id", String.valueOf(replyToMessageId));
-                builder.addFormDataPart("allow_sending_without_reply", String.valueOf(true));
+                builder.addFormDataPart("allow_sending_without_reply", "true");
             }
             Request request = new Request.Builder()
                     .url(makeURL("sendPhoto"))
