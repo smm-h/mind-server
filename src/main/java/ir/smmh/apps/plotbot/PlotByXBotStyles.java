@@ -50,7 +50,10 @@ public class PlotByXBotStyles {
     }
 
     public String getColorEmoji(String color) {
-        return colorEmojis.get(color);
+        var emoji = colorEmojis.get(color);
+        if (emoji == null)
+            return "️•";
+        return emoji;
     }
 
     private void addStroke(String name, Stroke stroke) {
@@ -62,6 +65,9 @@ public class PlotByXBotStyles {
     }
 
     public Color getColor(String name) {
-        return colors.get(name);
+        var namedColor = colors.get(name);
+        if (namedColor == null)
+            return new Color(Integer.parseInt(name));
+        return namedColor;
     }
 }

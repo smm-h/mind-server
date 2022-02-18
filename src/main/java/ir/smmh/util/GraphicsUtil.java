@@ -10,4 +10,15 @@ public interface GraphicsUtil {
     static int getAlpha(float transparency) {
         return ((int) (transparency * 255f)) << 24;
     }
+
+
+    static Color multiply(Color color, int value) {
+        double factor = value / 255.;
+        return new Color(
+                (int) (color.getRed() * factor),
+                (int) (color.getGreen() * factor),
+                (int) (color.getBlue() * factor),
+                color.getAlpha());
+    }
+
 }

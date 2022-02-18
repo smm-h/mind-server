@@ -9,7 +9,9 @@ import ir.smmh.lingu.impl.LanguageImpl;
 import ir.smmh.lingu.impl.TokenizerImpl;
 import ir.smmh.lingu.impl.TokenizerMakerImpl;
 import ir.smmh.lingu.processors.impl.MultiprocessorImpl;
+import ir.smmh.util.GraphicsUtil;
 import ir.smmh.util.Map;
+import ir.smmh.util.NumberPredicates;
 import ir.smmh.util.impl.MapImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,6 +19,39 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
+
+    static class ShadeExpression implements Expression {
+        private final Expression amount;
+        private Expression wrappedExpression;
+        private final String color;
+
+        public ShadeExpression(Expression wrappedExpression, String color, Expression amount) {
+            this.amount = amount;
+            this.color = color;
+            this.wrappedExpression = wrappedExpression;
+        }
+
+        public Expression amount() {
+            return amount;
+        }
+
+        public Expression wrappedExpression() {
+            return wrappedExpression;
+        }
+
+        public String color() {
+            return color;
+        }
+
+        public void setWrappedExpression(Expression expr) {
+            wrappedExpression = expr;
+        }
+
+        @Override
+        public double evaluate(double x) {
+            throw new RuntimeException("HONK!!! This should not be invoked");
+        }
+    }
 
     private final Map.SingleValue.Mutable<String, Operator> builtinOps = new MapImpl.SingleValue.Mutable<>();
     private final Map.SingleValue.Mutable<String, Operator> userDefinedOps = new MapImpl.SingleValue.Mutable<>();
@@ -29,6 +64,27 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
     private String color = "black";
     private String stroke = "thin";
     private double alpha = 0.7;
+    private ShadeExpression savedShadeExpression = null;
+
+    Expression popAndUnwrapIfNeeded() {
+        var expr = stack.pop();
+        if (expr instanceof ShadeExpression) {
+            savedShadeExpression = (ShadeExpression) expr;
+            expr = ((ShadeExpression) expr).wrappedExpression();
+        }
+
+        assert !(expr instanceof ShadeExpression);
+        return expr;
+    }
+
+    void pushAndWrapIfNeeded(Expression expr) {
+        if (savedShadeExpression != null) {
+            savedShadeExpression.setWrappedExpression(expr);
+            expr = savedShadeExpression;
+            savedShadeExpression = null;
+        }
+        stack.push(expr);
+    }
 
     @SuppressWarnings("SpellCheckingInspection")
     public FigureMakerImpl() {
@@ -36,7 +92,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
         TokenizerImpl tokenizer = new TokenizerImpl();
         tokenizer.define(new TokenizerMakerImpl.Streak("whitespace", " \n\t\r"));
         tokenizer.ignore("whitespace");
-        tokenizer.define(new TokenizerMakerImpl.Streak("id", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
+        tokenizer.define(new TokenizerMakerImpl.Streak("id", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz:"));
         tokenizer.define(new TokenizerMakerImpl.Streak("number", "0123456789."));
         getProcessor().extend(tokenizer);
         reserved.add("x");
@@ -131,7 +187,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                         try {
                             String data = token.getData();
                             literalValue = Double.parseDouble(data);
-                            stack.push(x -> literalValue);
+                            pushAndWrapIfNeeded(x -> literalValue);
                             debug.push(data);
                         } catch (NumberFormatException e) {
                             throw new MakingException("Could not parse number: " + markup.code(token.getData()));
@@ -144,23 +200,22 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                             if (symbol.equals("assign")) {
                                 arity = 2;
                                 StringBuilder builder = new StringBuilder();
-                                Expression identifier = stack.pop();
+                                Expression identifier = popAndUnwrapIfNeeded();
                                 debug.pop();
                                 if (!(identifier instanceof Identifier)) {
                                     throw new MakingException("Cannot assign value to variable using non-identifier expression");
                                 }
                                 Identifier verifiedIdentifier = (Identifier) identifier;
                                 builder.append(verifiedIdentifier.name).append(" = ");
-                                double value = stack.pop().evaluate(Double.NaN);
+                                double value = popAndUnwrapIfNeeded().evaluate(Double.NaN);
                                 builder.append(debug.pop()).append(" = ").append(value);
                                 reports.add(markup.code(builder.toString()).getData());
-                                if (Double.isNaN(value))
-                                    throw new MakingException("Expression evaluation failed");
+                                if (Double.isNaN(value)) throw new MakingException("Expression evaluation failed");
                                 verifiedIdentifier.value = value;
                             } else if (symbol.equals("define")) {
                                 arity = 2;
                                 StringBuilder builder = new StringBuilder();
-                                Expression identifier = stack.pop();
+                                Expression identifier = popAndUnwrapIfNeeded();
                                 debug.pop();
                                 if (!(identifier instanceof Identifier)) {
                                     throw new MakingException("Cannot define named function using non-identifier expression");
@@ -168,11 +223,11 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 Identifier verifiedIdentifier = (Identifier) identifier;
                                 builder.append(verifiedIdentifier.name);
                                 StringJoiner argJoiner = new StringJoiner(", ", "(", ")");
-                                final int argCount = (int) stack.pop().evaluate(Double.NaN);
+                                final int argCount = (int) popAndUnwrapIfNeeded().evaluate(Double.NaN);
                                 debug.pop();
                                 Identifier[] boundVariables = new Identifier[argCount];
                                 for (int i = 0; i < argCount; i++) {
-                                    Expression argIdentifier = stack.pop();
+                                    Expression argIdentifier = popAndUnwrapIfNeeded();
                                     debug.pop();
                                     if (argIdentifier instanceof Identifier) {
                                         Identifier verifiedArgIdentifier = (Identifier) argIdentifier;
@@ -184,7 +239,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                     }
                                 }
                                 builder.append(argJoiner).append(" := ");
-                                Expression expression = stack.pop();
+                                Expression expression = popAndUnwrapIfNeeded();
                                 builder.append(debug.pop());
                                 reports.add(markup.code(builder.toString()).getData());
                                 defineOperator(verifiedIdentifier.name, new Operator() {
@@ -205,9 +260,12 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 });
                             } else if (styles.isColor(symbol)) {
                                 color = symbol;
+                            } else if (symbol.startsWith(":")) {
+                                pushAndWrapIfNeeded(new Identifier(symbol.substring(1), Double.NaN));
+                                debug.push(symbol);
                             } else if (symbol.equals("alpha")) {
                                 arity = 1;
-                                Expression e = stack.pop();
+                                Expression e = popAndUnwrapIfNeeded();
                                 debug.pop();
                                 alpha = e.evaluate(0);
                                 if (alpha > 1 || alpha < 0) {
@@ -219,11 +277,17 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 if (stack.isEmpty()) {
                                     throw new MakingException("No expressions were made before " + markup.code("and"));
                                 }
-                                figureParts.add(new FigurePartImpl(color, alpha, stroke, debug.pop(), stack.pop()));
+                                var expr = stack.pop();
+                                if (expr instanceof ShadeExpression) {
+                                    var shadeValue = ((ShadeExpression) expr).amount().evaluate(Double.NaN);
+                                    color = Integer.toString(GraphicsUtil.multiply(styles.getColor(((ShadeExpression) expr).color()), (int) shadeValue).getRGB());
+                                    expr = ((ShadeExpression) expr).wrappedExpression;
+                                }
+                                figureParts.add(new FigurePartImpl(color, alpha, stroke, debug.pop(), expr));
                                 if (!stack.isEmpty()) {
                                     StringBuilder builder = new StringBuilder("Multiple expressions were made before" + markup.code("and") + " :");
                                     while (!stack.isEmpty()) {
-                                        stack.pop();
+                                        popAndUnwrapIfNeeded();
                                         builder.append("\n").append(markup.code(debug.pop()));
                                     }
                                     throw new MakingException(builder.toString());
@@ -232,7 +296,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 arity = 3;
                                 StringBuilder builder = new StringBuilder();
                                 builder.append("for ");
-                                Expression identifier = stack.pop();
+                                Expression identifier = popAndUnwrapIfNeeded();
                                 debug.pop();
                                 if (!(identifier instanceof Identifier)) {
                                     throw new MakingException("Cannot define named function using non-identifier expression");
@@ -240,21 +304,54 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 Identifier verifiedIdentifier = (Identifier) identifier;
                                 builder.append(verifiedIdentifier.name);
                                 verifiedIdentifier.bind();
-                                Expression limitExpression = stack.pop();
+                                Expression limitExpression = popAndUnwrapIfNeeded();
                                 debug.pop();
                                 int limit = (int) limitExpression.evaluate(Double.NaN);
-                                Expression e = stack.pop();
+                                Expression expression = stack.pop();
                                 String es = debug.pop();
                                 builder.append(" in range(").append(limit).append("): ").append(es);
                                 for (int i = 0; i < limit; i++) {
                                     int v = i;
+                                    var e = expression;
+                                    if (e instanceof ShadeExpression) {
+                                        verifiedIdentifier.value = i;
+                                        var shadeValue = ((ShadeExpression) e).amount().evaluate(Double.NaN);
+                                        color = Integer.toString(GraphicsUtil.multiply(styles.getColor(((ShadeExpression) e).color()), (int) shadeValue).getRGB());
+                                        e = ((ShadeExpression) e).wrappedExpression;
+                                    }
+                                    final var ex = e;
                                     Expression ei = x -> {
                                         verifiedIdentifier.value = v;
-                                        return e.evaluate(x);
+                                        return ex.evaluate(x);
                                     };
                                     figureParts.add(new FigurePartImpl(color, alpha, stroke, es + " where i=" + i, ei));
                                 }
                                 reports.add(markup.code(builder.toString()).getData());
+                            } else if (symbol.equals("shade")) {
+                                var color = popAndUnwrapIfNeeded();
+                                debug.pop();
+                                if (!(color instanceof Identifier))
+                                    throw new MakingException("Shade color must be an identifier, but it was a " + color.getClass().getSimpleName() + " reeeee");
+                                var colorName = ((Identifier) color).name;
+
+                                var shadeValue = new Expression() {
+                                    private final Expression expression = popAndUnwrapIfNeeded();
+
+                                    @Override
+                                    public double evaluate(double x) {
+                                        var shadeValue = expression.evaluate(x);
+                                        if (!NumberPredicates.WHOLE.test(shadeValue) || 0 > shadeValue || shadeValue > 255)
+                                            return Double.NaN;
+
+                                        if (Double.isNaN(shadeValue))
+                                            return Double.NaN;
+
+                                        return shadeValue;
+                                    }
+                                };
+
+                                debug.pop();
+                                pushAndWrapIfNeeded(new ShadeExpression(popAndUnwrapIfNeeded(), colorName, shadeValue));
                             } else {
                                 Operator op = builtinOps.getAtPlace(symbol);
                                 if (op == null) op = userDefinedOps.getAtPlace(symbol);
@@ -263,7 +360,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                     if (v == null) {
                                         v = new Identifier(symbol, Double.NaN);
                                     }
-                                    stack.push(v);
+                                    pushAndWrapIfNeeded(v);
                                     debug.push(v.name);
                                 } else {
                                     arity = op.getArity();
@@ -271,16 +368,15 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                     if (arity > 0) {
                                         StringBuilder builder = new StringBuilder();
                                         for (int i = 0; i < arity; i++) {
-                                            args[arity - 1 - i] = stack.pop();
-                                            if (i > 0)
-                                                builder.insert(0, ", ");
+                                            args[arity - 1 - i] = popAndUnwrapIfNeeded();
+                                            if (i > 0) builder.insert(0, ", ");
                                             builder.insert(0, debug.pop());
                                         }
                                         debug.push(symbol + "(" + builder + ")");
                                     } else {
                                         debug.push(symbol);
                                     }
-                                    stack.push(op.makeExpression(args));
+                                    pushAndWrapIfNeeded(op.makeExpression(args));
                                 }
                             }
                         } catch (EmptyStackException e) {
@@ -292,11 +388,17 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                 }
             }
             if (!stack.isEmpty()) {
-                figureParts.add(new FigurePartImpl(color, alpha, stroke, debug.pop(), stack.pop()));
+                var expr = stack.pop();
+                if (expr instanceof ShadeExpression) {
+                    var shadeValue = ((ShadeExpression) expr).amount().evaluate(Double.NaN);
+                    color = Integer.toString(GraphicsUtil.multiply(styles.getColor(((ShadeExpression) expr).color()), (int) shadeValue).getRGB());
+                    expr = ((ShadeExpression) expr).wrappedExpression;
+                }
+                figureParts.add(new FigurePartImpl(color, alpha, stroke, debug.pop(), expr));
                 if (!stack.isEmpty()) {
                     StringBuilder builder = new StringBuilder("Multiple expressions were made before" + markup.code("and") + " :");
                     while (!stack.isEmpty()) {
-                        stack.pop();
+                        popAndUnwrapIfNeeded();
                         builder.append("\n").append(markup.code(debug.pop()));
                     }
                     throw new MakingException(builder.toString());
@@ -330,8 +432,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
 
         @Override
         public double evaluate(double x) {
-            if (Double.isNaN(value))
-                throw new NullPointerException("Variable is not assigned: " + markup.code(name));
+            if (Double.isNaN(value)) throw new NullPointerException("Variable is not assigned: " + markup.code(name));
             return value;
         }
 
