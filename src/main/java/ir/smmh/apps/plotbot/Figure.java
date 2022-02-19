@@ -1,21 +1,24 @@
 package ir.smmh.apps.plotbot;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public interface Figure {
-    Iterable<Part> getParts();
+    @NotNull Iterable<Part> getParts();
 
     int getPartCount();
 
-    String getReport();
+    @NotNull String getReport();
+
+    @NotNull Viewport getViewport();
 
     interface Part {
-        String getColor();
+        @NotNull Expression getExpression();
 
-        double getAlpha();
+        @Nullable String getTitle();
 
-        String getStroke();
+        @Nullable String getColor();
 
-        Expression getExpression();
-
-        String getTitle();
+        @Nullable String getStroke();
     }
 }

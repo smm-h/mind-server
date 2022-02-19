@@ -36,7 +36,6 @@ public class TelegramBotHTMLWriter extends HTMLWriter implements TelegramBotMark
         @Override
         public @NotNull Section sectionBegin(MarkupFragment title) {
             depth++;
-            if (depth < 2) write("\n");
             write(bold(title));
             write("\n\n");
             return this;

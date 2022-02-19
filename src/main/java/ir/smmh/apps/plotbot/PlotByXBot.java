@@ -2,13 +2,12 @@ package ir.smmh.apps.plotbot;
 
 import annotations.Singleton;
 import ir.smmh.apps.plotbot.impl.FigureMakerImpl;
+import ir.smmh.apps.plotbot.impl.ViewportImpl;
 import ir.smmh.lingu.Maker;
 import ir.smmh.lingu.impl.CodeImpl;
 import ir.smmh.tgbot.TelegramBotTokens;
 import ir.smmh.tgbot.impl.UserManagingTelegramBotImpl;
 import ir.smmh.util.GraphicsUtil;
-import ir.smmh.util.jile.Chronometer;
-import ir.smmh.util.jile.impl.NChronometer;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -17,24 +16,25 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.List;
-import java.util.*;
+import java.util.Locale;
+import java.util.StringJoiner;
 
-import static ir.smmh.util.FunctionalUtil.with;
+import static ir.smmh.apps.plotbot.MarkupWriter.CachedMessage.*;
+import static ir.smmh.util.FunctionalUtil.*;
 
 @Singleton
 public class PlotByXBot extends UserManagingTelegramBotImpl<PlotByXBot.UserData> {
 
+    private static final double AREA = Math.pow(2, 20);
+    private static final double MIN_SCALE = 4;
     private static PlotByXBot instance;
     private final MarkupWriter markup = MarkupWriter.getInstance();
     private final FigureMaker maker = new FigureMakerImpl();
-    private final double timeOut = 3000;
     private final Color backColor = Color.WHITE;
     private final Color gridColor = Color.BLACK;
     private final Stroke gridStroke = new BasicStroke(1);
-    private final Color defaultColor = Color.BLACK;
-    private final Stroke defaultStroke = new BasicStroke(3);
-    private final PlotByXBotStyles styles = PlotByXBotStyles.getInstance();
+    private final Styles styles = Styles.getInstance();
+    public Viewport currentViewport = ViewportImpl.DEFAULT;
 
     private PlotByXBot() {
         super(MarkupWriter.getInstance().getParseMode());
@@ -48,72 +48,97 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<PlotByXBot.UserData>
         return instance == null ? (instance = new PlotByXBot()) : instance;
     }
 
+    public FigureMaker getMaker() {
+        return maker;
+    }
+
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void process(long chatId, String text, int messageId) {
         text = text.trim().toLowerCase(Locale.ROOT);
         if (text.charAt(0) == '/') {
             String[] args = text.split(" +");
             if (args.length > 0) {
+                String message;
                 String command = args[0];
                 try {
                     switch (command) {
-                        case "/ops": {
-                            List<String> list = new ArrayList<>();
-                            StringJoiner joiner = new StringJoiner("\n", markup.bold("Built-in operators:\n\n").getData(), "\n\nSee /userops");
-                            for (String symbol : maker.getBuiltinOperators()) {
-                                if (symbol.equals("x")) continue;
-                                Operator operator = maker.getBuiltinOperator(symbol);
-                                if (operator == null) continue;
-                                Double value = null;
-                                if (operator.getArity() == 0 && !symbol.equals("random")) {
-                                    try {
-                                        value = operator.makeExpression().evaluate(0);
-                                    } catch (Maker.MakingException ignored) {
-                                    }
+                        case "/builtin":
+                            message = markup.createDocument()
+                                    .sectionBegin("Built-in Operators")
+                                    .writeList(markup.createList(false)
+                                            .appendAllData(sort(convert(maker.getBuiltinOperators(), symbol -> symbol.equals("x") ? null : with(maker.getBuiltinOperator(symbol), operator -> (markup.bold(operator.getType()) + " " + markup.code(symbol)), null)))))
+                                    .sectionEnd()
+                                    .sectionBegin("Built-in Constants")
+                                    .writeList(markup.createList(false)
+                                            .appendAllData(sort(convert(maker.getConstants(), name -> with(maker.getConstantValue(name), value -> markup.code(name) + " " + markup.italic("(=" + value + ")"), null)))))
+                                    .sectionEnd()
+                                    .build().getData();
+                            break;
+                        //noinspection SpellCheckingInspection
+                        case "/userdefined":
+                            message = markup.createDocument()
+                                    .sectionBegin("User-defined Operators")
+                                    .writeList(markup.createList(false)
+                                            .appendAllData(sort(convert(maker.getUserDefinedOperators(), symbol -> symbol.equals("x") ? null : with(maker.getUserDefinedOperator(symbol), operator -> (markup.bold(operator.getType()) + " " + markup.code(symbol)), null)))))
+                                    .sectionEnd()
+                                    .sectionBegin("Variables")
+                                    .writeList(markup.createList(false)
+                                            .appendAllData(sort(convert(maker.getVariables(), name -> with(maker.getVariableValue(name), value -> markup.code(name) + " " + markup.italic("(=" + value + ")"), null)))))
+                                    .sectionEnd()
+                                    .build().getData();
+                            break;
+                        case "/reserved":
+                            message = markup.getCachedMessage(RESERVED);
+                            break;
+                        case "/start":
+                            message = markup.getCachedMessage(START);
+                            break;
+                        case "/help":
+                            message = markup.getCachedMessage(HELP);
+                            break;
+                        case "/commands":
+                            message = markup.getCachedMessage(COMMANDS);
+                            break;
+                        case "/viewport":
+                            if (args.length == 1) {
+                                currentViewport = ViewportImpl.DEFAULT;
+                                message = "Viewport is reset back to: " + markup.code(currentViewport.toString());
+                            } else {
+                                try {
+                                    currentViewport = ViewportImpl.make(
+                                            Double.parseDouble(args[1]),
+                                            Double.parseDouble(args[2]),
+                                            Double.parseDouble(args[3]),
+                                            Double.parseDouble(args[4]));
+                                    message = "Viewport is set to: " + markup.code(currentViewport.toString());
+                                } catch (NumberFormatException e) {
+                                    message = "Please provide valid numbers; viewport did not change";
+                                } catch (Maker.MakingException e) {
+                                    message = e.getMessage();
                                 }
-                                list.add(markup.bold(operator.getType()) + " " + markup.code(symbol) + (value == null ? "" : " " + markup.italic(String.format("(=%f)", value))));
                             }
-                            Collections.sort(list);
-                            for (String i : list) {
-                                joiner.add(i);
-                            }
-                            sendMessage(chatId, joiner.toString(), messageId);
                             break;
-                        }
-                        case "/userops": {
-                            List<String> list = new ArrayList<>();
-                            StringJoiner joiner = new StringJoiner("\n", markup.bold("User-defined operators:\n\n").getData(), "\n\nSee /ops");
-                            for (String symbol : maker.getUserDefinedOperators()) {
-                                if (symbol.equals("x")) continue;
-                                Operator operator = maker.getUserDefinedOperator(symbol);
-                                if (operator == null) continue;
-                                Double value = null;
-                                if (operator.getArity() == 0 && !symbol.equals("random")) {
-                                    try {
-                                        value = operator.makeExpression().evaluate(0);
-                                    } catch (Maker.MakingException ignored) {
-                                    }
-                                }
-                                list.add(markup.bold(operator.getType()) + " " + markup.code(symbol) + (value == null ? "" : " " + markup.italic(String.format("(=%f)", value))));
-                            }
-                            Collections.sort(list);
-                            for (String i : list) {
-                                joiner.add(i);
-                            }
-                            sendMessage(chatId, joiner.toString(), messageId);
+                        case "forget":
+                            message = markup.code(args[1]).getData() + (maker.forgetUserDefined(args[1]) ? " was forgotten" : " did not exist");
                             break;
-                        }
-                        case "/help": {
-                            sendMessage(chatId, markup.helpMessage, messageId);
+                        case "forgetall":
+                            message = maker.forgetAllUserDefined() + " user-defined name(s) were forgotten";
                             break;
-                        }
+                        default:
+                            message = "Unknown command " + markup.code(command) + "; use /commands to see a list of all available commands.";
+                            break;
                     }
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    sendMessage(chatId, "not enough arguments for command: " + markup.code(command), messageId);
+                    message = "Not enough arguments for command: " + markup.code(command);
                 }
+                if (message != null)
+                    sendMessage(chatId, message, messageId);
             }
         } else {
             StringJoiner caption = new StringJoiner("\n");
+            String hash = Integer.toHexString(Integer.toString(text.hashCode()).hashCode());
+//            caption.add("Hash: " + markup.code(hash));
             Figure figure;
             try {
                 figure = maker.makeFromCode(new CodeImpl(text, "plt"));
@@ -121,7 +146,9 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<PlotByXBot.UserData>
                 sendMessage(chatId, e.getMessage(), messageId);
                 return;
             }
-            File file = new File("gen/plotbot/" + text.hashCode() + ".png");
+            caption.add(figure.getReport());
+            //noinspection SpellCheckingInspection
+            File file = new File("gen/plotbot/" + hash + ".png");
             if (!file.exists()) {
                 try {
                     if (!file.createNewFile()) {
@@ -134,62 +161,80 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<PlotByXBot.UserData>
                     return;
                 }
             }
-            int w = 640;
-            int h = 640;
-            int hScale = w / 8;
-            int vScale = h / 8;
-            int hTicks = 1;
-            int vTicks = 1;
-            BufferedImage image = new BufferedImage(w * 2, h * 2, BufferedImage.TYPE_INT_ARGB);
+
+            // process the viewport
+            Viewport vp = figure.getViewport();
+            double precision = 1;
+            double ratio = vp.getHorizontalRadius() / vp.getVerticalRadius();
+            double vReach = Math.sqrt(AREA / ratio);
+            double hReach = ratio * vReach;
+            double hScale = hReach / vp.getHorizontalRadius();
+            double vScale = vReach / vp.getVerticalRadius();
+            double vpx = +vp.getOriginX() * hScale;
+            double vpy = -vp.getOriginY() * vScale;
+            int w = (int) (hReach * 2);
+            int h = (int) (vReach * 2);
+            double hOffset = hScale * (+vp.getOriginX() % 1);
+            double vOffset = vScale * (-vp.getOriginY() % 1);
+            double x1 = vpx - hReach - hOffset;
+            double y1 = vpy - vReach - vOffset;
+            double x2 = x1 + w;
+            double y2 = y1 + h;
+
+            BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
             Graphics2D g = (Graphics2D) image.getGraphics();
-            g.setColor(backColor);
-            g.drawRect(0, 0, w * 2, h * 2);
+
+            // turn on anti-aliasing
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // clear the background
+            g.setColor(backColor);
+            g.drawRect(0, 0, w, h);
+
+            // draw the grid lines
             g.setColor(GraphicsUtil.changeTransparency(gridColor, 0.1f));
             g.setStroke(gridStroke);
-            for (int x = 0; x <= w; x += hScale * hTicks) {
-                g.drawLine(w + x, 0, w + x, h * 2);
-                g.drawLine(w - x, 0, w - x, h * 2);
-            }
-            for (int y = 0; y <= h; y += vScale * vTicks) {
-                g.drawLine(0, h + y, w * 2, h + y);
-                g.drawLine(0, h - y, w * 2, h - y);
-            }
-            boolean fullCaption = figure.getPartCount() <= 10;
-            if (!fullCaption) {
-                caption.add(markup.italic(figure.getPartCount() + " expressions").getData());
-            }
-            for (Figure.Part r : figure.getParts()) {
-                Expression e = r.getExpression();
+
+            if (hScale >= MIN_SCALE)
+                for (int x = (int) hOffset; x <= w; x += hScale)
+                    g.drawLine(x, 0, x, h);
+
+            if (vScale >= MIN_SCALE)
+                for (int y = (int) vOffset; y <= h; y += vScale)
+                    g.drawLine(0, y, w, y);
+
+            // draw the parts
+            for (Figure.Part part : figure.getParts()) {
+                Expression expression = part.getExpression();
                 try {
-                    e.evaluate(0);
+                    expression.evaluate(0);
                 } catch (Throwable throwable) {
                     String message = throwable.getMessage();
                     sendMessage(chatId, message == null ? throwable.toString() : message, messageId);
                     return;
                 }
-                g.setColor(GraphicsUtil.changeTransparency(styles.getColor(r.getColor()), (float) r.getAlpha()));
-                g.setStroke(styles.getStroke(r.getStroke()));
-                Chronometer c = new NChronometer();
-                double totalElapsedTime = 0;
-                int iterationCount = 0;
-                double x, y, x_prev = 0, y_prev = 0;
-                for (x = -w; x <= w; x++) {
-                    c.reset();
-                    y = -e.evaluate(x / hScale) * vScale;
-                    if (x > -w)
-                        g.drawLine((int) x + w, (int) y + h, (int) x_prev + w, (int) y_prev + h);
-                    x_prev = x;
-                    y_prev = y;
-                    totalElapsedTime += c.stop();
-                    iterationCount++;
-                    if (totalElapsedTime >= timeOut) {
-                        sendMessage(chatId, "Timed out", messageId);
-                        break;
-                    }
+                expression.evaluate(Double.NaN);
+                g.setColor(styles.getColor(with(part.getColor(), "black")));
+                g.setStroke(styles.getStroke(with(part.getStroke(), "thin")));
+                double x, y, xPrev = 0, yPrev = 0;
+                boolean v, vPrev = true; // is within view
+                for (x = x1 - 1; x <= x2; x += precision) {
+                    y = -expression.evaluate(x / hScale) * vScale;
+                    v = y >= y1 && y <= y2;
+                    if (x >= x1) // ignore the first iteration because prevs do not have meaningful values
+                        if (v || vPrev) // if either point of the line is within view, draw it
+                            g.drawLine(
+                                    (int) (x + hReach + hOffset),
+                                    (int) (y + vReach + vOffset),
+                                    (int) (xPrev + hReach + hOffset),
+                                    (int) (yPrev + vReach + vOffset));
+                    xPrev = x;
+                    yPrev = y;
+                    vPrev = v;
                 }
-                if (fullCaption)
-                    caption.add(markup.expressionRequestLine(r, iterationCount / totalElapsedTime));
+                String title = part.getTitle();
+                if (title != null)
+                    caption.add(Styles.getInstance().getColorEmoji(with(part.getColor(), "black")) + " " + markup.code(title));
             }
             try {
                 ImageIO.write(image, "png", file);
@@ -214,7 +259,6 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<PlotByXBot.UserData>
         public UserData(long chatId) {
             super(chatId);
         }
-
     }
 
 }

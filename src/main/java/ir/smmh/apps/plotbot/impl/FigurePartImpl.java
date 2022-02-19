@@ -2,45 +2,40 @@ package ir.smmh.apps.plotbot.impl;
 
 import ir.smmh.apps.plotbot.Expression;
 import ir.smmh.apps.plotbot.Figure;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FigurePartImpl implements Figure.Part {
 
-    private final String color;
-    private final String stroke;
-    private final String title;
-    private final Expression expression;
-    private final double opacity;
+    private final @NotNull Expression expression;
+    private final @Nullable String title;
+    private final @Nullable String color;
+    private final @Nullable String stroke;
 
-    public FigurePartImpl(String color, double opacity, String stroke, String title, Expression expression) {
-        this.color = color;
-        this.opacity = opacity;
-        this.stroke = stroke;
-        this.title = title;
+    public FigurePartImpl(@NotNull Expression expression, @Nullable String title, @Nullable String color, @Nullable String stroke) {
         this.expression = expression;
+        this.title = title;
+        this.color = color;
+        this.stroke = stroke;
     }
 
     @Override
-    public String getColor() {
-        return color;
-    }
-
-    @Override
-    public double getAlpha() {
-        return opacity;
-    }
-
-    @Override
-    public String getStroke() {
-        return stroke;
-    }
-
-    @Override
-    public Expression getExpression() {
+    public @NotNull Expression getExpression() {
         return expression;
     }
 
     @Override
-    public String getTitle() {
+    public @Nullable String getTitle() {
         return title;
+    }
+
+    @Override
+    public @Nullable String getColor() {
+        return color;
+    }
+
+    @Override
+    public @Nullable String getStroke() {
+        return stroke;
     }
 }

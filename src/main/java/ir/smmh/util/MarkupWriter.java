@@ -9,6 +9,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import static ir.smmh.util.FunctionalUtil.with;
 
+@SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
 public interface MarkupWriter {
 
@@ -89,6 +90,11 @@ public interface MarkupWriter {
         @Contract("_,_->this")
         @NotNull Section writeList(List list, @Nullable MarkupFragment caption);
 
+        @Contract("_->this")
+        default @NotNull Section writeList(List list) {
+            return writeList(list, (MarkupFragment) null);
+        }
+
         @Contract("_,_->this")
         default @NotNull Section writeList(List list, @Nullable String caption) {
             //noinspection ConstantConditions
@@ -101,8 +107,24 @@ public interface MarkupWriter {
         @NotNull List append(MarkupFragment item);
 
         @Contract("_->this")
-        default @NotNull List append(String itemData) {
+        default @NotNull List appendData(String itemData) {
             return append(new MarkupFragment(itemData));
+        }
+
+        @Contract("_->this")
+        default @NotNull List appendAll(Iterable<MarkupFragment> items) {
+            for (MarkupFragment item : items) {
+                append(item);
+            }
+            return this;
+        }
+
+        @Contract("_->this")
+        default @NotNull List appendAllData(Iterable<String> data) {
+            for (String itemData : data) {
+                appendData(itemData);
+            }
+            return this;
         }
 
         @Contract("_->this")

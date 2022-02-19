@@ -12,12 +12,14 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
 
     private static final String BASE = "https://api.telegram.org/bot%s/%s";
     private final OkHttpClient client;
     private final @Nullable String parseMode;
+    private final int maxTries = 3;
     private String token;
     private int updateId;
     private boolean running;
@@ -79,11 +81,26 @@ public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
                 builder.addFormDataPart("reply_to_message_id", String.valueOf(replyToMessageId));
                 builder.addFormDataPart("allow_sending_without_reply", "true");
             }
-            Request request = new Request.Builder()
-                    .url(makeURL("sendPhoto"))
-                    .post(builder.build())
-                    .build();
-            client.newCall(request).execute().close();
+            int tries = 0;
+            while (true) {
+                try {
+                    client.newCall(new Request.Builder()
+                            .url(makeURL("sendPhoto"))
+                            .post(builder.build())
+                            .build()
+                    )
+                            .execute()
+                            .close();
+                    break;
+                } catch (SocketTimeoutException e) {
+                    if (tries++ < maxTries) {
+                        System.err.println("SOCKET TIMED OUT; TRYING AGAIN");
+                    } else {
+                        System.err.println("SOCKET TIMED OUT; NOT TRYING AGAIN");
+                        break;
+                    }
+                }
+            }
         } catch (JSONException | IOException e) {
             e.printStackTrace();
         }

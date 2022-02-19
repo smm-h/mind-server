@@ -16,7 +16,7 @@ public interface TelegramBotMarkupWriter extends MarkupWriter {
 
     @Override
     default @NotNull List createList(boolean ordered) {
-        return ordered ? new TelegramMarkupList.Numbered() : new TelegramMarkupList.Dash();
+        return ordered ? new TelegramMarkupList.Numbered() : new TelegramMarkupList.Bullet();
     }
 }
 

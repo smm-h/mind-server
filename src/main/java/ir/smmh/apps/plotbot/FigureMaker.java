@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface FigureMaker extends Language, Maker<Figure> {
 
+    void defineConstant(String name, double value);
+
     @NotNull Iterable<String> getBuiltinOperators();
 
     @NotNull Iterable<String> getUserDefinedOperators();
@@ -17,35 +19,19 @@ public interface FigureMaker extends Language, Maker<Figure> {
 
     void defineOperator(String name, Operator operator);
 
-    void undefineOperator(String name);
+    boolean forgetUserDefined(String name);
 
-    @FunctionalInterface
-    interface Constant extends Operator {
-        @NotNull Expression makeNullaryExpression();
+    int forgetAllUserDefined();
 
-        @Override
-        default int getArity() {
-            return 0;
-        }
-    }
+    @NotNull Iterable<String> getReservedNames();
 
-    @FunctionalInterface
-    interface UnaryOperator extends Operator {
-        @NotNull Expression makeUnaryExpression(Expression arg);
+    @Nullable String getReservedReasonType(String name);
 
-        @Override
-        default int getArity() {
-            return 1;
-        }
-    }
+    @NotNull Iterable<String> getConstants();
 
-    @FunctionalInterface
-    interface BinaryOperator extends Operator {
-        @NotNull Expression makeBinaryExpression(Expression lhs, Expression rhs);
+    @Nullable Double getConstantValue(String name);
 
-        @Override
-        default int getArity() {
-            return 2;
-        }
-    }
+    @NotNull Iterable<String> getVariables();
+
+    @Nullable Double getVariableValue(String name);
 }

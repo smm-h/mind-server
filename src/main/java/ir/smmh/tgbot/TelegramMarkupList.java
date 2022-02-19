@@ -28,10 +28,10 @@ public abstract class TelegramMarkupList implements MarkupWriter.List {
         return this;
     }
 
-    public static class Dash extends TelegramMarkupList {
+    public static class Bullet extends TelegramMarkupList {
         @Override
         protected String getBullet() {
-            return "- ";
+            return "\u2022 ";
         }
     }
 

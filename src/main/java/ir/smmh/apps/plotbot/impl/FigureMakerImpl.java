@@ -1,6 +1,9 @@
 package ir.smmh.apps.plotbot.impl;
 
 import ir.smmh.apps.plotbot.*;
+import ir.smmh.apps.plotbot.Operator.Binary;
+import ir.smmh.apps.plotbot.Operator.Nullary;
+import ir.smmh.apps.plotbot.Operator.Unary;
 import ir.smmh.lingu.Code;
 import ir.smmh.lingu.Mishap;
 import ir.smmh.lingu.Token;
@@ -16,19 +19,21 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static ir.smmh.util.FunctionalUtil.with;
+
 public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
 
+    private static final int MAX_ITERATION_LIMIT = 1000;
     private final Map.SingleValue.Mutable<String, Operator> builtinOps = new MapImpl.SingleValue.Mutable<>();
     private final Map.SingleValue.Mutable<String, Operator> userDefinedOps = new MapImpl.SingleValue.Mutable<>();
-    private final Map.SingleValue.Mutable<String, Identifier> identifiers = new MapImpl.SingleValue.Mutable<>();
+    private final Map.SingleValue.Mutable<String, Expression> constants = new MapImpl.SingleValue.Mutable<>();
+    private final Map.SingleValue.Mutable<String, Identifier> freeVariables = new MapImpl.SingleValue.Mutable<>();
     private final Stack<Expression> stack = new Stack<>();
     private final Stack<String> debug = new Stack<>();
-    private final Set<String> reserved = new HashSet<>();
+    private final java.util.Map<String, ReservationReason> reserved = new HashMap<>();
     private final MarkupWriter markup = MarkupWriter.getInstance();
-    private final PlotByXBotStyles styles = PlotByXBotStyles.getInstance();
-    private String color = "black";
-    private String stroke = "thin";
-    private double alpha = 0.7;
+    private final Styles styles = Styles.getInstance();
+    private String color = null, stroke = null;
 
     @SuppressWarnings("SpellCheckingInspection")
     public FigureMakerImpl() {
@@ -39,41 +44,53 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
         tokenizer.define(new TokenizerMakerImpl.Streak("id", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
         tokenizer.define(new TokenizerMakerImpl.Streak("number", "0123456789."));
         getProcessor().extend(tokenizer);
-        reserved.add("x");
-        reserved.add("define");
-        reserved.add("assign");
-        defineBuiltinOperator("x", (Constant) () -> (x -> x));
-        defineBuiltinOperator("e", (Constant) () -> (x -> 2.7182818284590452353602874713527));
-        defineBuiltinOperator("pi", (Constant) () -> (x -> 3.1415926535897932384626433832795));
-        defineBuiltinOperator("phi", (Constant) () -> (x -> 1.6180339887498948482045868343656));
-        defineBuiltinOperator("neg", (UnaryOperator) (arg) -> (x -> -arg.evaluate(x)));
-        defineBuiltinOperator("abs", (UnaryOperator) (arg) -> (x -> Math.abs(arg.evaluate(x))));
-        defineBuiltinOperator("sin", (UnaryOperator) (arg) -> (x -> Math.sin(arg.evaluate(x))));
-        defineBuiltinOperator("cos", (UnaryOperator) (arg) -> (x -> Math.cos(arg.evaluate(x))));
-        defineBuiltinOperator("tan", (UnaryOperator) (arg) -> (x -> Math.tan(arg.evaluate(x))));
-        defineBuiltinOperator("asin", (UnaryOperator) (arg) -> (x -> Math.asin(arg.evaluate(x))));
-        defineBuiltinOperator("acos", (UnaryOperator) (arg) -> (x -> Math.acos(arg.evaluate(x))));
-        defineBuiltinOperator("atan", (UnaryOperator) (arg) -> (x -> Math.atan(arg.evaluate(x))));
-        defineBuiltinOperator("sinh", (UnaryOperator) (arg) -> (x -> Math.sinh(arg.evaluate(x))));
-        defineBuiltinOperator("cosh", (UnaryOperator) (arg) -> (x -> Math.cosh(arg.evaluate(x))));
-        defineBuiltinOperator("tanh", (UnaryOperator) (arg) -> (x -> Math.tanh(arg.evaluate(x))));
-        defineBuiltinOperator("sqrt", (UnaryOperator) (arg) -> (x -> Math.sqrt(arg.evaluate(x))));
-        defineBuiltinOperator("cbrt", (UnaryOperator) (arg) -> (x -> Math.cbrt(arg.evaluate(x))));
-        defineBuiltinOperator("floor", (UnaryOperator) (arg) -> (x -> Math.floor(arg.evaluate(x))));
-        defineBuiltinOperator("round", (UnaryOperator) (arg) -> (x -> Math.round(arg.evaluate(x))));
-        defineBuiltinOperator("ceil", (UnaryOperator) (arg) -> (x -> Math.ceil(arg.evaluate(x))));
-        defineBuiltinOperator("sgn", (UnaryOperator) (arg) -> (x -> Math.signum(arg.evaluate(x))));
-        defineBuiltinOperator("random", (Constant) () -> (x -> Math.random()));
-        defineBuiltinOperator("exp", (UnaryOperator) (arg) -> (x -> Math.exp(arg.evaluate(x))));
-        defineBuiltinOperator("log", (UnaryOperator) (arg) -> (x -> Math.log(arg.evaluate(x))));
-        defineBuiltinOperator("min", (BinaryOperator) (lhs, rhs) -> (x -> Math.min(lhs.evaluate(x), rhs.evaluate(x))));
-        defineBuiltinOperator("max", (BinaryOperator) (lhs, rhs) -> (x -> Math.max(lhs.evaluate(x), rhs.evaluate(x))));
-        defineBuiltinOperator("add", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) + rhs.evaluate(x)));
-        defineBuiltinOperator("sub", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) - rhs.evaluate(x)));
-        defineBuiltinOperator("mul", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) * rhs.evaluate(x)));
-        defineBuiltinOperator("div", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) / rhs.evaluate(x)));
-        defineBuiltinOperator("mod", (BinaryOperator) (lhs, rhs) -> (x -> lhs.evaluate(x) % rhs.evaluate(x)));
-        defineBuiltinOperator("pow", (BinaryOperator) (lhs, rhs) -> (x -> Math.pow(lhs.evaluate(x), rhs.evaluate(x))));
+        reserved.put("define", ReservationReason.KEYWORD);
+        reserved.put("assign", ReservationReason.KEYWORD);
+        reserved.put("and", ReservationReason.KEYWORD);
+        reserved.put("iterate", ReservationReason.KEYWORD);
+        reserved.put("viewport", ReservationReason.KEYWORD);
+        for (String name : styles.getColorNames()) reserved.put(name, ReservationReason.COLOR);
+        for (String name : styles.getStrokeNames()) reserved.put(name, ReservationReason.STROKE);
+        defineConstant("e", 2.7182818284590452353602874713527);
+        defineConstant("pi", 3.1415926535897932384626433832795);
+        defineConstant("phi", 1.6180339887498948482045868343656);
+        defineConstant("infinity", Double.POSITIVE_INFINITY);
+        defineConstant("epsilon", Double.MIN_VALUE);
+        defineBuiltinOperator("x", (Nullary) () -> (x -> x));
+        defineBuiltinOperator("random", (Nullary) () -> (x -> Math.random()));
+        defineBuiltinOperator("neg", (Unary) (arg) -> (x -> -arg.evaluate(x)));
+        defineBuiltinOperator("abs", (Unary) (arg) -> (x -> Math.abs(arg.evaluate(x))));
+        defineBuiltinOperator("sin", (Unary) (arg) -> (x -> Math.sin(arg.evaluate(x))));
+        defineBuiltinOperator("cos", (Unary) (arg) -> (x -> Math.cos(arg.evaluate(x))));
+        defineBuiltinOperator("tan", (Unary) (arg) -> (x -> Math.tan(arg.evaluate(x))));
+        defineBuiltinOperator("asin", (Unary) (arg) -> (x -> Math.asin(arg.evaluate(x))));
+        defineBuiltinOperator("acos", (Unary) (arg) -> (x -> Math.acos(arg.evaluate(x))));
+        defineBuiltinOperator("atan", (Unary) (arg) -> (x -> Math.atan(arg.evaluate(x))));
+        defineBuiltinOperator("sinh", (Unary) (arg) -> (x -> Math.sinh(arg.evaluate(x))));
+        defineBuiltinOperator("cosh", (Unary) (arg) -> (x -> Math.cosh(arg.evaluate(x))));
+        defineBuiltinOperator("tanh", (Unary) (arg) -> (x -> Math.tanh(arg.evaluate(x))));
+        defineBuiltinOperator("sqrt", (Unary) (arg) -> (x -> Math.sqrt(arg.evaluate(x))));
+        defineBuiltinOperator("cbrt", (Unary) (arg) -> (x -> Math.cbrt(arg.evaluate(x))));
+        defineBuiltinOperator("floor", (Unary) (arg) -> (x -> Math.floor(arg.evaluate(x))));
+        defineBuiltinOperator("round", (Unary) (arg) -> (x -> Math.round(arg.evaluate(x))));
+        defineBuiltinOperator("ceil", (Unary) (arg) -> (x -> Math.ceil(arg.evaluate(x))));
+        defineBuiltinOperator("sgn", (Unary) (arg) -> (x -> Math.signum(arg.evaluate(x))));
+        defineBuiltinOperator("exp", (Unary) (arg) -> (x -> Math.exp(arg.evaluate(x))));
+        defineBuiltinOperator("log", (Unary) (arg) -> (x -> Math.log(arg.evaluate(x))));
+        defineBuiltinOperator("min", (Binary) (lhs, rhs) -> (x -> Math.min(lhs.evaluate(x), rhs.evaluate(x))));
+        defineBuiltinOperator("max", (Binary) (lhs, rhs) -> (x -> Math.max(lhs.evaluate(x), rhs.evaluate(x))));
+        defineBuiltinOperator("add", (Binary) (lhs, rhs) -> (x -> lhs.evaluate(x) + rhs.evaluate(x)));
+        defineBuiltinOperator("sub", (Binary) (lhs, rhs) -> (x -> lhs.evaluate(x) - rhs.evaluate(x)));
+        defineBuiltinOperator("mul", (Binary) (lhs, rhs) -> (x -> lhs.evaluate(x) * rhs.evaluate(x)));
+        defineBuiltinOperator("div", (Binary) (lhs, rhs) -> (x -> lhs.evaluate(x) / rhs.evaluate(x)));
+        defineBuiltinOperator("mod", (Binary) (lhs, rhs) -> (x -> lhs.evaluate(x) % rhs.evaluate(x)));
+        defineBuiltinOperator("pow", (Binary) (lhs, rhs) -> (x -> Math.pow(lhs.evaluate(x), rhs.evaluate(x))));
+    }
+
+    @Override
+    public void defineConstant(String name, double value) {
+        reserved.put(name, ReservationReason.CONSTANT);
+        constants.setAtPlace(name, x -> value);
     }
 
     @Override
@@ -97,7 +114,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
     }
 
     private void defineBuiltinOperator(String name, Operator operator) {
-        reserved.add(name);
+        reserved.put(name, ReservationReason.OPERATOR);
         builtinOps.setAtPlace(name, operator);
     }
 
@@ -107,13 +124,55 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
     }
 
     @Override
-    public void undefineOperator(String name) {
+    public boolean forgetUserDefined(String name) {
+        boolean existed = userDefinedOps.containsPlace(name) || freeVariables.containsPlace(name);
         userDefinedOps.removeAtPlace(name);
+        freeVariables.removeAtPlace(name);
+        return existed;
+    }
+
+    @Override
+    public int forgetAllUserDefined() {
+        int count = userDefinedOps.getSize() + freeVariables.getSize();
+        userDefinedOps.removeAllPlaces();
+        freeVariables.removeAllPlaces();
+        return count;
+    }
+
+    @Override
+    public @NotNull Iterable<String> getReservedNames() {
+        return reserved.keySet();
+    }
+
+    @Override
+    public @Nullable String getReservedReasonType(String name) {
+        return reserved.get(name).type();
+    }
+
+    @Override
+    public @NotNull Iterable<String> getConstants() {
+        return constants.overKeys();
+    }
+
+    @Override
+    public @Nullable Double getConstantValue(String name) {
+        return with(constants.getAtPlace(name), c -> c.evaluate(Double.NaN), null);
+    }
+
+    @Override
+    public @NotNull Iterable<String> getVariables() {
+        return freeVariables.overKeys();
+    }
+
+    @Override
+    public @Nullable Double getVariableValue(String name) {
+        return with(freeVariables.getAtPlace(name), c -> c.evaluate(Double.NaN), null);
     }
 
     @Override
     public @NotNull Figure makeFromCode(@NotNull Code code) throws MakingException {
         StringJoiner reports = new StringJoiner("\n");
+        Viewport viewport = PlotByXBot.getInstance().currentViewport;
         List<Figure.Part> figureParts = new ArrayList<>();
         List<Token.Individual> tokens = TokenizerImpl.tokenized.read(code);
 //        System.out.println(((Comprehension.List<Token.Individual, String>) token -> token.getTypeString() + ":" + token.getData()).comprehend(tokens));
@@ -205,21 +264,15 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 });
                             } else if (styles.isColor(symbol)) {
                                 color = symbol;
-                            } else if (symbol.equals("alpha")) {
-                                arity = 1;
-                                Expression e = stack.pop();
-                                debug.pop();
-                                alpha = e.evaluate(0);
-                                if (alpha > 1 || alpha < 0) {
-                                    throw new MakingException("Alpha value must be between 0 and 1");
-                                }
                             } else if (styles.isStroke(symbol)) {
                                 stroke = symbol;
                             } else if (symbol.equals("and")) {
                                 if (stack.isEmpty()) {
                                     throw new MakingException("No expressions were made before " + markup.code("and"));
                                 }
-                                figureParts.add(new FigurePartImpl(color, alpha, stroke, debug.pop(), stack.pop()));
+                                figureParts.add(new FigurePartImpl(stack.pop(), debug.pop(), color, stroke));
+                                color = null;
+                                stroke = null;
                                 if (!stack.isEmpty()) {
                                     StringBuilder builder = new StringBuilder("Multiple expressions were made before" + markup.code("and") + " :");
                                     while (!stack.isEmpty()) {
@@ -235,7 +288,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 Expression identifier = stack.pop();
                                 debug.pop();
                                 if (!(identifier instanceof Identifier)) {
-                                    throw new MakingException("Cannot define named function using non-identifier expression");
+                                    throw new MakingException("Cannot bind iteration index to a non-identifier expression");
                                 }
                                 Identifier verifiedIdentifier = (Identifier) identifier;
                                 builder.append(verifiedIdentifier.name);
@@ -243,6 +296,12 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 Expression limitExpression = stack.pop();
                                 debug.pop();
                                 int limit = (int) limitExpression.evaluate(Double.NaN);
+                                if (limit == 0)
+                                    throw new MakingException("Iteration limit cannot be zero");
+                                if (limit < 0)
+                                    throw new MakingException("Iteration limit cannot be negative");
+                                if (limit > MAX_ITERATION_LIMIT)
+                                    throw new MakingException("Iteration limit cannot be higher than " + markup.code(Integer.toString(MAX_ITERATION_LIMIT)));
                                 Expression e = stack.pop();
                                 String es = debug.pop();
                                 builder.append(" in range(").append(limit).append("): ").append(es);
@@ -252,16 +311,38 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                         verifiedIdentifier.value = v;
                                         return e.evaluate(x);
                                     };
-                                    figureParts.add(new FigurePartImpl(color, alpha, stroke, es + " where i=" + i, ei));
+                                    figureParts.add(new FigurePartImpl(ei, null, color, stroke));
                                 }
                                 reports.add(markup.code(builder.toString()).getData());
+                            } else if (symbol.equals("viewport")) {
+                                arity = 4;
+                                debug.pop();
+                                double vr = stack.pop().evaluate(Double.NaN);
+                                if (Double.isNaN(vr))
+                                    throw new MakingException("Vertical radius must not depend on " + markup.code("x"));
+                                debug.pop();
+                                double hr = stack.pop().evaluate(Double.NaN);
+                                if (Double.isNaN(hr))
+                                    throw new MakingException("Horizontal radius must not depend on " + markup.code("x"));
+                                debug.pop();
+                                double oy = stack.pop().evaluate(Double.NaN);
+                                if (Double.isNaN(oy))
+                                    throw new MakingException("Origin Y must not depend on " + markup.code("x"));
+                                debug.pop();
+                                double ox = stack.pop().evaluate(Double.NaN);
+                                if (Double.isNaN(ox))
+                                    throw new MakingException("Origin Y must not depend on " + markup.code("x"));
+                                viewport = ViewportImpl.make(ox, oy, hr, vr);
+                            } else if (constants.containsPlace(symbol)) {
+                                stack.push(constants.getAtPlace(symbol));
+                                debug.push(symbol);
                             } else {
                                 Operator op = builtinOps.getAtPlace(symbol);
                                 if (op == null) op = userDefinedOps.getAtPlace(symbol);
                                 if (op == null) {
-                                    Identifier v = identifiers.getAtPlace(symbol);
+                                    Identifier v = freeVariables.getAtPlace(symbol);
                                     if (v == null) {
-                                        v = new Identifier(symbol, Double.NaN);
+                                        v = new Identifier(symbol);
                                     }
                                     stack.push(v);
                                     debug.push(v.name);
@@ -292,7 +373,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                 }
             }
             if (!stack.isEmpty()) {
-                figureParts.add(new FigurePartImpl(color, alpha, stroke, debug.pop(), stack.pop()));
+                figureParts.add(new FigurePartImpl(stack.pop(), debug.pop(), color, stroke));
                 if (!stack.isEmpty()) {
                     StringBuilder builder = new StringBuilder("Multiple expressions were made before" + markup.code("and") + " :");
                     while (!stack.isEmpty()) {
@@ -305,7 +386,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
             if (figureParts.isEmpty()) {
                 reports.add("No expressions were made");
             }
-            return new FigureImpl(figureParts, reports.toString());
+            return new FigureImpl(figureParts, reports.toString(), viewport);
         } else {
             for (Set<Mishap> set : mishaps.values()) {
                 for (Mishap mishap : set) {
@@ -316,30 +397,68 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
         }
     }
 
+    public enum ReservationReason {
+        KEYWORD, COLOR, STROKE, CONSTANT, OPERATOR;
+
+        public String type() {
+            switch (this) {
+                case KEYWORD:
+                    return "Keyword";
+                case COLOR:
+                    return "Color";
+                case STROKE:
+                    return "Width";
+                case CONSTANT:
+                    return "Constant";
+                case OPERATOR:
+                    return "Operator";
+                default:
+                    return "Unknown";
+            }
+        }
+
+        public String why() {
+            switch (this) {
+                case KEYWORD:
+                    return "it is a keyword";
+                case COLOR:
+                    return "it specifies a certain color";
+                case STROKE:
+                    return "it specifies a certain width";
+                case CONSTANT:
+                    return "it refers to a certain constant";
+                case OPERATOR:
+                    return "it refers to a certain operator";
+                default:
+                    return "it is reserved";
+            }
+        }
+    }
+
     private class Identifier implements Expression {
         final String name;
-        double value;
+        double value = Double.NaN;
 
-        private Identifier(String name, double value) throws MakingException {
-            if (reserved.contains(name))
-                throw new MakingException("Cannot reuse reserved identifier: " + markup.code(name));
-            identifiers.setAtPlace(name, this);
+        private Identifier(String name) throws MakingException {
+            if (reserved.containsKey(name)) {
+                throw new MakingException("Cannot use " + markup.code(name) + " because " + reserved.get(name).why() + "; see /reserved");
+            }
+            freeVariables.setAtPlace(name, this);
             this.name = name;
-            this.value = value;
         }
 
         @Override
         public double evaluate(double x) {
             if (Double.isNaN(value))
-                throw new NullPointerException("Variable is not assigned: " + markup.code(name));
+                throw new NullPointerException("Free variable is unassigned: " + markup.code(name));
             return value;
         }
 
         private void bind() throws MakingException {
             if (Double.isNaN(value)) {
-                identifiers.removeAtPlace(name);
+                freeVariables.removeAtPlace(name);
             } else {
-                throw new MakingException("Cannot use free identifier as bound:" + markup.code(name));
+                throw new MakingException("Cannot bind " + markup.code(name) + " as it has already been used as a free variable");
             }
         }
     }

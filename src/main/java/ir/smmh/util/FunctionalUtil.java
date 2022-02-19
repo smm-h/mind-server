@@ -1,9 +1,14 @@
 package ir.smmh.util;
 
+import ir.smmh.nile.adj.Multitude;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -52,6 +57,36 @@ public interface FunctionalUtil {
         return o -> p.test(o) || q.test(o);
     }
 
+    static <T extends Comparable<T>> @NotNull Iterable<T> sort(Iterable<? extends T> input) {
+        List<T> list = new ArrayList<>(capacityNeededFor(input, 10));
+        for (T i : input)
+            with(i, list::add);
+        Collections.sort(list);
+        return list;
+    }
+
+    static Integer capacityNeededFor(Iterable<?> iterable) {
+        if (iterable instanceof Collection<?>) {
+            return ((Collection<?>) iterable).size();
+        } else if (iterable instanceof Multitude) {
+            return ((Multitude) iterable).getSize();
+        } else {
+            return null;
+        }
+    }
+
+    static int capacityNeededFor(Iterable<?> iterable, int defaultCapacity) {
+        Integer size = capacityNeededFor(iterable);
+        return size == null ? defaultCapacity : size;
+    }
+
+    static <T, R> @NotNull Iterable<R> convert(Iterable<? extends T> input, Function<T, R> convertor) {
+        List<R> list = new ArrayList<>(capacityNeededFor(input, 10));
+        for (T i : input)
+            with(convertor.apply(i), list::add);
+        return list;
+    }
+
     @FunctionalInterface
     interface OnEventListener {
         void onEvent();
@@ -87,7 +122,7 @@ public interface FunctionalUtil {
     @FunctionalInterface
     interface SupplierMayFail<T> extends Supplier<T> {
         @Contract("_, !null -> !null")
-        static <T> T getSafe(SupplierMayFail<? extends T> supplier, T valueOnFailure) {
+        static <T> T getSafe(SupplierMayFail<? extends T> supplier, @Nullable T valueOnFailure) {
             try {
                 return supplier.getUnsafe();
             } catch (Throwable throwable) {

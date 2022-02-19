@@ -8,29 +8,62 @@ public
 interface Operator {
 
     default String getType() {
-        switch (getArity()) {
-            case 0:
-                return "Constant";
-            case 1:
-                return "Unary Operator";
-            case 2:
-                return "Binary Operator";
-            default:
-                return "Multiary Operator";
-        }
+        return "Multiary Operator";
     }
 
     int getArity();
 
     default @NotNull Expression makeExpression(Expression... args) throws Maker.MakingException {
-        if (this instanceof FigureMaker.Constant) {
-            return ((FigureMaker.Constant) this).makeNullaryExpression();
-        } else if (this instanceof FigureMaker.UnaryOperator) {
-            return ((FigureMaker.UnaryOperator) this).makeUnaryExpression(args[0]);
-        } else if (this instanceof FigureMaker.BinaryOperator) {
-            return ((FigureMaker.BinaryOperator) this).makeBinaryExpression(args[0], args[1]);
+        if (this instanceof Nullary) {
+            return ((Nullary) this).makeNullaryExpression();
+        } else if (this instanceof Unary) {
+            return ((Unary) this).makeUnaryExpression(args[0]);
+        } else if (this instanceof Binary) {
+            return ((Binary) this).makeBinaryExpression(args[0], args[1]);
         } else {
             throw new Maker.MakingException("override makeExpression in your operator");
+        }
+    }
+
+    @FunctionalInterface
+    interface Nullary extends Operator {
+        default String getType() {
+            return "Nullary Operator";
+        }
+
+        @NotNull Expression makeNullaryExpression();
+
+        @Override
+        default int getArity() {
+            return 0;
+        }
+    }
+
+    @FunctionalInterface
+    interface Unary extends Operator {
+        default String getType() {
+            return "Unary Operator";
+        }
+
+        @NotNull Expression makeUnaryExpression(Expression arg);
+
+        @Override
+        default int getArity() {
+            return 1;
+        }
+    }
+
+    @FunctionalInterface
+    interface Binary extends Operator {
+        default String getType() {
+            return "Binary Operator";
+        }
+
+        @NotNull Expression makeBinaryExpression(Expression lhs, Expression rhs);
+
+        @Override
+        default int getArity() {
+            return 2;
         }
     }
 }

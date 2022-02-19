@@ -82,6 +82,11 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
             public void removeAtPlace(K toRemove) {
                 map.remove(toRemove);
             }
+
+            @Override
+            public void removeAllPlaces() {
+                map.clear();
+            }
         }
     }
 
@@ -140,6 +145,11 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
             @Override
             public void removeAtPlace(K toRemove) {
                 map.remove(toRemove);
+            }
+
+            @Override
+            public void removeAllPlaces() {
+                map.clear();
             }
         }
     }
