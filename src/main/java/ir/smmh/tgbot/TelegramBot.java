@@ -5,6 +5,7 @@ import ir.smmh.tgbot.impl.ChatImpl;
 import ir.smmh.tgbot.impl.ContentImpl;
 import ir.smmh.tgbot.impl.LocationImpl;
 import ir.smmh.tgbot.impl.UserImpl;
+import ir.smmh.util.JSONUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,9 +36,13 @@ public interface TelegramBot {
 
     void sendPhoto(long chatId, File file, String caption, @Nullable Integer replyToMessageId) throws FileNotFoundException;
 
-//    void answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results);
+    default void answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results) {
+        answerInlineQuery(inline_query_id, results, false);
+    }
 
-    interface User {
+    void answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results, boolean is_personal);
+
+    interface User extends JSONUtil.ReadOnlyJSON {
 
         @Contract("!null->!null")
         static User of(@Nullable JSONObject wrapped) {
@@ -70,7 +75,7 @@ public interface TelegramBot {
         }
     }
 
-    interface Chat {
+    interface Chat extends JSONUtil.ReadOnlyJSON {
 
         @Contract("!null->!null")
         static Chat of(@Nullable JSONObject wrapped) {
@@ -104,7 +109,7 @@ public interface TelegramBot {
         }
     }
 
-    interface Location {
+    interface Location extends JSONUtil.ReadOnlyJSON {
 
         @Contract("!null->!null")
         static Location of(@Nullable JSONObject wrapped) {
@@ -195,7 +200,7 @@ public interface TelegramBot {
             }
         }
 
-        interface Content {
+        interface Content extends JSONUtil.ReadOnlyJSON {
             interface Message extends Content {
                 int message_id();
 
@@ -249,18 +254,25 @@ public interface TelegramBot {
         }
     }
 
-    interface InlineQueryResult {
+    interface InlineQueryResult extends JSONUtil.ReadOnlyJSON {
         @NotNull String type();
 
         /**
-         * Unique identifier for this result, 1-64 Bytes
+         * @return Unique identifier for this result, 1-64 Bytes
          */
-        String id();
+        @NotNull String id();
 
-        /**
-         * Inline keyboard attached to the message
-         */
-        @Nullable InlineKeyboardMarkup reply_markup();
+//        /**
+//         * Inline keyboard attached to the message
+//         */
+//         @Nullable InlineKeyboardMarkup reply_markup();
+//
+//        /**
+//         * Content of the message to be sent, instead of the actual media/message
+//         * This field is required if InlineQueryResult.Video is used to send an
+//         * HTML-page as a result (e.g., a YouTube video).
+//         */
+//         @Nullable InputMessageContent input_message_content();
 
         /**
          * Represents a link to an article or web page.
@@ -277,11 +289,6 @@ public interface TelegramBot {
              * Title of the result
              */
             @NotNull String title();
-
-            /**
-             * Content of the message to be sent
-             */
-            @NotNull InputMessageContent input_message_content();
 
             /**
              * URL of the result
@@ -359,21 +366,6 @@ public interface TelegramBot {
              * Caption of the photo to be sent, 0-1024 characters after entities parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the photo caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the photo
-             */
-            @Nullable InputMessageContent input_message_content();
         }
 
         /**
@@ -426,21 +418,6 @@ public interface TelegramBot {
              * Caption of the GIF file to be sent, 0-1024 characters after entities parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the GIF animation
-             */
-            @Nullable InputMessageContent input_message_content();
         }
 
         /**
@@ -475,12 +452,14 @@ public interface TelegramBot {
             @Nullable Integer mpeg4_duration();
 
             /**
-             * URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for the result
+             * URL of the static (JPEG or GIF) or animated (MPEG4) thumbnail for
+             * the result
              */
             @NotNull String thumb_url();
 
             /**
-             * MIME type of the thumbnail, must be one of `image/jpeg`, `image/gif`, or `video/mp4`. Defaults to `image/jpeg`
+             * MIME type of the thumbnail, must be one of `image/jpeg`,
+             * `image/gif`, or `video/mp4`. Defaults to `image/jpeg`
              */
             @Nullable String thumb_mime_type();
 
@@ -490,32 +469,23 @@ public interface TelegramBot {
             @Nullable String title();
 
             /**
-             * Caption of the MPEG-4 file to be sent, 0-1024 characters after entities parsing
+             * Caption of the MPEG-4 file to be sent, 0-1024 characters after
+             * entities parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the video animation
-             */
-            @Nullable InputMessageContent input_message_content();
         }
 
         /**
-         * Represents a link to a page containing an embedded video player or a video file. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
+         * Represents a link to a page containing an embedded video player or a
+         * video file. By default, this video file will be sent by the user with
+         * an optional caption. Alternatively, you can use input_message_content
+         * to send a message with the specified content instead of the video.
          */
         interface Video extends InlineQueryResult {
 
-// If an InlineQueryResultVideo message contains an embedded video (e.g., YouTube), you must replace its content using input_message_content.
+            // If an InlineQueryResultVideo message contains an embedded video
+            // (e.g., YouTube), you must replace its content using
+            // input_message_content.
 
             @Override
             @NotNull
@@ -544,19 +514,10 @@ public interface TelegramBot {
             @NotNull String title();
 
             /**
-             * Caption of the video to be sent, 0-1024 characters after entities parsing
+             * Caption of the video to be sent, 0-1024 characters after entities
+             * parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the video caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
 
             /**
              * Video width
@@ -577,15 +538,13 @@ public interface TelegramBot {
              * Short description of the result
              */
             @Nullable String description();
-
-            /**
-             * Content of the message to be sent instead of the video. This field is required if InlineQueryResultVideo is used to send an HTML-page as a result (e.g., a YouTube video).
-             */
-            @Nullable InputMessageContent input_message_content();
         }
 
         /**
-         * Represents a link to an MP3 audio file. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
+         * Represents a link to an MP3 audio file. By default, this audio file
+         * will be sent by the user. Alternatively, you can use
+         * input_message_content to send a message with the specified content
+         * instead of the audio.
          */
         interface Audio extends InlineQueryResult {
 
@@ -611,16 +570,6 @@ public interface TelegramBot {
             @Nullable String caption();
 
             /**
-             * Mode for parsing entities in the audio caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
              * Performer
              */
             @Nullable String performer();
@@ -630,15 +579,13 @@ public interface TelegramBot {
              */
             @Nullable Integer audio_duration();
 
-            /**
-             * Content of the message to be sent instead of the audio
-             */
-            @Nullable InputMessageContent input_message_content();
-
         }
 
         /**
-         * Represents a link to a voice recording in an .OGG container encoded with OPUS. By default, this voice recording will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the the voice message.
+         * Represents a link to a voice recording in an .OGG container encoded
+         * with OPUS. By default, this voice recording will be sent by the user.
+         * Alternatively, you can use input_message_content to send a message
+         * with the specified content instead of the the voice message.
          */
         interface Voice extends InlineQueryResult {
 
@@ -664,29 +611,18 @@ public interface TelegramBot {
             @Nullable String caption();
 
             /**
-             * Mode for parsing entities in the voice message caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
              * Recording duration in seconds
              */
             @Nullable Integer voice_duration();
 
-            /**
-             * Content of the message to be sent instead of the voice recording
-             */
-            @Nullable InputMessageContent input_message_content();
-
         }
 
         /**
-         * Represents a link to a file. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file. Currently, only .PDF and .ZIP files can be sent using this method.
+         * Represents a link to a file. By default, this file will be sent by
+         * the user with an optional caption. Alternatively, you can use
+         * input_message_content to send a message with the specified content
+         * instead of the file. Currently, only .PDF and .ZIP files can be sent
+         * using this method.
          */
         interface Document extends InlineQueryResult {
 
@@ -702,19 +638,10 @@ public interface TelegramBot {
             @NotNull String title();
 
             /**
-             * Caption of the document to be sent, 0-1024 characters after entities parsing
+             * Caption of the document to be sent, 0-1024 characters after
+             * entities parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the document caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
 
             /**
              * A valid URL for the file
@@ -722,7 +649,8 @@ public interface TelegramBot {
             @NotNull String document_url();
 
             /**
-             * Mime type of the content of the file, either `application/pdf` or `application/zip`
+             * Mime type of the content of the file, either `application/pdf` or
+             * `application/zip`
              */
             @NotNull String mime_type();
 
@@ -730,11 +658,6 @@ public interface TelegramBot {
              * Short description of the result
              */
             @Nullable String description();
-
-            /**
-             * Content of the message to be sent instead of the file
-             */
-            @Nullable InputMessageContent input_message_content();
 
             /**
              * URL of the thumbnail (JPEG only) for the file
@@ -754,7 +677,9 @@ public interface TelegramBot {
         }
 
         /**
-         * Represents a location on a map. By default, the location will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the location.
+         * Represents a location on a map. By default, the location will be sent
+         * by the user. Alternatively, you can use input_message_content to send
+         * a message with the specified content instead of the location.
          */
         interface Location extends InlineQueryResult {
 
@@ -780,29 +705,29 @@ public interface TelegramBot {
             @NotNull String title();
 
             /**
-             * The radius of uncertainty for the location, measured in meters; 0-1500
+             * The radius of uncertainty for the location, measured in meters;
+             * 0-1500
              */
             @Nullable Float horizontal_accuracy();
 
             /**
-             * Period in seconds for which the location can be updated, should be between 60 and 86400.
+             * Period in seconds for which the location can be updated,
+             * should be between 60 and 86400.
              */
             @Nullable Integer live_period();
 
             /**
-             * For live locations, a direction in which the user is moving, in degrees. Must be between 1 and 360 if specified.
+             * For live locations, a direction in which the user is moving,
+             * in degrees. Must be between 1 and 360 if specified.
              */
             @Nullable Integer heading();
 
             /**
-             * For live locations, a maximum distance for proximity alerts about approaching another chat member, in meters. Must be between 1 and 100000 if specified.
+             * For live locations, a maximum distance for proximity alerts about
+             * approaching another chat member, in meters. Must be between
+             * 1 and 100000 if specified.
              */
             @Nullable Integer proximity_alert_radius();
-
-            /**
-             * Content of the message to be sent instead of the location
-             */
-            @Nullable InputMessageContent input_message_content();
 
             /**
              * Url of the thumbnail for the result
@@ -822,7 +747,9 @@ public interface TelegramBot {
         }
 
         /**
-         * Represents a venue. By default, the venue will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the venue.
+         * Represents a venue. By default, the venue will be sent by the user.
+         * Alternatively, you can use input_message_content to send a message
+         * with the specified content instead of the venue.
          */
         interface Venue extends InlineQueryResult {
 
@@ -858,7 +785,7 @@ public interface TelegramBot {
             @Nullable String foursquare_id();
 
             /**
-             * Foursquare type of the venue, if known. (For example, `arts_entertainment/default`, `arts_entertainment/aquarium` or `food/icecream`.)
+             * Foursquare type of the venue, if known. (Consult documentation)
              */
             @Nullable String foursquare_type();
 
@@ -868,14 +795,9 @@ public interface TelegramBot {
             @Nullable String google_place_id();
 
             /**
-             * Google Places type of the venue. (See supported types.)
+             * Google Places type of the venue. (Consult documentation)
              */
             @Nullable String google_place_type();
-
-            /**
-             * Content of the message to be sent instead of the venue
-             */
-            @Nullable InputMessageContent input_message_content();
 
             /**
              * Url of the thumbnail for the result
@@ -924,11 +846,6 @@ public interface TelegramBot {
              * Additional data about the contact in the form of a vCard, 0-2048 bytes
              */
             @Nullable String vcard();
-
-            /**
-             * Content of the message to be sent instead of the contact
-             */
-            @Nullable InputMessageContent input_message_content();
 
             /**
              * Url of the thumbnail for the result
@@ -995,21 +912,6 @@ public interface TelegramBot {
              * Caption of the photo to be sent, 0-1024 characters after entities parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the photo caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the photo
-             */
-            @Nullable InputMessageContent input_message_content();
         }
 
         /**
@@ -1037,21 +939,6 @@ public interface TelegramBot {
              * Caption of the GIF file to be sent, 0-1024 characters after entities parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the GIF animation
-             */
-            @Nullable InputMessageContent input_message_content();
         }
 
         /**
@@ -1079,21 +966,6 @@ public interface TelegramBot {
              * Caption of the MPEG-4 file to be sent, 0-1024 characters after entities parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the video animation
-             */
-            @Nullable InputMessageContent input_message_content();
         }
 
         /**
@@ -1111,11 +983,6 @@ public interface TelegramBot {
              * A valid file identifier of the sticker
              */
             @NotNull String sticker_file_id();
-
-            /**
-             * Content of the message to be sent instead of the sticker
-             */
-            @Nullable InputMessageContent input_message_content();
 
         }
 
@@ -1150,21 +1017,6 @@ public interface TelegramBot {
              */
             @Nullable String caption();
 
-            /**
-             * Mode for parsing entities in the document caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the file
-             */
-            @Nullable InputMessageContent input_message_content();
-
         }
 
         /**
@@ -1197,21 +1049,6 @@ public interface TelegramBot {
              * Caption of the video to be sent, 0-1024 characters after entities parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the video caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the video
-             */
-            @Nullable InputMessageContent input_message_content();
         }
 
         /**
@@ -1240,21 +1077,6 @@ public interface TelegramBot {
              */
             @Nullable String caption();
 
-            /**
-             * Mode for parsing entities in the voice message caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the voice message
-             */
-            @Nullable InputMessageContent input_message_content();
-
         }
 
         /**
@@ -1277,31 +1099,6 @@ public interface TelegramBot {
              * Caption, 0-1024 characters after entities parsing
              */
             @Nullable String caption();
-
-            /**
-             * Mode for parsing entities in the audio caption. See formatting options for more details.
-             */
-            @Nullable String parse_mode();
-
-            /**
-             * List of special entities that appear in the caption, which can be specified instead of parse_mode
-             */
-            @Nullable Sequential<MessageEntity> caption_entities();
-
-            /**
-             * Content of the message to be sent instead of the audio
-             */
-            @Nullable InputMessageContent input_message_content();
-
         }
-    }
-
-    interface InputMessageContent {
-    }
-
-    interface InlineKeyboardMarkup {
-    }
-
-    interface MessageEntity {
     }
 }

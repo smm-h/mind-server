@@ -45,12 +45,9 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<UserData> {
             int messageId = message.message_id();
             handle(text, chatId, messageId);
         });
-        addHandler(new Update.Handler.inline_query() {
-            @Override
-            public void handle(Update.Content.InlineQuery inlineQuery) {
-                String text = inlineQuery.query();
-                inlineQuery.id();
-            }
+        addHandler((Update.Handler.inline_query) inlineQuery -> {
+            String text = inlineQuery.query();
+            inlineQuery.id();
         });
     }
 

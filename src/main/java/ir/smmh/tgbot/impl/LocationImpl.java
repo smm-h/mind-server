@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class LocationImpl extends JSONUtil.JSONWrapper implements Location {
+public class LocationImpl extends JSONUtil.ReadOnlyJSONImpl implements Location {
 
     private LocationImpl(JSONObject wrapped) {
         super(wrapped);
@@ -24,17 +24,17 @@ public class LocationImpl extends JSONUtil.JSONWrapper implements Location {
 
     @Override
     public float longitude() {
-        return wrapped.getFloat("longitude");
+        return getFloat("longitude");
     }
 
     @Override
     public float latitude() {
-        return wrapped.getFloat("latitude");
+        return getFloat("latitude");
     }
 
     @Override
     public @Nullable Float horizontal_accuracy() {
-        return wrapped.has("horizontal_accuracy") ? wrapped.getFloat("horizontal_accuracy") : null;
+        return getNullableFloat("horizontal_accuracy");
     }
 
     private static class Live extends LocationImpl implements Location.Live {
@@ -45,17 +45,17 @@ public class LocationImpl extends JSONUtil.JSONWrapper implements Location {
 
         @Override
         public @Nullable Integer live_period() {
-            return wrapped.has("live_period") ? wrapped.getInt("live_period") : null;
+            return has("live_period") ? getInt("live_period") : null;
         }
 
         @Override
         public @Nullable Integer heading() {
-            return wrapped.has("heading") ? wrapped.getInt("heading") : null;
+            return has("heading") ? getInt("heading") : null;
         }
 
         @Override
         public @Nullable Integer proximity_alert_radius() {
-            return wrapped.has("proximity_alert_radius") ? wrapped.getInt("proximity_alert_radius") : null;
+            return has("proximity_alert_radius") ? getInt("proximity_alert_radius") : null;
         }
     }
 }

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class UserImpl extends JSONUtil.JSONWrapper implements User {
+public class UserImpl extends JSONUtil.ReadOnlyJSONImpl implements User {
     private UserImpl(JSONObject wrapped) {
         super(wrapped);
     }
@@ -26,32 +26,32 @@ public class UserImpl extends JSONUtil.JSONWrapper implements User {
 
     @Override
     public long id() {
-        return wrapped.getLong("id");
+        return getLong("id");
     }
 
     @Override
     public boolean is_bot() {
-        return wrapped.getBoolean("is_bot");
+        return getBoolean("is_bot");
     }
 
     @Override
     public @NotNull String first_name() {
-        return wrapped.getString("first_name");
+        return getString("first_name");
     }
 
     @Override
     public @Nullable String last_name() {
-        return wrapped.optString("last_name", null);
+        return getNullableString("last_name");
     }
 
     @Override
     public @Nullable String username() {
-        return wrapped.optString("username", null);
+        return getString("username");
     }
 
     @Override
     public @Nullable String language_code() {
-        return wrapped.optString("language_code", null);
+        return getString("language_code");
     }
 
     private static class MyselfImpl extends UserImpl implements User.Myself {
@@ -62,17 +62,17 @@ public class UserImpl extends JSONUtil.JSONWrapper implements User {
 
         @Override
         public boolean can_join_groups() {
-            return wrapped.getBoolean("can_join_groups");
+            return getBoolean("can_join_groups");
         }
 
         @Override
         public boolean can_read_all_group_messages() {
-            return wrapped.getBoolean("can_read_all_group_messages");
+            return getBoolean("can_read_all_group_messages");
         }
 
         @Override
         public boolean supports_inline_queries() {
-            return wrapped.getBoolean("supports_inline_queries");
+            return getBoolean("supports_inline_queries");
         }
     }
 }

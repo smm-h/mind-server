@@ -2,6 +2,7 @@ package ir.smmh.util;
 
 import ir.smmh.nile.verbs.CanAddTo;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -172,11 +173,90 @@ public interface JSONUtil {
         return object;
     }
 
-    class JSONWrapper {
-        protected final JSONObject wrapped;
+    interface ReadOnlyJSON {
+        @NotNull JSONObject toJSONObject();
 
-        public JSONWrapper(JSONObject wrapped) {
+        boolean has(String key);
+
+        boolean getBoolean(String key);
+
+        int getInt(String key);
+
+        long getLong(String key);
+
+        float getFloat(String key);
+
+        @Nullable Float getNullableFloat(String key);
+
+        @NotNull String getString(String key);
+
+        @NotNull JSONObject getJSONObject(String key);
+
+        @Nullable JSONObject getNullableJSONObject(String key);
+
+        @Nullable String getNullableString(String key);
+    }
+
+    class ReadOnlyJSONImpl implements ReadOnlyJSON {
+        private final JSONObject wrapped;
+
+        public ReadOnlyJSONImpl(JSONObject wrapped) {
             this.wrapped = wrapped;
+        }
+
+        @Override
+        public @NotNull JSONObject toJSONObject() {
+            return wrapped;
+        }
+
+        @Override
+        public boolean has(String key) {
+            return wrapped.has(key);
+        }
+
+        @Override
+        public boolean getBoolean(String key) {
+            return wrapped.getBoolean(key);
+        }
+
+        @Override
+        public int getInt(String key) {
+            return wrapped.getInt(key);
+        }
+
+        @Override
+        public long getLong(String key) {
+            return wrapped.getLong(key);
+        }
+
+        @Override
+        public float getFloat(String key) {
+            return wrapped.getFloat(key);
+        }
+
+        @Override
+        public @Nullable Float getNullableFloat(String key) {
+            return wrapped.has(key) ? wrapped.getFloat(key) : null;
+        }
+
+        @Override
+        public @NotNull String getString(String key) {
+            return wrapped.getString(key);
+        }
+
+        @Override
+        public @NotNull JSONObject getJSONObject(String key) {
+            return wrapped.getJSONObject(key);
+        }
+
+        @Override
+        public @Nullable JSONObject getNullableJSONObject(String key) {
+            return wrapped.optJSONObject(key);
+        }
+
+        @Override
+        public @Nullable String getNullableString(String key) {
+            return wrapped.optString(key, null);
         }
     }
 }

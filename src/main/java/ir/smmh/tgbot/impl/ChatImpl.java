@@ -7,12 +7,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
+public class ChatImpl extends JSONUtil.ReadOnlyJSONImpl implements Chat {
     private final long id;
 
     private ChatImpl(JSONObject wrapped) {
         super(wrapped);
-        this.id = wrapped.getLong("id");
+        this.id = getLong("id");
     }
 
     @Contract("!null->!null")
@@ -45,17 +45,17 @@ public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
 
         @Override
         public @Nullable String username() {
-            return wrapped.getString("username");
+            return getString("username");
         }
 
         @Override
         public @Nullable String first_name() {
-            return wrapped.getString("first_name");
+            return getString("first_name");
         }
 
         @Override
         public @Nullable String last_name() {
-            return wrapped.getString("last_name");
+            return getString("last_name");
         }
     }
 
@@ -67,7 +67,7 @@ public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
 
         @Override
         public @NotNull String title() {
-            return wrapped.getString("title");
+            return getString("title");
         }
     }
 
@@ -79,12 +79,12 @@ public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
 
         @Override
         public @NotNull String title() {
-            return wrapped.getString("title");
+            return getString("title");
         }
 
         @Override
         public @Nullable String username() {
-            return wrapped.getString("username");
+            return getString("username");
         }
     }
 
@@ -96,12 +96,12 @@ public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
 
         @Override
         public @NotNull String title() {
-            return wrapped.getString("title");
+            return getString("title");
         }
 
         @Override
         public @Nullable String username() {
-            return wrapped.getString("username");
+            return getString("username");
         }
     }
 }

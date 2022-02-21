@@ -1,5 +1,6 @@
 package ir.smmh.tgbot.impl;
 
+import ir.smmh.nile.adj.Sequential;
 import ir.smmh.tgbot.MethodFailedException;
 import ir.smmh.tgbot.TelegramBot;
 import ir.smmh.util.JSONUtil;
@@ -45,6 +46,33 @@ public abstract class TelegramBotImpl implements TelegramBot {
             array.put(handlers.allowedUpdateType());
         }
         params = "{\"timeout\": 3, \"allowed_updates\": " + array + ", \"offset\": %d}";
+    }
+
+    @Override
+    public void answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results, boolean is_personal) {
+        JSONObject p = new JSONObject();
+        int count = 0;
+        JSONArray resultsArray = new JSONArray();
+        for (InlineQueryResult r : results) {
+            resultsArray.put(r.toJSONObject());
+            if (++count >= 50) break;
+        }
+        try {
+            p.put("inline_query_id", inline_query_id);
+            p.put("results", resultsArray);
+            p.put("is_personal", is_personal);
+            RequestBody body = RequestBody.create(p.toString(), NetworkUtil.JSON);
+            Request request = new Request.Builder()
+                    .url(makeURL("sendMessage"))
+                    .addHeader("Content-Type", "application/json")
+                    .post(body)
+                    .build();
+            Response response = client.newCall(request).execute();
+//            System.out.println(response.body().string());
+            response.close();
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class ContentImpl extends JSONUtil.JSONWrapper implements Update.Content {
+public class ContentImpl extends JSONUtil.ReadOnlyJSONImpl implements Update.Content {
 
     public ContentImpl(JSONObject wrapper) {
         super(wrapper);
@@ -23,22 +23,22 @@ public class ContentImpl extends JSONUtil.JSONWrapper implements Update.Content 
 
         @Override
         public int message_id() {
-            return wrapped.getInt("message_id");
+            return getInt("message_id");
         }
 
         @Override
         public @Nullable String text() {
-            return wrapped.optString("text", null);
+            return getNullableString("text");
         }
 
         @Override
         public @Nullable User from() {
-            return User.of(wrapped.optJSONObject("from", null));
+            return User.of(getNullableJSONObject("from"));
         }
 
         @Override
         public @NotNull Chat chat() {
-            return Chat.of(wrapped.getJSONObject("chat"));
+            return Chat.of(getJSONObject("chat"));
         }
     }
 
@@ -50,32 +50,32 @@ public class ContentImpl extends JSONUtil.JSONWrapper implements Update.Content 
 
         @Override
         public @NotNull String id() {
-            return wrapped.getString("id");
+            return getString("id");
         }
 
         @Override
         public @NotNull User from() {
-            return User.of(wrapped.getJSONObject("from"));
+            return User.of(getJSONObject("from"));
         }
 
         @Override
         public @NotNull String query() {
-            return wrapped.getString("query");
+            return getString("query");
         }
 
         @Override
         public @NotNull String offset() {
-            return wrapped.getString("offset");
+            return getString("offset");
         }
 
         @Override
         public @Nullable String chat_type() {
-            return wrapped.optString("chat_type", null);
+            return getNullableString("chat_type");
         }
 
         @Override
         public @Nullable Location location() {
-            return Location.of(wrapped.optJSONObject("location", null));
+            return Location.of(getNullableJSONObject("location"));
         }
     }
 }
