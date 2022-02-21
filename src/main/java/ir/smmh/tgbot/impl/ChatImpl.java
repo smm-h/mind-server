@@ -16,19 +16,19 @@ public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
     }
 
     @Contract("!null->!null")
-    public static Chat of(@Nullable JSONObject object) {
-        if (object == null) return null;
-        switch (object.getString("type")) {
+    public static Chat of(@Nullable JSONObject wrapped) {
+        if (wrapped == null) return null;
+        switch (wrapped.getString("type")) {
             case "private":
-                return new Private(object);
+                return new Private(wrapped);
             case "group":
-                return new Group(object);
+                return new Group(wrapped);
             case "supergroup":
-                return new Supergroup(object);
+                return new Supergroup(wrapped);
             case "channel":
-                return new Channel(object);
+                return new Channel(wrapped);
             default:
-                return new ChatImpl(object);
+                return new ChatImpl(wrapped);
         }
     }
 
@@ -37,7 +37,7 @@ public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
         return id;
     }
 
-    public static class Private extends ChatImpl implements Chat.Private {
+    private static class Private extends ChatImpl implements Chat.Private {
 
         private Private(JSONObject wrapped) {
             super(wrapped);
@@ -59,7 +59,7 @@ public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
         }
     }
 
-    public static class Group extends ChatImpl implements Chat.Group {
+    private static class Group extends ChatImpl implements Chat.Group {
 
         private Group(JSONObject wrapped) {
             super(wrapped);
@@ -71,7 +71,7 @@ public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
         }
     }
 
-    public static class Supergroup extends ChatImpl implements Chat.Supergroup {
+    private static class Supergroup extends ChatImpl implements Chat.Supergroup {
 
         private Supergroup(JSONObject wrapped) {
             super(wrapped);
@@ -88,7 +88,7 @@ public class ChatImpl extends JSONUtil.JSONWrapper implements Chat {
         }
     }
 
-    public static class Channel extends ChatImpl implements Chat.Channel {
+    private static class Channel extends ChatImpl implements Chat.Channel {
 
         private Channel(JSONObject wrapped) {
             super(wrapped);

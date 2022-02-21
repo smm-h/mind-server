@@ -13,9 +13,9 @@ public class UserImpl extends JSONUtil.JSONWrapper implements User {
     }
 
     @Contract("!null->!null")
-    public static User of(@Nullable JSONObject object) {
-        if (object == null) return null;
-        return new UserImpl(object);
+    public static User of(@Nullable JSONObject wrapped) {
+        if (wrapped == null) return null;
+        return new UserImpl(wrapped);
     }
 
     @Contract("!null->!null")
@@ -54,7 +54,7 @@ public class UserImpl extends JSONUtil.JSONWrapper implements User {
         return wrapped.optString("language_code", null);
     }
 
-    public static class MyselfImpl extends UserImpl implements User.Myself {
+    private static class MyselfImpl extends UserImpl implements User.Myself {
 
         private MyselfImpl(JSONObject wrapped) {
             super(wrapped);

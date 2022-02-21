@@ -2,6 +2,8 @@ package ir.smmh.tgbot;
 
 import ir.smmh.tgbot.impl.ChatImpl;
 import ir.smmh.tgbot.impl.ContentImpl;
+import ir.smmh.tgbot.impl.UserImpl;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
@@ -31,6 +33,12 @@ public interface TelegramBot {
     void sendPhoto(long chatId, File file, String caption, @Nullable Integer replyToMessageId) throws FileNotFoundException;
 
     interface User {
+
+        @Contract("!null->!null")
+        static User of(@Nullable JSONObject wrapped) {
+            return UserImpl.of(wrapped);
+        }
+
         long id();
 
         boolean is_bot();
@@ -59,8 +67,9 @@ public interface TelegramBot {
 
     interface Chat {
 
-        static Chat of(JSONObject object) {
-            return ChatImpl.of(object);
+        @Contract("!null->!null")
+        static Chat of(@Nullable JSONObject wrapped) {
+            return ChatImpl.of(wrapped);
         }
 
         long id();
@@ -87,6 +96,39 @@ public interface TelegramBot {
             @NotNull String title();
 
             @Nullable String username();
+        }
+    }
+
+    interface Location {
+        float longitude();
+
+        float latitude();
+
+        /**
+         * @return The radius of uncertainty for the location, measured in
+         * meters; 0-1500
+         */
+        @Nullable Float horizontal_accuracy();
+
+        interface Live extends Location {
+            /**
+             * @return Time relative to the message sending date, during which
+             * the location can be updated; in seconds. For active live
+             * locations only.
+             */
+            @Nullable Integer live_period();
+
+            /**
+             * @return The direction in which user is moving, in degrees; 1-360.
+             * For active live locations only.
+             */
+            @Nullable Integer heading();
+
+            /**
+             * @return Maximum distance for proximity alerts about approaching
+             * another chat member, in meters. For sent live locations only.
+             */
+            @Nullable Integer proximity_alert_radius();
         }
     }
 

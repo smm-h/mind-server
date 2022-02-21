@@ -32,7 +32,7 @@ public class ContentImpl extends JSONUtil.JSONWrapper implements Update.Content 
 
         @Override
         public @Nullable User from() {
-            return UserImpl.of(wrapped.optJSONObject("from", null));
+            return User.of(wrapped.optJSONObject("from", null));
         }
 
         @Override
@@ -59,7 +59,7 @@ public class ContentImpl extends JSONUtil.JSONWrapper implements Update.Content 
 
         @Override
         public @NotNull User from() {
-            return UserImpl.of(wrapped.getJSONObject("from"));
+            return User.of(wrapped.getJSONObject("from"));
         }
     }
 }
