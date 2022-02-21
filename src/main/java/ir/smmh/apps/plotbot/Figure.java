@@ -3,8 +3,10 @@ package ir.smmh.apps.plotbot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 public interface Figure {
-    @NotNull Iterable<Part> getParts();
+    @NotNull List<Part> getParts();
 
     int getPartCount();
 

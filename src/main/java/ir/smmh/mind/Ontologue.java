@@ -19,8 +19,7 @@ public class Ontologue extends StandardAPITelegramBotImpl {
         process("mind", parameters);
     }
 
-    @Override
-    public final JSONObject processRequest(long chatId, String request) {
+    public final JSONObject handleRequest(String request) {
         String[] s = request.split(" ");
         switch (s[0].toLowerCase(Locale.ROOT)) {
             case "/whoami": {

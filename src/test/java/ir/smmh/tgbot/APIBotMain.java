@@ -5,6 +5,8 @@ import ir.smmh.tgbot.impl.StandardAPITelegramBotImpl;
 
 class APIBotMain {
     public static void main(String[] args) {
-        new StandardAPITelegramBotImpl(new MindsAPI(), null).start(TelegramBotTokens.OntologueBot);
+        StandardAPITelegramBot bot = new StandardAPITelegramBotImpl(new MindsAPI(), null);
+        bot.addHandler((TelegramBot.Update.Handler.message) bot::handleViaStandardAPI);
+        bot.start(TelegramBotTokens.OntologueBot);
     }
 }

@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
-public abstract class UserManagingTelegramBotImpl<U extends UserManagingTelegramBot.UserData> extends SimpleTelegramBotImpl implements UserManagingTelegramBot<U> {
+public abstract class UserManagingTelegramBotImpl<U extends UserManagingTelegramBot.UserData> extends TelegramBotImpl implements UserManagingTelegramBot<U> {
 
     private final Map.SingleValue.Mutable<Long, U> users = new MapImpl.SingleValue.Mutable<>();
 
@@ -37,6 +37,11 @@ public abstract class UserManagingTelegramBotImpl<U extends UserManagingTelegram
         @Override
         public long getChatId() {
             return chatId;
+        }
+
+        @Override
+        public String toString() {
+            return "Chat@" + chatId;
         }
     }
 }

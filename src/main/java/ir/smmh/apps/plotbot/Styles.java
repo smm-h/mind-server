@@ -13,15 +13,15 @@ public interface Styles {
 
     void addColor(String name, String emoji, Color color);
 
-    void addStroke(String name, int width);
+    void addStroke(String name, double width);
+
+    void addStroke(String name, Stroke stroke);
 
     boolean isColor(String name);
 
     boolean isStroke(String name);
 
     @Nullable String getColorEmoji(String color);
-
-    void addStroke(String name, Stroke stroke);
 
     @Nullable Stroke getStroke(String name);
 

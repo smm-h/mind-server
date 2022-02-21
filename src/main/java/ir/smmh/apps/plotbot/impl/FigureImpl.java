@@ -18,7 +18,7 @@ public class FigureImpl implements Figure {
     }
 
     @Override
-    public @NotNull Iterable<Part> getParts() {
+    public @NotNull List<Part> getParts() {
         return parts;
     }
 

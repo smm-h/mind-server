@@ -171,4 +171,12 @@ public interface JSONUtil {
         object.put(key4, value4);
         return object;
     }
+
+    class JSONWrapper {
+        protected final JSONObject wrapped;
+
+        public JSONWrapper(JSONObject wrapped) {
+            this.wrapped = wrapped;
+        }
+    }
 }

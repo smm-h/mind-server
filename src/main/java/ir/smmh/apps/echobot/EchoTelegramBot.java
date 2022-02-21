@@ -1,15 +1,22 @@
 package ir.smmh.apps.echobot;
 
-import ir.smmh.tgbot.impl.SimpleTelegramBotImpl;
-import org.jetbrains.annotations.NotNull;
+import ir.smmh.tgbot.impl.TelegramBotImpl;
 
-public class EchoTelegramBot extends SimpleTelegramBotImpl {
+public class EchoTelegramBot extends TelegramBotImpl {
     public EchoTelegramBot() {
         super(null);
-    }
-
-    @Override
-    public final void process(long chatId, @NotNull String text, int messageId) {
-        sendMessage(chatId, text, messageId);
+        addHandler((Update.Handler.message) message -> {
+            int messageId = message.message_id();
+            String text = message.text();
+            if (text != null) {
+                long chatId = message.from().id();
+                System.out.println("@" + chatId + " #" + messageId + ": " + text);
+                try {
+                    sendMessage(chatId, text, messageId);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                }
+            }
+        });
     }
 }

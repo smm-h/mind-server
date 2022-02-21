@@ -112,7 +112,7 @@ public abstract class JSONAPIImpl implements JSONAPI {
                         UserManagingJSONAPIImpl<?, ?> me = ((UserManagingJSONAPIImpl<?, ?>) this);
                         @Nullable JSONObject authentication;
                         try {
-                            authentication = request.has("authentication") ? request.getJSONObject("authentication") : null;
+                            authentication = request.optJSONObject("authentication", null);
                         } catch (JSONException e) {
                             return respond(COULD_NOT_PARSE_REQUEST, e);
                         }

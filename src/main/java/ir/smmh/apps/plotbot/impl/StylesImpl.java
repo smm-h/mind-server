@@ -25,9 +25,9 @@ public class StylesImpl implements Styles {
         addColor("black", "&#9899;&#65039;", new Color(51, 51, 51));
         addColor("white", "&#9898;&#65039;", new Color(204, 204, 204));
         addStroke("veryThin", 1);
-        addStroke("thin", 3);
-        addStroke("thick", 5);
-        addStroke("veryThick", 7);
+        addStroke("thin", 8);
+        addStroke("thick", 16);
+        addStroke("veryThick", 32);
     }
 
     public static Styles getInstance() {
@@ -41,8 +41,8 @@ public class StylesImpl implements Styles {
     }
 
     @Override
-    public void addStroke(String name, int width) {
-        addStroke(name.toLowerCase(Locale.ROOT), new BasicStroke(width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+    public void addStroke(String name, double width) {
+        addStroke(name.toLowerCase(Locale.ROOT), new BasicStroke((float) width, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
     }
 
     @Override

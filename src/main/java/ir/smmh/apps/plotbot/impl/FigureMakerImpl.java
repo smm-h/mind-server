@@ -5,6 +5,7 @@ import ir.smmh.apps.plotbot.Operator.Binary;
 import ir.smmh.apps.plotbot.Operator.Nullary;
 import ir.smmh.apps.plotbot.Operator.Unary;
 import ir.smmh.lingu.Code;
+import ir.smmh.lingu.Maker.MakingException;
 import ir.smmh.lingu.Mishap;
 import ir.smmh.lingu.Token;
 import ir.smmh.lingu.impl.CodeImpl;
@@ -25,9 +26,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
 
     private static final int MAX_ITERATION_LIMIT = 1000;
     private final Map.SingleValue.Mutable<String, Operator> builtinOps = new MapImpl.SingleValue.Mutable<>();
-    private final Map.SingleValue.Mutable<String, Operator> userDefinedOps = new MapImpl.SingleValue.Mutable<>();
     private final Map.SingleValue.Mutable<String, Expression> constants = new MapImpl.SingleValue.Mutable<>();
-    private final Map.SingleValue.Mutable<String, Identifier> freeVariables = new MapImpl.SingleValue.Mutable<>();
     private final Stack<Expression> stack = new Stack<>();
     private final Stack<String> debug = new Stack<>();
     private final java.util.Map<String, ReservationReason> reserved = new HashMap<>();
@@ -49,6 +48,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
         reserved.put("and", ReservationReason.KEYWORD);
         reserved.put("iterate", ReservationReason.KEYWORD);
         reserved.put("viewport", ReservationReason.KEYWORD);
+        reserved.put("thickness", ReservationReason.KEYWORD);
         for (String name : styles.getColorNames()) reserved.put(name, ReservationReason.COLOR);
         for (String name : styles.getStrokeNames()) reserved.put(name, ReservationReason.STROKE);
         defineConstant("e", 2.7182818284590452353602874713527);
@@ -99,45 +99,16 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
     }
 
     @Override
-    public @NotNull Iterable<String> getUserDefinedOperators() {
-        return userDefinedOps.overKeys();
-    }
-
-    @Override
     public @Nullable Operator getBuiltinOperator(String name) {
         return builtinOps.getAtPlace(name);
     }
 
-    @Override
-    public @Nullable Operator getUserDefinedOperator(String name) {
-        return userDefinedOps.getAtPlace(name);
-    }
 
     private void defineBuiltinOperator(String name, Operator operator) {
         reserved.put(name, ReservationReason.OPERATOR);
         builtinOps.setAtPlace(name, operator);
     }
 
-    @Override
-    public void defineOperator(String name, Operator operator) {
-        userDefinedOps.setAtPlace(name, operator);
-    }
-
-    @Override
-    public boolean forgetUserDefined(String name) {
-        boolean existed = userDefinedOps.containsPlace(name) || freeVariables.containsPlace(name);
-        userDefinedOps.removeAtPlace(name);
-        freeVariables.removeAtPlace(name);
-        return existed;
-    }
-
-    @Override
-    public int forgetAllUserDefined() {
-        int count = userDefinedOps.getSize() + freeVariables.getSize();
-        userDefinedOps.removeAllPlaces();
-        freeVariables.removeAllPlaces();
-        return count;
-    }
 
     @Override
     public @NotNull Iterable<String> getReservedNames() {
@@ -160,20 +131,12 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
     }
 
     @Override
-    public @NotNull Iterable<String> getVariables() {
-        return freeVariables.overKeys();
-    }
-
-    @Override
-    public @Nullable Double getVariableValue(String name) {
-        return with(freeVariables.getAtPlace(name), c -> c.evaluate(Double.NaN), null);
-    }
-
-    @Override
-    public @NotNull Figure makeFromCode(@NotNull Code code) throws MakingException {
+    public @NotNull Figure make(long chatId, String text) throws MakingException {
+        UserData ud = PlotByXBot.getInstance().getUser(chatId);
         StringJoiner reports = new StringJoiner("\n");
         Viewport viewport = PlotByXBot.getInstance().currentViewport;
         List<Figure.Part> figureParts = new ArrayList<>();
+        Code code = new CodeImpl(text, "plt");
         List<Token.Individual> tokens = TokenizerImpl.tokenized.read(code);
 //        System.out.println(((Comprehension.List<Token.Individual, String>) token -> token.getTypeString() + ":" + token.getData()).comprehend(tokens));
         java.util.Map<Token.Individual, Set<Mishap>> mishaps = CodeImpl.mishaps.read(code);
@@ -206,26 +169,26 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 Expression identifier = stack.pop();
                                 debug.pop();
                                 if (!(identifier instanceof Identifier)) {
-                                    throw new MakingException("Cannot assign value to variable using non-identifier expression");
+                                    throw new MakingException("Cannot assign value to non-identifier expression");
                                 }
                                 Identifier verifiedIdentifier = (Identifier) identifier;
-                                builder.append(verifiedIdentifier.name).append(" = ");
+                                builder.append(verifiedIdentifier.getName()).append(" = ");
                                 double value = stack.pop().evaluate(Double.NaN);
                                 builder.append(debug.pop()).append(" = ").append(value);
                                 reports.add(markup.code(builder.toString()).getData());
                                 if (Double.isNaN(value))
                                     throw new MakingException("Expression evaluation failed");
-                                verifiedIdentifier.value = value;
+                                verifiedIdentifier.setValue(value);
                             } else if (symbol.equals("define")) {
                                 arity = 2;
                                 StringBuilder builder = new StringBuilder();
                                 Expression identifier = stack.pop();
                                 debug.pop();
                                 if (!(identifier instanceof Identifier)) {
-                                    throw new MakingException("Cannot define named function using non-identifier expression");
+                                    throw new MakingException("Cannot define operation with non-identifier expression");
                                 }
                                 Identifier verifiedIdentifier = (Identifier) identifier;
-                                builder.append(verifiedIdentifier.name);
+                                builder.append(verifiedIdentifier.getName());
                                 StringJoiner argJoiner = new StringJoiner(", ", "(", ")");
                                 final int argCount = (int) stack.pop().evaluate(Double.NaN);
                                 debug.pop();
@@ -235,7 +198,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                     debug.pop();
                                     if (argIdentifier instanceof Identifier) {
                                         Identifier verifiedArgIdentifier = (Identifier) argIdentifier;
-                                        argJoiner.add(verifiedArgIdentifier.name);
+                                        argJoiner.add(verifiedArgIdentifier.getName());
                                         verifiedArgIdentifier.bind();
                                         boundVariables[i] = verifiedArgIdentifier;
                                     } else {
@@ -246,7 +209,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 Expression expression = stack.pop();
                                 builder.append(debug.pop());
                                 reports.add(markup.code(builder.toString()).getData());
-                                defineOperator(verifiedIdentifier.name, new Operator() {
+                                ud.defineOperator(verifiedIdentifier.getName(), new Operator() {
                                     @Override
                                     public int getArity() {
                                         return argCount;
@@ -256,7 +219,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                     public @NotNull Expression makeExpression(Expression... args) {
                                         return x -> {
                                             for (int i = 0; i < argCount; i++) {
-                                                boundVariables[i].value = args[i].evaluate(x);
+                                                boundVariables[i].setValue(args[i].evaluate(x));
                                             }
                                             return expression.evaluate(x);
                                         };
@@ -266,6 +229,13 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 color = symbol;
                             } else if (styles.isStroke(symbol)) {
                                 stroke = symbol;
+                            } else if (symbol.equals("thickness")) {
+                                debug.pop();
+                                double thickness = stack.pop().evaluate(Double.NaN);
+                                if (Double.isNaN(thickness))
+                                    throw new MakingException("Thickness must not depend on " + markup.code("x"));
+                                stroke = "thickness_" + thickness;
+                                styles.addStroke(stroke, thickness);
                             } else if (symbol.equals("and")) {
                                 if (stack.isEmpty()) {
                                     throw new MakingException("No expressions were made before " + markup.code("and"));
@@ -274,7 +244,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 color = null;
                                 stroke = null;
                                 if (!stack.isEmpty()) {
-                                    StringBuilder builder = new StringBuilder("Multiple expressions were made before" + markup.code("and") + " :");
+                                    StringBuilder builder = new StringBuilder("Multiple expressions were made before " + markup.code("and") + " :");
                                     while (!stack.isEmpty()) {
                                         stack.pop();
                                         builder.append("\n").append(markup.code(debug.pop()));
@@ -291,7 +261,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                     throw new MakingException("Cannot bind iteration index to a non-identifier expression");
                                 }
                                 Identifier verifiedIdentifier = (Identifier) identifier;
-                                builder.append(verifiedIdentifier.name);
+                                builder.append(verifiedIdentifier.getName());
                                 verifiedIdentifier.bind();
                                 Expression limitExpression = stack.pop();
                                 debug.pop();
@@ -308,7 +278,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 for (int i = 0; i < limit; i++) {
                                     int v = i;
                                     Expression ei = x -> {
-                                        verifiedIdentifier.value = v;
+                                        verifiedIdentifier.setValue(v);
                                         return e.evaluate(x);
                                     };
                                     figureParts.add(new FigurePartImpl(ei, null, color, stroke));
@@ -327,25 +297,28 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                                 debug.pop();
                                 double oy = stack.pop().evaluate(Double.NaN);
                                 if (Double.isNaN(oy))
-                                    throw new MakingException("Origin Y must not depend on " + markup.code("x"));
+                                    throw new MakingException("Center Y must not depend on " + markup.code("x"));
                                 debug.pop();
                                 double ox = stack.pop().evaluate(Double.NaN);
                                 if (Double.isNaN(ox))
-                                    throw new MakingException("Origin Y must not depend on " + markup.code("x"));
+                                    throw new MakingException("Center X must not depend on " + markup.code("x"));
                                 viewport = ViewportImpl.make(ox, oy, hr, vr);
                             } else if (constants.containsPlace(symbol)) {
                                 stack.push(constants.getAtPlace(symbol));
                                 debug.push(symbol);
                             } else {
                                 Operator op = builtinOps.getAtPlace(symbol);
-                                if (op == null) op = userDefinedOps.getAtPlace(symbol);
+                                if (op == null) op = ud.getUserDefinedOperator(symbol);
                                 if (op == null) {
-                                    Identifier v = freeVariables.getAtPlace(symbol);
-                                    if (v == null) {
-                                        v = new Identifier(symbol);
+                                    Identifier identifier = ud.getVariableIdentifier(symbol);
+                                    if (identifier == null) {
+                                        if (reserved.containsKey(symbol)) {
+                                            throw new MakingException("Cannot use " + markup.code(symbol) + " because " + reserved.get(symbol).why() + "; see /reserved");
+                                        }
+                                        identifier = ud.newIdentifier(symbol);
                                     }
-                                    stack.push(v);
-                                    debug.push(v.name);
+                                    stack.push(identifier);
+                                    debug.push(identifier.getName());
                                 } else {
                                     arity = op.getArity();
                                     Expression[] args = new Expression[arity];
@@ -372,19 +345,33 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                         throw new MakingException("Unhandled token type: " + markup.code(token.getTypeString()) + "");
                 }
             }
-            if (!stack.isEmpty()) {
-                figureParts.add(new FigurePartImpl(stack.pop(), debug.pop(), color, stroke));
-                if (!stack.isEmpty()) {
-                    StringBuilder builder = new StringBuilder("Multiple expressions were made before" + markup.code("and") + " :");
+            switch (stack.size()) {
+                case 0:
+                    reports.add("No expressions were made");
+                    break;
+                case 1:
+                    figureParts.add(new FigurePartImpl(stack.pop(), debug.pop(), color, stroke));
+                    break;
+                default:
+                    boolean undefined = false;
+                    StringBuilder builder = new StringBuilder("Multiple expressions were made:");
                     while (!stack.isEmpty()) {
-                        stack.pop();
-                        builder.append("\n").append(markup.code(debug.pop()));
+                        Expression extra = stack.pop();
+                        String extraString = debug.pop();
+                        builder.append("\n").append(markup.code(extraString));
+                        if (extra instanceof Identifier) {
+                            if (Double.isNaN(((Identifier) extra).getValue())) {
+                                builder.append(" (undefined)");
+                                undefined = true;
+                            }
+                        }
+                    }
+                    if (undefined) {
+                        builder.append("\n\nTry /builtin or /userdefined to see a list of defined names");
+                    } else {
+                        builder.append("\n\nUse ").append(markup.code("and")).append(" between your expressions");
                     }
                     throw new MakingException(builder.toString());
-                }
-            }
-            if (figureParts.isEmpty()) {
-                reports.add("No expressions were made");
             }
             return new FigureImpl(figureParts, reports.toString(), viewport);
         } else {
@@ -431,34 +418,6 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
                     return "it refers to a certain operator";
                 default:
                     return "it is reserved";
-            }
-        }
-    }
-
-    private class Identifier implements Expression {
-        final String name;
-        double value = Double.NaN;
-
-        private Identifier(String name) throws MakingException {
-            if (reserved.containsKey(name)) {
-                throw new MakingException("Cannot use " + markup.code(name) + " because " + reserved.get(name).why() + "; see /reserved");
-            }
-            freeVariables.setAtPlace(name, this);
-            this.name = name;
-        }
-
-        @Override
-        public double evaluate(double x) {
-            if (Double.isNaN(value))
-                throw new NullPointerException("Free variable is unassigned: " + markup.code(name));
-            return value;
-        }
-
-        private void bind() throws MakingException {
-            if (Double.isNaN(value)) {
-                freeVariables.removeAtPlace(name);
-            } else {
-                throw new MakingException("Cannot bind " + markup.code(name) + " as it has already been used as a free variable");
             }
         }
     }

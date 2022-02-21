@@ -7,14 +7,12 @@ public interface StandardAPITelegramBot extends APITelegramBot {
     @Override
     JSONAPIImpl getAPI();
 
-    default JSONObject processRequest(long chatId, String request) {
-        return getAPI().processJSON(request);
-    }
-
-    @Override
-    default void process(long chatId, String text, int messageId) {
+    default void handleViaStandardAPI(Update.Content.Message message) {
+        String text = message.text();
+        if (text == null) return;
+        long chatId = message.chat().id();
         String string;
-        JSONObject response = processRequest(chatId, text);
+        JSONObject response = getAPI().processJSON(text);
         if (response.has("results")) {
             string = processResults(response.getJSONObject("results"));
         } else if (response.has("error_message")) {
@@ -22,7 +20,7 @@ public interface StandardAPITelegramBot extends APITelegramBot {
         } else {
             string = response.getString("description");
         }
-        sendMessage(chatId, string, messageId);
+        sendMessage(chatId, string, message.message_id());
     }
 
     default String processResults(JSONObject results) {

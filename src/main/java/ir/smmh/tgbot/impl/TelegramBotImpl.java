@@ -1,9 +1,11 @@
 package ir.smmh.tgbot.impl;
 
-import ir.smmh.tgbot.SimpleTelegramBot;
+import ir.smmh.tgbot.MethodFailedException;
+import ir.smmh.tgbot.TelegramBot;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.NetworkUtil;
 import okhttp3.*;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,26 +15,59 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
+@SuppressWarnings("FieldCanBeLocal")
+public abstract class TelegramBotImpl implements TelegramBot {
 
-    private static final String BASE = "https://api.telegram.org/bot%s/%s";
+    private final String BASE = "https://api.telegram.org/bot%s/%s";
     private final OkHttpClient client;
     private final @Nullable String parseMode;
     private final int maxTries = 3;
+    private final List<Update.Handler<?>> handlers = new ArrayList<>();
+    private String params;
     private String token;
     private int updateId;
     private boolean running;
 
-    public SimpleTelegramBotImpl(@Nullable String parseMode) {
+    public TelegramBotImpl(@Nullable String parseMode) {
         super();
         this.parseMode = parseMode;
         client = new OkHttpClient();
     }
 
     @Override
+    public void addHandler(Update.Handler<?> handler) {
+        handlers.add(handler);
+        JSONArray array = new JSONArray();
+        for (Update.Handler<?> handlers : handlers) {
+            array.put(handlers.allowedUpdateType());
+        }
+        params = "{\"timeout\": 3, \"allowed_updates\": " + array + ", \"offset\": %d}";
+    }
+
+    @Override
     public final boolean isRunning() {
         return running;
+    }
+
+    @Override
+    public @NotNull User.Myself getMe() throws MethodFailedException {
+        try {
+            Request request = new Request.Builder()
+                    .url(makeURL("getMe"))
+//                    .addHeader("Content-Type", "application/json")
+                    .build();
+            Response response = client.newCall(request).execute();
+            ResponseBody body = response.body();
+            response.close();
+            if (body == null) throw new MethodFailedException();
+            return UserImpl.myself(JSONUtil.parse(body.string()));
+        } catch (JSONException | IOException e) {
+            e.printStackTrace();
+            throw new MethodFailedException();
+        }
     }
 
     @Override
@@ -126,8 +161,6 @@ public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
         running = true;
         token = withToken;
 
-        final String params = "{\"timeout\": 3, \"allowed_updates\": [\"message\"], \"offset\": %d}";
-
         while (running) {
             try {
                 RequestBody requestBody = RequestBody.create(String.format(params, updateId), NetworkUtil.JSON);
@@ -135,10 +168,24 @@ public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
                 Response response = client.newCall(request).execute();
                 ResponseBody responseBody = response.body();
                 if (responseBody != null) {
-                    handle(JSONUtil.parse(responseBody.string()));
+                    try {
+                        JSONArray array = JSONUtil.parse(responseBody.string()).getJSONArray("result");
+                        for (int i = 0; i < array.length(); i++) {
+                            JSONObject update = array.getJSONObject(i);
+                            updateId = Math.max(updateId, update.getInt("update_id") + 1);
+                            for (Update.Handler<?> handler : handlers) {
+                                String allowedUpdate = handler.allowedUpdateType();
+                                if (update.has(allowedUpdate)) {
+                                    handler.handle(update.getJSONObject(allowedUpdate));
+                                }
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                     responseBody.close();
                 } else {
-                    handle(new JSONObject());
+                    System.err.println("Null response body");
                 }
             } catch (JSONException | IOException e) {
                 System.err.println(e.getMessage());
@@ -146,34 +193,8 @@ public abstract class SimpleTelegramBotImpl implements SimpleTelegramBot {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                System.err.println("LONG POLLING INTERRUPTED");
             }
-        }
-    }
-
-    private void handle(JSONObject object) {
-        try {
-            JSONArray array = object.getJSONArray("result");
-            for (int i = 0; i < array.length(); i++) {
-                JSONObject update = array.getJSONObject(i);
-                updateId = Math.max(updateId, update.getInt("update_id") + 1);
-                if (update.has("message")) {
-                    JSONObject message = update.getJSONObject("message");
-                    int messageId = message.getInt("message_id");
-                    if (message.has("text")) {
-                        String text = message.getString("text");
-                        long chatId = message.getJSONObject("chat").getLong("id");
-                        System.out.println("@" + chatId + " #" + messageId + ": " + text);
-                        try {
-                            process(chatId, text, messageId);
-                        } catch (Throwable throwable) {
-                            throwable.printStackTrace();
-                        }
-                    }
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 }

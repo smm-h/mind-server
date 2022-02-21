@@ -4,7 +4,7 @@ import ir.smmh.api.API;
 import ir.smmh.tgbot.APITelegramBot;
 import org.jetbrains.annotations.Nullable;
 
-public class APITelegramBotImpl extends SimpleTelegramBotImpl implements APITelegramBot {
+public class APITelegramBotImpl extends TelegramBotImpl implements APITelegramBot {
 
     private final API api;
 

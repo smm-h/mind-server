@@ -82,9 +82,10 @@ public class MarkupWriter extends TelegramBotHTMLWriter {
                                 .appendData("/builtin Show a list of all built-in operators and constants")
                                 .appendData("/userDefined Show a list of all user-defined operators and variables")
                                 .appendData("/reserved Show a list of all reserved names")
-                                .appendData("/viewport" + code("x") + " " + code("y") + " " + code("hr") + " " + code("vr") + " Change the current viewport; use without args to reset to default")
+                                .appendData("/viewport " + code("x") + " " + code("y") + " " + code("hr") + " " + code("vr") + " Change the current viewport; use without arguments to reset to default")
                                 .appendData("/forget " + code("name") + " Forget a user-defined operator or variable")
                                 .appendData("/forgetAll Forget all user-defined operators and variables")
+                                .appendData("/toggleDarkMode Toggle dark-mode friendly color scheme")
                         )
                         .sectionEnd()
                         .build().getData();
