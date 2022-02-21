@@ -175,7 +175,6 @@ public abstract class SettingsFormalizerImpl<T extends Settings> extends Languag
 
             NodedTreeImpl<InformalSettings> tree = treeMaker.makeFromCode(code);
 
-
             CodeProcess formalizing = new CodeProcessImpl(code, "formalizing those settings");
 
             Map<T, FormalSettings> wrappedToFormal = new HashMap<>();

@@ -668,7 +668,6 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
     interface View<T> extends ir.smmh.util.View.Injected<Sequential<T>>, Sequential<T> {
 
-
         static <T> View<T> allButOne(Sequential<T> sequential, int except) {
             return new AllButOne<>(sequential, except);
         }

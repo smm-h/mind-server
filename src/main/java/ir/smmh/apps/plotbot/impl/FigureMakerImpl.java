@@ -103,12 +103,10 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
         return builtinOps.getAtPlace(name);
     }
 
-
     private void defineBuiltinOperator(String name, Operator operator) {
         reserved.put(name, ReservationReason.OPERATOR);
         builtinOps.setAtPlace(name, operator);
     }
-
 
     @Override
     public @NotNull Iterable<String> getReservedNames() {

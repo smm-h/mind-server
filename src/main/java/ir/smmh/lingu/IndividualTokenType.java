@@ -1,6 +1,5 @@
 package ir.smmh.lingu;
 
-
 import org.jetbrains.annotations.NotNull;
 
 public class IndividualTokenType implements Token.Type.Individual {

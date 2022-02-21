@@ -1,6 +1,7 @@
 package ir.smmh.tgbot.impl;
 
 import ir.smmh.tgbot.TelegramBot.Chat;
+import ir.smmh.tgbot.TelegramBot.Location;
 import ir.smmh.tgbot.TelegramBot.Update;
 import ir.smmh.tgbot.TelegramBot.User;
 import ir.smmh.util.JSONUtil;
@@ -48,8 +49,13 @@ public class ContentImpl extends JSONUtil.JSONWrapper implements Update.Content 
         }
 
         @Override
-        public int id() {
-            return wrapped.getInt("id");
+        public @NotNull String id() {
+            return wrapped.getString("id");
+        }
+
+        @Override
+        public @NotNull User from() {
+            return User.of(wrapped.getJSONObject("from"));
         }
 
         @Override
@@ -58,8 +64,18 @@ public class ContentImpl extends JSONUtil.JSONWrapper implements Update.Content 
         }
 
         @Override
-        public @NotNull User from() {
-            return User.of(wrapped.getJSONObject("from"));
+        public @NotNull String offset() {
+            return wrapped.getString("offset");
+        }
+
+        @Override
+        public @Nullable String chat_type() {
+            return wrapped.optString("chat_type", null);
+        }
+
+        @Override
+        public @Nullable Location location() {
+            return Location.of(wrapped.optJSONObject("location", null));
         }
     }
 }

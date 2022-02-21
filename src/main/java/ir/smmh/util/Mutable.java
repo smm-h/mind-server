@@ -81,7 +81,6 @@ public interface Mutable extends AutoCloseable {
             getInjectedMutable().setDirty(dirty);
         }
 
-
         @Override
         default void preMutate() {
             getInjectedMutable().preMutate();
@@ -166,7 +165,6 @@ public interface Mutable extends AutoCloseable {
             default void setDirty(boolean dirty) {
                 getInjectedMutable().setDirty(dirty);
             }
-
 
             @Override
             default void preMutate() {

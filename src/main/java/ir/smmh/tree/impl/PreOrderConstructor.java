@@ -16,7 +16,6 @@ public class PreOrderConstructor<DataType> implements Tree.Binary.OrderConstruct
         this.postOrder = postOrder;
     }
 
-
     @Override
     public final @NotNull Sequential<DataType> getFirstSource() {
         return inOrder;

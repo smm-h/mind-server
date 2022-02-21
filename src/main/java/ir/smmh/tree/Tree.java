@@ -21,7 +21,6 @@ public interface Tree<DataType> extends
 
     int getHeight();
 
-
     /**
      * @return the number of leaves
      */

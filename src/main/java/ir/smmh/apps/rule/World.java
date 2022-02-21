@@ -165,7 +165,6 @@ public interface World {
         @Nullable Sequential<@Position Integer> search();
     }
 
-
     interface Command {
 
         void execute(Context context, Adder adder);

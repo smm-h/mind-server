@@ -6,7 +6,6 @@ import ir.smmh.util.impl.MapImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-
 public abstract class UserManagingTelegramBotImpl<U extends UserManagingTelegramBot.UserData> extends TelegramBotImpl implements UserManagingTelegramBot<U> {
 
     private final Map.SingleValue.Mutable<Long, U> users = new MapImpl.SingleValue.Mutable<>();
