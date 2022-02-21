@@ -5,7 +5,6 @@ import ir.smmh.apps.plotbot.MarkupWriter;
 import ir.smmh.apps.plotbot.Operator;
 import ir.smmh.apps.plotbot.UserData;
 import ir.smmh.lingu.Maker.MakingException;
-import ir.smmh.tgbot.impl.UserManagingTelegramBotImpl;
 import ir.smmh.util.Map;
 import ir.smmh.util.impl.MapImpl;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static ir.smmh.util.FunctionalUtil.with;
 
-public class UserDataImpl extends UserManagingTelegramBotImpl.UserData implements UserData {
+public class UserDataImpl extends ir.smmh.tgbot.impl.UserDataImpl implements UserData {
 
     private static final MarkupWriter markup = MarkupWriter.getInstance();
     private final Map.SingleValue.Mutable<String, Operator> userDefinedOps = new MapImpl.SingleValue.Mutable<>();

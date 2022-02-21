@@ -1,7 +1,7 @@
 package ir.smmh.tree.impl;
 
 import ir.smmh.nile.adj.Sequential;
-import ir.smmh.nile.adj.impl.BinarySequentialImpl;
+import ir.smmh.nile.adj.impl.DoubleSequence;
 import ir.smmh.nile.verbs.CanContain;
 import ir.smmh.tree.NodedTree;
 import ir.smmh.util.FunctionalUtil;
@@ -171,7 +171,7 @@ public class NodedBinaryTreeImpl<DataType> implements NodedTree.Binary.Mutable<D
 
         @Override
         public final @NotNull Sequential.Mutable<Node> getChildren() {
-            return new BinarySequentialImpl<>(leftChild, rightChild);
+            return new DoubleSequence<>(leftChild, rightChild);
         }
 
         @Override

@@ -1,10 +1,9 @@
 package ir.smmh.apps.plotbot;
 
-import ir.smmh.tgbot.UserManagingTelegramBot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface UserData extends UserManagingTelegramBot.UserData {
+public interface UserData extends ir.smmh.tgbot.UserData {
     @NotNull Iterable<String> getUserDefinedOperators();
 
     @Nullable Operator getUserDefinedOperator(String name);

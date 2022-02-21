@@ -5,9 +5,12 @@ import ir.smmh.apps.plotbot.impl.FigureMakerImpl;
 import ir.smmh.apps.plotbot.impl.UserDataImpl;
 import ir.smmh.apps.plotbot.impl.ViewportImpl;
 import ir.smmh.lingu.Maker;
+import ir.smmh.nile.adj.impl.SingleSequence;
 import ir.smmh.tgbot.TelegramBotTokens;
+import ir.smmh.tgbot.impl.InlineQueryResultCachedPhoto;
 import ir.smmh.tgbot.impl.UserManagingTelegramBotImpl;
 import ir.smmh.util.GraphicsUtil;
+import ir.smmh.util.RandomUtil;
 import org.jetbrains.annotations.NotNull;
 
 import javax.imageio.ImageIO;
@@ -47,7 +50,11 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<UserData> {
         });
         addHandler((Update.Handler.inline_query) inlineQuery -> {
             String text = inlineQuery.query();
-            inlineQuery.id();
+            inlineQuery.from().id();
+            String photo_file_id = null;
+            answerInlineQuery(inlineQuery.id(), new SingleSequence<>(new InlineQueryResultCachedPhoto(
+                    RandomUtil.generateRandomHex(16), photo_file_id, null, null, null
+            )));
         });
     }
 
@@ -62,7 +69,7 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<UserData> {
     @SuppressWarnings("SpellCheckingInspection")
     private void handle(String text, long chatId, int messageId) {
         System.out.println("@" + chatId + " #" + messageId + ": " + text);
-        ir.smmh.apps.plotbot.UserData ud = getUser(chatId);
+        UserData ud = getUser(chatId);
         text = text.trim().toLowerCase(Locale.ROOT);
         if (text.charAt(0) == '/') {
             String[] args = text.split(" +");

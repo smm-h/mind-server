@@ -16,8 +16,7 @@ import static ir.smmh.util.FunctionalUtil.with;
 
 @SuppressWarnings("unused")
 @ParametersAreNonnullByDefault
-public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone<Sequential<T>>, CanGetAtIndex<T>,
-        CanContain<T> {
+public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone<Sequential<T>>, CanGetAtIndex<T>, CanContain<T> {
 
     static <T> Sequential<T> of(List<? extends T> list) {
 

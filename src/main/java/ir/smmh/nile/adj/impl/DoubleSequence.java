@@ -4,16 +4,12 @@ import ir.smmh.nile.adj.Sequential;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 
-public class BinarySequentialImpl<T> extends Sequential.AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
+public class DoubleSequence<T> extends Sequential.AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
 
     private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
     private T first, second;
 
-    public BinarySequentialImpl() {
-        super();
-    }
-
-    public BinarySequentialImpl(T first, T second) {
+    public DoubleSequence(T first, T second) {
         super();
         this.first = first;
         this.second = second;
