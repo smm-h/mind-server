@@ -1,6 +1,7 @@
 package ir.smmh.tgbot;
 
 import ir.smmh.nile.adj.Sequential;
+import ir.smmh.tgbot.types.InlineQueryResult;
 import org.jetbrains.annotations.NotNull;
 
 public interface UserManagingTelegramBot<U extends UserData> extends TelegramBot {

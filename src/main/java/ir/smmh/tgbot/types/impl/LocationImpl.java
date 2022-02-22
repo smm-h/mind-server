@@ -1,6 +1,6 @@
-package ir.smmh.tgbot.impl;
+package ir.smmh.tgbot.types.impl;
 
-import ir.smmh.tgbot.TelegramBot.Location;
+import ir.smmh.tgbot.types.Location;
 import ir.smmh.util.JSONUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;

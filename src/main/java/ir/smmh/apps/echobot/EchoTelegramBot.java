@@ -1,6 +1,7 @@
 package ir.smmh.apps.echobot;
 
 import ir.smmh.tgbot.impl.TelegramBotImpl;
+import ir.smmh.tgbot.types.Update;
 
 public class EchoTelegramBot extends TelegramBotImpl {
     public EchoTelegramBot() {

@@ -29,7 +29,7 @@ public class CmdAPI implements API {
 
     public static void main(String[] args) {
         API api = new CmdAPI();
-//        new APIBotImpl(api).start("Bots.r5bot");
+//        new APIBotImpl(api).start(TOKEN);
         new ServerImpl(api).start(7000);
     }
 

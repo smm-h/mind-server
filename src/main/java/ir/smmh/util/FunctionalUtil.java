@@ -21,6 +21,11 @@ public interface FunctionalUtil {
         return self;
     }
 
+    @SuppressWarnings("unchecked")
+    static <T, C> C cast(T self) {
+        return (C) self;
+    }
+
     static <T> T with(@Nullable T it, @NotNull T defaultValue) {
         return it == null ? defaultValue : it;
     }

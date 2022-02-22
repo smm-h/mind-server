@@ -5,13 +5,16 @@ import ir.smmh.apps.plotbot.impl.FigureMakerImpl;
 import ir.smmh.apps.plotbot.impl.UserDataImpl;
 import ir.smmh.apps.plotbot.impl.ViewportImpl;
 import ir.smmh.lingu.Maker;
-import ir.smmh.nile.adj.impl.SingleSequence;
-import ir.smmh.tgbot.TelegramBotTokens;
-import ir.smmh.tgbot.impl.InlineQueryResultCachedPhoto;
 import ir.smmh.tgbot.impl.UserManagingTelegramBotImpl;
+import ir.smmh.tgbot.types.ChatMember;
+import ir.smmh.tgbot.types.Update;
+import ir.smmh.tgbot.types.impl.InlineQueryResultImpl;
 import ir.smmh.util.GraphicsUtil;
 import ir.smmh.util.RandomUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import sensitive.TelegramBotTokens;
+import sensitive.TelegramUniqueIds;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -38,6 +41,7 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<UserData> {
     private final Stroke gridStroke = new BasicStroke(1);
     private final Stroke axesStroke = new BasicStroke(1);
     public Viewport currentViewport = ViewportImpl.DEFAULT;
+    private long cacheChat = 0;
 
     private PlotByXBot() {
         super(MarkupWriter.getInstance().getParseMode());
@@ -49,12 +53,26 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<UserData> {
             handle(text, chatId, messageId);
         });
         addHandler((Update.Handler.inline_query) inlineQuery -> {
-            String text = inlineQuery.query();
-            inlineQuery.from().id();
-            String photo_file_id = null;
-            answerInlineQuery(inlineQuery.id(), new SingleSequence<>(new InlineQueryResultCachedPhoto(
-                    RandomUtil.generateRandomHex(16), photo_file_id, null, null, null
-            )));
+            if (cacheChat != 0) {
+                String text = inlineQuery.query();
+                String photo_file_id = null;
+                handle(text, cacheChat, null);
+                answerInlineQuery(inlineQuery.id(), new InlineQueryResultImpl.CachedPhoto(
+                        RandomUtil.generateRandomHex(16), photo_file_id, null, null, null
+                ));
+            }
+        });
+        addHandler((Update.Handler.my_chat_member) chatMemberUpdated -> {
+            if (chatMemberUpdated.from().id() == TelegramUniqueIds.ADMIN
+                    && chatMemberUpdated.chat().id() == TelegramUniqueIds.CACHE) {
+                ChatMember cm = chatMemberUpdated.new_chat_member();
+                if (cm instanceof ChatMember.Administrator) {
+                    ChatMember.Administrator admin = (ChatMember.Administrator) cm;
+                    if (admin.can_post_messages()) {
+                        cacheChat = TelegramUniqueIds.CACHE;
+                    }
+                }
+            }
         });
     }
 
@@ -67,8 +85,8 @@ public class PlotByXBot extends UserManagingTelegramBotImpl<UserData> {
     }
 
     @SuppressWarnings("SpellCheckingInspection")
-    private void handle(String text, long chatId, int messageId) {
-        System.out.println("@" + chatId + " #" + messageId + ": " + text);
+    private void handle(String text, long chatId, @Nullable Integer messageId) {
+        System.out.println("@" + chatId + " " + (messageId == null ? "INLINE" : "#" + messageId) + ": " + text);
         UserData ud = getUser(chatId);
         text = text.trim().toLowerCase(Locale.ROOT);
         if (text.charAt(0) == '/') {

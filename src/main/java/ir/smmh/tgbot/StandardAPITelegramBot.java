@@ -1,13 +1,14 @@
 package ir.smmh.tgbot;
 
 import ir.smmh.api.JSONAPIImpl;
+import ir.smmh.tgbot.types.Message;
 import org.json.JSONObject;
 
 public interface StandardAPITelegramBot extends APITelegramBot {
     @Override
     JSONAPIImpl getAPI();
 
-    default void handleViaStandardAPI(Update.Content.Message message) {
+    default void handleViaStandardAPI(Message message) {
         String text = message.text();
         if (text == null) return;
         long chatId = message.chat().id();

@@ -1,6 +1,6 @@
 package ir.smmh.tgbot.impl;
 
-import ir.smmh.tgbot.TelegramBot.User;
+import ir.smmh.tgbot.types.User;
 import ir.smmh.util.JSONUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

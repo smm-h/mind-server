@@ -51,8 +51,8 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Inje
         this.mind = mind;
         name = object.getString("name");
         intensions = JSONUtil.arrayOfStrings(object, "intensions", MutableCollectionImpl.of(new HashSet<>()));
-        properties = c.comprehend(JSONUtil.arrayOfObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
-        staticProperties = sc.comprehend(JSONUtil.arrayOfObjects(object, "static-properties", new HashSet<>(), o -> new StaticPropertyImpl(this, o)));
+        properties = c.comprehend(JSONUtil.arrayOfJSONObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
+        staticProperties = sc.comprehend(JSONUtil.arrayOfJSONObjects(object, "static-properties", new HashSet<>(), o -> new StaticPropertyImpl(this, o)));
         storage = StorageImpl.of(mind.getName());
         setup();
     }

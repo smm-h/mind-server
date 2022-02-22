@@ -1,5 +1,7 @@
 package ir.smmh.util;
 
+import ir.smmh.nile.adj.Sequential;
+import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.nile.verbs.CanAddTo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +18,7 @@ import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
 @ParametersAreNonnullByDefault
-@SuppressWarnings({"unused", "ThrowsRuntimeException", "ClassWithTooManyMethods"})
+@SuppressWarnings({"ThrowsRuntimeException", "ClassWithTooManyMethods"})
 public interface JSONUtil {
 
     static @NotNull JSONObject parse(String string) throws JSONException {
@@ -46,8 +48,13 @@ public interface JSONUtil {
         return canAddTo;
     }
 
-    static <T, C extends CanAddTo<T>> @NotNull C arrayOfObjects(JSONObject object, String key, C canAddTo, Function<JSONObject, T> convertor) throws JSONException {
+    static <T, C extends CanAddTo<T>> @NotNull C arrayOfJSONObjects(JSONObject object, String key, C canAddTo, Function<JSONObject, T> convertor) throws JSONException {
         addFromJSONObjects(canAddTo::add, object, key, convertor);
+        return canAddTo;
+    }
+
+    static <T, C extends CanAddTo<T>> @NotNull C arrayOfObjects(JSONObject object, String key, C canAddTo, Function<Object, T> convertor) throws JSONException {
+        addFromObjects(canAddTo::add, object, key, convertor);
         return canAddTo;
     }
 
@@ -74,8 +81,13 @@ public interface JSONUtil {
         return destination;
     }
 
-    static <T, C extends Collection<T>> @NotNull C arrayOfObjects(JSONObject object, String key, C destination, Function<JSONObject, T> convertor) throws JSONException {
+    static <T, C extends Collection<T>> @NotNull C arrayOfJSONObjects(JSONObject object, String key, C destination, Function<JSONObject, T> convertor) throws JSONException {
         addFromJSONObjects(destination::add, object, key, convertor);
+        return destination;
+    }
+
+    static <T, C extends Collection<T>> @NotNull C arrayOfObjects(JSONObject object, String key, C destination, Function<Object, T> convertor) throws JSONException {
+        addFromObjects(destination::add, object, key, convertor);
         return destination;
     }
 
@@ -108,6 +120,14 @@ public interface JSONUtil {
             JSONArray array = object.getJSONArray(key);
             for (int i = 0; i < array.length(); i++)
                 add.accept(convertor.apply(array.getJSONObject(i)));
+        }
+    }
+
+    static <T> void addFromObjects(Consumer<? super T> add, JSONObject object, String key, Function<? super Object, T> convertor) throws JSONException {
+        if (object.has(key)) {
+            JSONArray array = object.getJSONArray(key);
+            for (int i = 0; i < array.length(); i++)
+                add.accept(convertor.apply(array.get(i)));
         }
     }
 
@@ -195,6 +215,10 @@ public interface JSONUtil {
         @Nullable JSONObject getNullableJSONObject(String key);
 
         @Nullable String getNullableString(String key);
+
+        @NotNull <T> Sequential<T> getSequential(String key);
+
+        @Nullable <T> Sequential<T> getNullableSequential(String key);
     }
 
     class ReadOnlyJSONImpl implements ReadOnlyJSON {
@@ -257,6 +281,16 @@ public interface JSONUtil {
         @Override
         public @Nullable String getNullableString(String key) {
             return wrapped.optString(key, null);
+        }
+
+        @Override
+        public @NotNull <T> Sequential<T> getSequential(String key) {
+            return arrayOfJSONObjects(wrapped, key, new SequentialImpl<>(), FunctionalUtil::cast);
+        }
+
+        @Override
+        public @Nullable <T> Sequential<T> getNullableSequential(String key) {
+            return has(key) ? getSequential(key) : null;
         }
     }
 }

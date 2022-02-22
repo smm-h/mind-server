@@ -1,6 +1,6 @@
 package ir.smmh.mind;
 
-import ir.smmh.tgbot.TelegramBotTokens;
+import sensitive.TelegramBotTokens;
 
 class OntologueMain {
     public static void main(String[] args) {

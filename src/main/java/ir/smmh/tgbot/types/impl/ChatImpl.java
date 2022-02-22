@@ -1,6 +1,6 @@
-package ir.smmh.tgbot.impl;
+package ir.smmh.tgbot.types.impl;
 
-import ir.smmh.tgbot.TelegramBot.Chat;
+import ir.smmh.tgbot.types.Chat;
 import ir.smmh.util.JSONUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

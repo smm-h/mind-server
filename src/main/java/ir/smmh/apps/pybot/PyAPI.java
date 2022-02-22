@@ -1,7 +1,7 @@
 package ir.smmh.apps.pybot;
 
 import ir.smmh.api.API;
-import ir.smmh.tgbot.impl.APITelegramBotImpl;
+import ir.smmh.net.server.impl.ServerImpl;
 import org.jetbrains.annotations.NotNull;
 import org.python.util.PythonInterpreter;
 
@@ -12,8 +12,8 @@ public class PyAPI implements API {
 
     public static void main(String[] args) {
         API api = new PyAPI();
-        new APITelegramBotImpl(api, null).start("Bots.r5bot");
-//        new ServerImpl(api).start(7000);
+//        new APITelegramBotImpl(api, null).start(TOKEN);
+        new ServerImpl(api).start(7000);
     }
 
     @Override

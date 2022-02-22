@@ -44,7 +44,7 @@ public final class MutableMindImpl implements Mind.Mutable, Mutable.WithListener
     private MutableMindImpl(JSONObject object) throws JSONException {
         super();
         name = object.getString("name");
-        for (MutableIdeaImpl idea : JSONUtil.arrayOfObjects(object, "ideas", new HashSet<>(8), o -> {
+        for (MutableIdeaImpl idea : JSONUtil.arrayOfJSONObjects(object, "ideas", new HashSet<>(8), o -> {
             try {
                 return new MutableIdeaImpl(this, o);
             } catch (JSONException e) {
