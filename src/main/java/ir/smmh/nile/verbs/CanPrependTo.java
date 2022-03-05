@@ -7,4 +7,9 @@ public interface CanPrependTo<T> {
     }
 
     void prepend(T toPrepend);
+
+    default void prependAll(Iterable<T> toPrepend) {
+        for (T i : toPrepend)
+            prepend(i);
+    }
 }

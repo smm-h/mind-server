@@ -12,4 +12,9 @@ public interface CanAppendTo<T> extends CanAddTo<T> {
     default void add(T toAdd) {
         append(toAdd);
     }
+
+    default void appendAll(Iterable<T> toAppend) {
+        for (T i : toAppend)
+            append(i);
+    }
 }

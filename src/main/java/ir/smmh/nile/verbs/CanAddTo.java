@@ -9,4 +9,9 @@ public interface CanAddTo<T> extends Multitude.VariableSize {
     }
 
     void add(T toAdd);
+
+    default void addAll(Iterable<T> toAdd) {
+        for (T i : toAdd)
+            add(i);
+    }
 }
