@@ -4,9 +4,8 @@ import ir.smmh.nile.adj.Sequential;
 import ir.smmh.util.impl.MutableImpl;
 import org.jetbrains.annotations.NotNull;
 
-public class SingleSequence<T> extends Sequential.AbstractSequential<T> implements Sequential.Mutable<T>, ir.smmh.util.Mutable.Injected {
+public class SingleSequence<T> extends Sequential.AbstractMutableSequential<T> {
 
-    private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
     private T singleton;
 
     public SingleSequence(T singleton) {
@@ -31,10 +30,5 @@ public class SingleSequence<T> extends Sequential.AbstractSequential<T> implemen
     @Override
     public final int getSize() {
         return 1;
-    }
-
-    @Override
-    public final @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
-        return injectedMutable;
     }
 }

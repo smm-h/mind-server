@@ -8,6 +8,11 @@ import java.util.List;
 
 public class SequentialImpl<T> extends Sequential.AbstractMutableSequential<T> implements Sequential.Mutable.VariableSize<T> {
 
+    @Override
+    public Sequential.Mutable.VariableSize<T> clone(boolean deepIfPossible) {
+        return new SequentialImpl<>(asList());
+    }
+
     private final List<T> list;
 
     public SequentialImpl(int initialCapacity) {
@@ -70,6 +75,13 @@ public class SequentialImpl<T> extends Sequential.AbstractMutableSequential<T> i
     public void clear() {
         preMutate();
         list.clear();
+        postMutate();
+    }
+
+    @Override
+    public void prepend(T toPrepend) {
+        preMutate();
+        list.add(0, toPrepend);
         postMutate();
     }
 }

@@ -388,6 +388,10 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
     T getAtIndex(int index);
 
     interface Mutable<T> extends Sequential<T>, CanSwapAtIndices<T> {
+
+        @Override
+        Sequential.Mutable<T> clone(boolean deepIfPossible);
+
         static Sequential.Mutable<Character> of(String string) {
             return of(string.toCharArray());
         }
@@ -632,7 +636,10 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
             return () -> new ReverseIterator.Mutable<>(this);
         }
 
-        interface VariableSize<T> extends Mutable<T>, CanAppendTo<T>, CanRemoveIndexFrom<T>, CanClear {
+        interface VariableSize<T> extends Mutable<T>, CanPrependTo<T>, CanAppendTo<T>, CanRemoveIndexFrom<T>, CanClear {
+
+            @Override
+            Sequential.Mutable.VariableSize<T> clone(boolean deepIfPossible);
 
             static <T> Sequential.Mutable.VariableSize<T> of(List<T> list) {
                 return new SequentialImpl<>(list);
@@ -847,6 +854,11 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
         @Override
         public @NotNull ir.smmh.util.Mutable.WithListeners getInjectedMutable() {
             return injectedMutable;
+        }
+
+        @Override
+        public Sequential.Mutable<T> clone(boolean deepIfPossible) {
+            return new SequentialImpl<>(asList());
         }
     }
 
