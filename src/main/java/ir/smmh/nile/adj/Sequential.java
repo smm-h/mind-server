@@ -387,7 +387,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
     @Override
     T getAtIndex(int index);
 
-    interface Mutable<T> extends Sequential<T>, CanSwapAtIndices<T> {
+    interface Mutable<T> extends Sequential<T>, CanSwapAtIndices<T>, ir.smmh.util.Mutable.WithListeners {
 
         @Override
         Sequential.Mutable<T> clone(boolean deepIfPossible);
