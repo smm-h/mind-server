@@ -1,6 +1,7 @@
 package ir.smmh.util;
 
 import ir.smmh.Backward;
+import ir.smmh.nile.adj.Sequential;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -48,11 +49,6 @@ public interface StringUtil {
         return Backward.repeat(Character.toString(ch), count);
     }
 
-    static byte valueOfSymbol(String s) {
-        assert s.length() == 1;
-        return valueOfSymbol(s.charAt(0));
-    }
-
     static byte valueOfSymbol(char c, byte radix) {
         byte v = valueOfSymbol(c);
         if (v < radix)
@@ -97,15 +93,14 @@ public interface StringUtil {
      * {@code 'B'}, ... {@code 'X'}, {@code 'Y'}, {@code 'Z'}} as <i>char</i>.
      */
     static char symbolOfValue(byte value) {
-        assert value >= 0 && value < RADIX_MAX;
-
-        // handles digits
         if (value < 10)
+            // handles digits
             return (char) (value + 48);
-
+        else if (value < RADIX_MAX)
             // handles letters
-        else
             return (char) (value + 55);
+        else
+            throw new IllegalArgumentException("value: " + value + " does not have a symbol");
     }
 
     static String stringOfValue(int value) {
@@ -176,7 +171,7 @@ public interface StringUtil {
      * </table>
      */
     @SuppressWarnings("SpellCheckingInspection")
-    static Number valueOfString(@NotNull String string, byte radix) {
+    static Number valueOfString(String string, byte radix) {
 
         if (string.isEmpty())
             throw new IllegalArgumentException("empty string has no numeric value");
@@ -214,28 +209,25 @@ public interface StringUtil {
         }
     }
 
+    /**
+     * Takes an input string, applies some filling to it, and returns it
+     *
+     * @param input     The input string
+     * @param filler    The string by which filling is to be done
+     * @param leftwards The direction in which the filling is to be done
+     * @param length    Length of the final string
+     * @param cut       Pass true if keeping the output length is more important
+     *                  than displaying the entire input
+     * @return The output string
+     */
     static String fill(String input, String filler, boolean leftwards, int length, boolean cut) {
         int n = input.length();
         if (n > length) {
-            if (cut) {
-                if (leftwards) {
-                    return input.substring(n - length);
-                } else {
-                    return input.substring(0, length);
-                }
-            } else {
-                return input;
-            }
+            return cut ? (leftwards ? input.substring(n - length) : input.substring(0, length)) : input;
         } else {
             String addition = Backward.repeat(filler, (int) Math.ceil((length - n) / (float) filler.length()));
-            if (addition.length() > length) {
-                addition = addition.substring(0, length);
-            }
-            if (leftwards) {
-                return addition + input;
-            } else {
-                return input + addition;
-            }
+            if (addition.length() > length) addition = addition.substring(0, length);
+            return leftwards ? addition + input : input + addition;
         }
     }
 
@@ -243,7 +235,14 @@ public interface StringUtil {
         return "U+" + fill(stringOfValue(codepoint, RADIX_HEX), "0", true, 4, false);
     }
 
-    static int count(@NotNull String string, char c) {
+    static boolean contains(String string, char c) {
+        for (int i = 0; i < string.length(); i++)
+            if (string.charAt(i) == c)
+                return true;
+        return false;
+    }
+
+    static int count(String string, char c) {
         int count = 0;
         for (int i = 0; i < string.length(); i++)
             if (string.charAt(i) == c)
@@ -251,7 +250,24 @@ public interface StringUtil {
         return count;
     }
 
-    static @NotNull String[] split(@NotNull String string, char splitter) {
+    static @NotNull Sequential<String> splitByLength(String string, int limit) {
+        int l = string.length();
+        int n = l / limit + (l % limit > 0 ? 1 : 0);
+        String[] array = new String[n];
+
+        for (int i = 0; i < n; i += 1) {
+            int a = i * limit;
+            if (a > l - limit) {
+                array[i] = string.substring(a);
+            } else {
+                array[i] = string.substring(a, a + limit);
+            }
+        }
+
+        return Sequential.of(array);
+    }
+
+    static @NotNull Sequential<String> splitByCharacter(String string, char splitter) {
 
         int n = count(string, splitter) + 1;
 
@@ -270,14 +286,24 @@ public interface StringUtil {
             a = b + 1;
         }
 
-        return array;
+        return Sequential.of(array);
     }
 
     static @NotNull Set<Character> characterSet(String chars) {
         Set<Character> set = new HashSet<>();
-        char[] array = chars.toCharArray();
-        for (char c : array)
+        for (char c : chars.toCharArray())
             set.add(c);
         return set;
+    }
+
+    static @NotNull String replaceCharacter(String string, char c, char replaceWith) {
+        StringBuilder b = new StringBuilder(string);
+        int n = b.length();
+        for (int i = 0; i < n; i++) {
+            if (b.charAt(i) == c) {
+                b.setCharAt(i, replaceWith);
+            }
+        }
+        return b.toString();
     }
 }

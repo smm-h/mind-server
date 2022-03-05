@@ -85,6 +85,28 @@ public interface FunctionalUtil {
         return size == null ? defaultCapacity : size;
     }
 
+    static int capacityNeededForIterateIfNull(Iterable<?> iterable) {
+        Integer size = capacityNeededFor(iterable);
+        if (size == null) {
+            int count = 0;
+            for (Object i : iterable) {
+                count++;
+            }
+            return count;
+        } else {
+            return size;
+        }
+    }
+
+    static boolean isEmpty(Iterable<?> iterable) {
+        Integer size = capacityNeededFor(iterable);
+        if (size == null) {
+            return !iterable.iterator().hasNext();
+        } else {
+            return size == 0;
+        }
+    }
+
     static <T, R> @NotNull Iterable<R> convert(Iterable<? extends T> input, Function<T, R> convertor) {
         List<R> list = new ArrayList<>(capacityNeededFor(input, 10));
         for (T i : input)

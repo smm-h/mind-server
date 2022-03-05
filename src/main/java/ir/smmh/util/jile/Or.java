@@ -14,6 +14,10 @@ public interface Or<This, That> {
 
     boolean isThis();
 
+    default boolean isThat() {
+        return !isThis();
+    }
+
     This getThis();
 
     That getThat();
