@@ -6,12 +6,10 @@ import ir.smmh.util.impl.FormImpl;
 import ir.smmh.util.jile.Or;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 
 /**
  * A form is a plain text document with spaces to fill out or leave blank. It is
@@ -23,7 +21,7 @@ import java.util.Collections;
  */
 public interface Form extends CanClone<Form>, Mutable {
 
-    static @NotNull Form empty() {
+    static @NotNull Form blank() {
         return new FormImpl();
     }
 
@@ -68,16 +66,16 @@ public interface Form extends CanClone<Form>, Mutable {
     @NotNull Form prepend(char c);
 
     @Contract("_->this")
-    @NotNull Form leaveBlank(BlankSpace blankSpace);
+    default @NotNull Form leaveBlank(BlankSpace blankSpace) {
+        fillOut(blankSpace, Sequential.empty());
+        return this;
+    }
 
     @Contract("_, _->this")
-    @NotNull Form fillOut(BlankSpace.SingleValue blankSpace, String value);
+    @NotNull Form fillOut(BlankSpace blankSpace, Sequential<String> values);
 
     @Contract("_, _->this")
-    @NotNull Form fillOut(BlankSpace.MultiValue blankSpace, Iterable<String> values);
-
-    @Contract("_, _->this")
-    default @NotNull Form fillOut(BlankSpace.MultiValue blankSpace, String... values) {
+    default @NotNull Form fillOut(BlankSpace blankSpace, String... values) {
         fillOut(blankSpace, Sequential.of(values));
         return this;
     }
@@ -89,58 +87,60 @@ public interface Form extends CanClone<Form>, Mutable {
 
     interface BlankSpace {
 
-        boolean canBeLeftBlank();
+        boolean isInexhaustible();
 
-        @NotNull String leaveBlank();
+        BlankSpace ITSELF = (Form.BlankSpace.ExactlyOne) Sequential::getSingleton;
 
-        interface MultiValue extends BlankSpace {
-            @NotNull String enterValues(Iterable<String> values);
+        boolean acceptsLength(int length);
 
-            @Override
-            default @NotNull String leaveBlank() {
-                return enterValues(Collections.emptySet());
-            }
+        @NotNull String enterValues(Sequential<String> values);
 
-            @FunctionalInterface
-            interface CanBeLeftBlank extends MultiValue {
-                @Override
-                default boolean canBeLeftBlank() {
-                    return true;
-                }
-            }
-
-            @FunctionalInterface
-            interface CanNotBeLeftBlank extends MultiValue {
-                @Override
-                default boolean canBeLeftBlank() {
-                    return true;
-                }
-            }
+        default @NotNull String leaveBlank() {
+            return enterValues(Sequential.empty());
         }
 
-        interface SingleValue extends BlankSpace {
-            @NotNull String enterValue(@Nullable String value);
+        @FunctionalInterface
+        interface ZeroOrMore extends BlankSpace {
+            @Override
+            default boolean acceptsLength(int length) {
+                return length >= 0;
+            }
 
             @Override
-            default @NotNull String leaveBlank() {
-                return enterValue(null);
+            default boolean isInexhaustible() {return true;}
+        }
+
+        @FunctionalInterface
+        interface OneOrMore extends BlankSpace {
+            @Override
+            default boolean acceptsLength(int length) {
+                return length >= 1;
             }
 
-            @FunctionalInterface
-            interface CanBeLeftBlank extends SingleValue {
-                @Override
-                default boolean canBeLeftBlank() {
-                    return true;
-                }
+            @Override
+            default boolean isInexhaustible() {return true;}
+        }
+
+        @FunctionalInterface
+        interface ZeroOrOne extends BlankSpace {
+            @Override
+            default boolean acceptsLength(int length) {
+                return length == 0 || length == 1;
             }
 
-            @FunctionalInterface
-            interface CanNotBeLeftBlank extends SingleValue {
-                @Override
-                default boolean canBeLeftBlank() {
-                    return true;
-                }
+            @Override
+            default boolean isInexhaustible() {return false;}
+        }
+
+        @FunctionalInterface
+        interface ExactlyOne extends BlankSpace {
+            @Override
+            default boolean acceptsLength(int length) {
+                return length == 1;
             }
+
+            @Override
+            default boolean isInexhaustible() {return false;}
         }
     }
 }

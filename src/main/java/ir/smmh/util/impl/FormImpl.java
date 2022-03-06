@@ -2,26 +2,27 @@ package ir.smmh.util.impl;
 
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.SequentialImpl;
-import ir.smmh.util.FunctionalUtil;
+import ir.smmh.util.Form;
 import ir.smmh.util.Map;
 import ir.smmh.util.Mutable;
-import ir.smmh.util.Form;
 import ir.smmh.util.jile.Or;
 import ir.smmh.util.jile.impl.FatOr;
 import org.jetbrains.annotations.NotNull;
 
 public class FormImpl implements Form, Mutable.WithListeners.Injected {
     private final Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence;
+    private final Map.MultiValue.Mutable<BlankSpace, String> map;
     private transient String string = null;
     private transient int size = -1;
     private transient boolean isFilledOut = false;
 
     public FormImpl() {
-        this(new SequentialImpl<>());
+        this(new SequentialImpl<>(), new MapImpl.MultiValue.Mutable<>());
     }
 
-    private FormImpl(Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence) {
+    private FormImpl(Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence, Map.MultiValue.Mutable<BlankSpace, String> map) {
         this.sequence = sequence;
+        this.map = map;
         getOnCleanListeners().add(() -> {
             isFilledOut = false;
             for (var i : sequence) {
@@ -51,13 +52,8 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     }
 
     @Override
-    public boolean isFilledOut() {
-        return clean() && isFilledOut;
-    }
-
-    @Override
     public Form clone(boolean deepIfPossible) {
-        return new FormImpl(sequence.clone(false));
+        return new FormImpl(sequence.clone(false), map.clone(false));
     }
 
     @Override
@@ -114,53 +110,15 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     }
 
     @Override
-    public @NotNull Form leaveBlank(BlankSpace blankSpace) {
-        fillRaw(blankSpace, blankSpace.leaveBlank());
+    public @NotNull Form fillOut(BlankSpace blankSpace, Sequential<String> values) {
+        map.addAllAtPlace(blankSpace, values);
         return this;
-    }
-
-    @Override
-    public @NotNull Form fillOut(BlankSpace.SingleValue blankSpace, String value) {
-        fillRaw(blankSpace, blankSpace.enterValue(value));
-        return this;
-    }
-
-    @Override
-    public @NotNull Form fillOut(BlankSpace.MultiValue blankSpace, Iterable<String> values) {
-        fillRaw(blankSpace, blankSpace.enterValues(values));
-        return this;
-    }
-
-    private void fillRaw(BlankSpace blankSpace, String rawValue) {
-        var k = make(blankSpace);
-        var v = make(rawValue);
-        int n = sequence.getSize();
-        for (int i = 0; i < n; i++) {
-            if (sequence.getAtIndex(i).equalTo(k)) {
-                sequence.setAtIndex(i, v);
-            }
-        }
     }
 
     @Override
     public @NotNull Form fillOut(Map.MultiValue<BlankSpace, String> map) {
-        for (BlankSpace k : map.overKeys()) {
-            Iterable<String> v = map.getAtPlace(k);
-            int n = FunctionalUtil.capacityNeededForIterateIfNull(v);
-            if (k instanceof BlankSpace.SingleValue) {
-                if (n == 0) {
-                    leaveBlank(k);
-                } else if (n == 1) {
-                    fillOut((BlankSpace.SingleValue) k, v.iterator().next());
-                } else {
-                    throw new UnsupportedOperationException("cannot fill out single value blank space with iterable");
-                }
-            } else if (k instanceof BlankSpace.MultiValue) {
-                fillOut((BlankSpace.MultiValue) k, v);
-            } else {
-                throw new UnsupportedOperationException("blank space must be either single-value or multi-value");
-            }
-        }
+        for (BlankSpace k : map.overKeys())
+            fillOut(k, map.getAtPlace(k));
         return this;
     }
 
@@ -170,8 +128,13 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     }
 
     @Override
+    public boolean isFilledOut() {
+        return clean() && isFilledOut;
+    }
+
+    @Override
     public String toString() {
-        return clean() ? string : null;
+        return isFilledOut() ? string : null;
     }
 
     @Override
