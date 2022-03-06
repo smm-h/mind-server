@@ -1,6 +1,7 @@
 package ir.smmh.nile.verbs;
 
 import ir.smmh.nile.adj.Indexible;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.IntFunction;
 
@@ -25,7 +26,7 @@ public interface CanGetAtIndex<T> extends Indexible, IntFunction<T> {
         return getAtIndexWrapAround(-1);
     }
 
-    default T getSingleton() {
+    default @NotNull T getSingleton() {
         assertSingleton();
         return getAtIndex(0);
     }

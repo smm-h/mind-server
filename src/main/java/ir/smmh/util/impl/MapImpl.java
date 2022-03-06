@@ -27,7 +27,15 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
 
     public static class SingleValue<K, V> extends MapImpl<K, V> implements Map.SingleValue<K, V> {
 
-        protected final java.util.Map<K, V> map = new HashMap<>();
+        protected final java.util.Map<K, V> map;
+
+        public SingleValue() {
+            this(new HashMap<>());
+        }
+
+        private SingleValue(java.util.Map<K, V> map) {
+            this.map = map;
+        }
 
         @Override
         public final int getSize() {
@@ -64,9 +72,27 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
             return map.values();
         }
 
+        @Override
+        public Map.SingleValue<K, V> clone(boolean deepIfPossible) {
+            return new MapImpl.SingleValue<>(new HashMap<>(map));
+        }
+
+        @Override
+        public Map.SingleValue<K, V> specificThis() {
+            return this;
+        }
+
         public static class Mutable<K, V> extends MapImpl.SingleValue<K, V> implements Map.SingleValue.Mutable<K, V>, ir.smmh.util.Mutable.Injected {
 
             private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
+
+            public Mutable() {
+                super();
+            }
+
+            private Mutable(java.util.Map<K, V> map) {
+                super(map);
+            }
 
             @Override
             public final void setAtPlace(K place, V toSet) {
@@ -87,11 +113,24 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
             public void removeAllPlaces() {
                 map.clear();
             }
+
+            @Override
+            public Map.SingleValue.Mutable<K, V> clone(boolean deepIfPossible) {
+                return new MapImpl.SingleValue.Mutable<>(new HashMap<>(map));
+            }
         }
     }
 
     public static class MultiValue<K, V> extends MapImpl<K, V> implements Map.MultiValue<K, V> {
-        protected final java.util.Map<K, Sequential.Mutable.VariableSize<V>> map = new HashMap<>();
+        protected final java.util.Map<K, Sequential.Mutable.VariableSize<V>> map;
+
+        public MultiValue() {
+            this(new HashMap<>());
+        }
+
+        private MultiValue(java.util.Map<K, Sequential.Mutable.VariableSize<V>> map) {
+            this.map = map;
+        }
 
         @Override
         public boolean contains(V toCheck) {
@@ -128,8 +167,26 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
             return map.size();
         }
 
+        @Override
+        public Map.MultiValue<K, V> clone(boolean deepIfPossible) {
+            return new MapImpl.MultiValue<>(new HashMap<>(map));
+        }
+
+        @Override
+        public Map.MultiValue<K, V> specificThis() {
+            return this;
+        }
+
         public static class Mutable<K, V> extends MapImpl.MultiValue<K, V> implements Map.MultiValue.Mutable<K, V>, ir.smmh.util.Mutable.Injected {
             private final ir.smmh.util.Mutable.WithListeners injectedMutable = MutableImpl.blank();
+
+            public Mutable() {
+                super();
+            }
+
+            private Mutable(java.util.Map<K, Sequential.Mutable.VariableSize<V>> map) {
+                super(map);
+            }
 
             @Override
             public final void setAtPlace(K place, V toSet) {
@@ -150,6 +207,11 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
             @Override
             public void removeAllPlaces() {
                 map.clear();
+            }
+
+            @Override
+            public Map.MultiValue.Mutable<K, V> clone(boolean deepIfPossible) {
+                return new MapImpl.MultiValue.Mutable<>(new HashMap<>(map));
             }
         }
     }

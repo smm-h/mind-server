@@ -15,7 +15,7 @@ public interface Map<K, V> extends CanContainPlace<K>, CanContain<V> {
         void removeAllPlaces();
     }
 
-    interface SingleValue<K, V> extends Map<K, V>, CanGetAtPlace<K, V> {
+    interface SingleValue<K, V> extends Map<K, V>, CanGetAtPlace<K, V>, CanClone<SingleValue<K, V>> {
 
         @Override
         default boolean containsPlace(K key) {
@@ -25,10 +25,12 @@ public interface Map<K, V> extends CanContainPlace<K>, CanContain<V> {
         @NotNull Iterable<V> overValues();
 
         interface Mutable<K, V> extends Map.Mutable<K, V>, SingleValue<K, V> {
+            @Override
+            SingleValue.Mutable<K, V> clone(boolean deepIfPossible);
         }
     }
 
-    interface MultiValue<K, V> extends Map<K, V>, CanGetAtPlace<K, Sequential<V>> {
+    interface MultiValue<K, V> extends Map<K, V>, CanGetAtPlace<K, Sequential<V>>, CanClone<MultiValue<K, V>> {
 
         @Override
         @NotNull Sequential<V> getAtPlace(K key);
@@ -43,7 +45,14 @@ public interface Map<K, V> extends CanContainPlace<K>, CanContain<V> {
         }
 
         interface Mutable<K, V> extends Map.Mutable<K, V>, MultiValue<K, V> {
+            @Override
+            MultiValue.Mutable<K, V> clone(boolean deepIfPossible);
 
+            default void addAllAtPlace(K place, Iterable<V> toSet) {
+                for (V value : toSet) {
+                    setAtPlace(place, value);
+                }
+            }
         }
     }
 }
