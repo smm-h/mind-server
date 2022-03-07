@@ -11,10 +11,4 @@ public interface CanClone<T> extends FunctionalUtil.RecursivelySpecific<T> {
     }
 
     T clone(boolean deepIfPossible);
-
-    static <T extends CanClone<?> & Mutable.WithListeners> T cloneLazily(T canCloneLazily, boolean deepIfPossible, Consumer<T> setter) {
-        setter.accept(canCloneLazily);
-        canCloneLazily.getOnPreMutateListeners().addDisposable(() -> setter.accept((T) canCloneLazily.clone(deepIfPossible)));
-        return canCloneLazily;
-    }
 }
