@@ -33,8 +33,8 @@ public interface Form extends CanClone<Form>, Mutable {
      * @throws UnsupportedOperationException If filling out the form fails
      * @throws IOException                   If writing to file fails
      */
-    static void fillAndWrite(Form form, Map.MultiValue<BlankSpace, String> map, Path destination) throws IOException {
-        Form clone = form.clone(false);
+    default void generate(Map.MultiValue<BlankSpace, String> map, Path destination) throws IOException {
+        Form clone = clone(false);
         clone.fillOut(map);
         Files.writeString(destination, clone.toString());
     }

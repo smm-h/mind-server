@@ -2,45 +2,52 @@ package ir.smmh.util.impl;
 
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.SequentialImpl;
+import ir.smmh.nile.verbs.CanClone;
 import ir.smmh.util.Form;
 import ir.smmh.util.Map;
 import ir.smmh.util.Mutable;
 import ir.smmh.util.jile.Or;
 import ir.smmh.util.jile.impl.FatOr;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FormImpl implements Form, Mutable.WithListeners.Injected {
-    private final Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence;
-    private final Map.MultiValue.Mutable<BlankSpace, String> map;
+    private final @NotNull Map.MultiValue.Mutable<BlankSpace, String> map;
+    private @NotNull Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence;
     private transient String string = null;
     private transient int size = -1;
     private transient boolean isFilledOut = false;
 
     public FormImpl() {
-        this(new SequentialImpl<>(), new MapImpl.MultiValue.Mutable<>());
+        this(null, null);
     }
 
-    private FormImpl(Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence, Map.MultiValue.Mutable<BlankSpace, String> map) {
-        this.sequence = sequence;
-        this.map = map;
+    private FormImpl(@Nullable Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence, @Nullable Map.MultiValue.Mutable<BlankSpace, String> map) {
+        this.sequence = sequence == null ? new SequentialImpl<>() : CanClone.cloneLazily(sequence, false, t -> this.sequence = t);
+        this.map = map == null ? new MapImpl.MultiValue.Mutable<>() : map.clone(false);
         getOnCleanListeners().add(() -> {
             isFilledOut = false;
-            for (var i : sequence) {
+            for (var i : this.sequence) {
                 if (i.isThat()) {
                     return;
                 }
             }
             isFilledOut = true;
             size = 0;
-            for (var i : sequence) {
+            for (var i : this.sequence) {
                 size += i.getThis().length();
             }
             StringBuilder b = new StringBuilder(size);
-            for (var i : sequence) {
+            for (var i : this.sequence) {
                 b.append(i.getThis());
             }
             string = b.toString();
         });
+    }
+
+    @Override
+    public Form clone(boolean deepIfPossible) {
+        return new FormImpl(sequence, map);
     }
 
     private static Or<String, BlankSpace> make(String string) {
@@ -49,11 +56,6 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
 
     private static Or<String, BlankSpace> make(BlankSpace blankSpace) {
         return FatOr.makeThat(blankSpace);
-    }
-
-    @Override
-    public Form clone(boolean deepIfPossible) {
-        return new FormImpl(sequence.clone(false), map.clone(false));
     }
 
     @Override
