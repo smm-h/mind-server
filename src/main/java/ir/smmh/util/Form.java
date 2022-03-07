@@ -6,38 +6,44 @@ import ir.smmh.util.impl.FormImpl;
 import ir.smmh.util.jile.Or;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
- * A form is a plain text document with spaces to fill out or leave blank. It is
- * useful for generating end-texts from patterns. Some spaces may accept more
+ * A form is a plain text document with blank spaces to fill out or leave blank.
+ * It is used for generating strings from patterns. Some spaces may accept more
  * than one value. Start with StringForm.empty() and chain methods to build your
- * form, and finish with toString(). Be advised that all filling out method
- * mutate the form meaning you will not be able to use it more than once.
- * To avoid this, use fillAndWrite() which does not mutate the form.
+ * form, and finish with generate(). The filling out methods do not mutate the
+ * form, meaning you can use it more than once.
  */
-public interface Form extends CanClone<Form>, Mutable {
-
-    static @NotNull Form blank() {
-        return new FormImpl();
+public interface Form extends Mutable, CanClone<Form> {
+    static @NotNull Form emptyForm(String title) {
+        return new FormImpl(title);
     }
+
+    @NotNull Form copy(String title);
 
     /**
      * This method helps you use a pre-made string form, fill it, and write its
      * contents to a file. However, it does not actually mutate the source form
      * like all other fill methods.
      *
-     * @throws UnsupportedOperationException If filling out the form fails
-     * @throws IOException                   If writing to file fails
+     * @throws IncompleteFormException If filling out the form fails
+     * @throws IOException             If writing to file fails
      */
-    default void generate(Map.MultiValue<BlankSpace, String> map, Path destination) throws IOException {
-        Form clone = clone(false);
-        clone.fillOut(map);
-        Files.writeString(destination, clone.toString());
+    default void generateToFile(Path destination) throws IncompleteFormException, IOException {
+        Files.writeString(destination, generate());
     }
+
+    @NotNull String generate() throws IncompleteFormException;
+
+    @NotNull String getTitle();
+
+    @Contract("_, _->this")
+    @NotNull Form enter(BlankSpace blankSpace, String entry);
 
     boolean isFilledOut();
 
@@ -65,82 +71,113 @@ public interface Form extends CanClone<Form>, Mutable {
     @Contract("_->this")
     @NotNull Form prepend(char c);
 
-    @Contract("_->this")
-    default @NotNull Form leaveBlank(BlankSpace blankSpace) {
-        fillOut(blankSpace, Sequential.empty());
-        return this;
-    }
+    @Contract("_, _->this")
+    @NotNull Form enter(BlankSpace blankSpace, Sequential<String> entries);
 
     @Contract("_, _->this")
-    @NotNull Form fillOut(BlankSpace blankSpace, Sequential<String> values);
-
-    @Contract("_, _->this")
-    default @NotNull Form fillOut(BlankSpace blankSpace, String... values) {
-        fillOut(blankSpace, Sequential.of(values));
+    default @NotNull Form enter(BlankSpace blankSpace, String... entries) {
+        enter(blankSpace, Sequential.of(entries));
         return this;
     }
 
     @Contract("_->this")
-    @NotNull Form fillOut(Map.MultiValue<BlankSpace, String> map);
+    @NotNull Form enter(Map.MultiValue<BlankSpace, String> mappedEntries);
 
     @NotNull Sequential<Or<String, BlankSpace>> getSequence();
 
     interface BlankSpace {
-
-        boolean isInexhaustible();
-
-        BlankSpace ITSELF = (Form.BlankSpace.ExactlyOne) Sequential::getSingleton;
-
-        boolean acceptsLength(int length);
-
-        @NotNull String enterValues(Sequential<String> values);
-
-        default @NotNull String leaveBlank() {
-            return enterValues(Sequential.empty());
+        static BlankSpace itself(String title) {
+            return new Form.BlankSpace.ExactlyOne(title) {
+                @Override
+                public @NotNull String compose(@NotNull Sequential<String> values) {
+                    return values.getSingleton();
+                }
+            };
         }
 
-        @FunctionalInterface
-        interface ZeroOrMore extends BlankSpace {
-            @Override
-            default boolean acceptsLength(int length) {
-                return length >= 0;
+        @NotNull String getTitle();
+
+        default boolean acceptsCount(int count) {
+            int min = getMinimumCount();
+            int max = getMaximumCount();
+            return count >= min && (max == -1 || count <= max);
+        }
+
+        int getMinimumCount();
+
+        int getMaximumCount();
+
+        @NotNull String compose(Sequential<String> values) throws IncompleteFormException;
+
+        abstract class ZeroOrMore extends BlankSpace.Impl {
+            public ZeroOrMore(String title) {
+                super(title, 0, -1);
+            }
+        }
+
+        abstract class OneOrMore extends BlankSpace.Impl {
+            public OneOrMore(String title) {
+                super(title, 1, -1);
+            }
+        }
+
+        abstract class ZeroOrOne extends BlankSpace.Impl {
+            public ZeroOrOne(String title) {
+                super(title, 0, 1);
+            }
+        }
+
+        abstract class ExactlyOne extends BlankSpace.Impl {
+            public ExactlyOne(String title) {
+                super(title, 1, 1);
+            }
+        }
+
+        abstract class Impl implements BlankSpace {
+
+            private final String title;
+            private final int minimumCount, maximumCount;
+
+            public Impl(String title, int minimumCount, int maximumCount) {
+                if (minimumCount < 0 || (maximumCount != -1 && (minimumCount > maximumCount || maximumCount <= 0)))
+                    throw new IllegalArgumentException("invalid range");
+                this.title = title;
+                this.minimumCount = minimumCount;
+                this.maximumCount = maximumCount;
             }
 
             @Override
-            default boolean isInexhaustible() {return true;}
-        }
-
-        @FunctionalInterface
-        interface OneOrMore extends BlankSpace {
-            @Override
-            default boolean acceptsLength(int length) {
-                return length >= 1;
+            public @NotNull String getTitle() {
+                return title;
             }
 
             @Override
-            default boolean isInexhaustible() {return true;}
-        }
-
-        @FunctionalInterface
-        interface ZeroOrOne extends BlankSpace {
-            @Override
-            default boolean acceptsLength(int length) {
-                return length == 0 || length == 1;
+            public int getMinimumCount() {
+                return minimumCount;
             }
 
             @Override
-            default boolean isInexhaustible() {return false;}
+            public int getMaximumCount() {
+                return maximumCount;
+            }
+        }
+    }
+
+    class IncompleteFormException extends Exception {
+        private final BlankSpace blankSpace;
+
+        public IncompleteFormException(BlankSpace blankSpace) {
+            super("missing blank space: " + blankSpace.getTitle());
+            this.blankSpace = blankSpace;
         }
 
-        @FunctionalInterface
-        interface ExactlyOne extends BlankSpace {
-            @Override
-            default boolean acceptsLength(int length) {
-                return length == 1;
-            }
+        public IncompleteFormException() {
+            super("missing blank space");
+            this.blankSpace = null;
+        }
 
-            @Override
-            default boolean isInexhaustible() {return false;}
+        public @Nullable BlankSpace getBlankSpace() {
+            return blankSpace;
         }
     }
 }

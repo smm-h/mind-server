@@ -10,42 +10,48 @@ import ir.smmh.util.jile.impl.FatOr;
 import org.jetbrains.annotations.NotNull;
 
 public class FormImpl implements Form, Mutable.WithListeners.Injected {
-    private final @NotNull Map.MultiValue.Mutable<BlankSpace, String> map;
-    private final @NotNull Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence;
+    private final String title;
+    private final Map.MultiValue.Mutable<BlankSpace, String> map;
+    private final Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence;
     private transient String string = null;
-    private transient int size = -1;
     private transient boolean isFilledOut = false;
+    private transient IncompleteFormException lazyException;
 
-    public FormImpl() {
-        this(new SequentialImpl<>(), new MapImpl.MultiValue.Mutable<>());
+    public FormImpl(String title) {
+        this(title, new SequentialImpl<>(), new MapImpl.MultiValue.Mutable<>());
     }
 
-    private FormImpl(Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence, Map.MultiValue.Mutable<BlankSpace, String> map) {
+    private FormImpl(String title, Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence, Map.MultiValue.Mutable<BlankSpace, String> map) {
+        this.title = title;
         this.sequence = sequence;
         this.map = map;
         getOnCleanListeners().add(() -> {
             isFilledOut = false;
-            for (var i : this.sequence) {
-                if (i.isThat()) {
-                    return;
+            lazyException = null;
+            StringBuilder b = new StringBuilder();
+            int n = sequence.getSize();
+            for (int i = 0; i < n; i++) {
+                var o = sequence.getAtIndex(i);
+                if (o.isThis()) {
+                    b.append(o.getThis());
+                } else {
+                    BlankSpace s = o.getThat();
+                    try {
+                        b.append(s.compose(map.getAtPlace(s)));
+                    } catch (IncompleteFormException e) {
+                        lazyException = e;
+                        return;
+                    }
                 }
             }
-            isFilledOut = true;
-            size = 0;
-            for (var i : this.sequence) {
-                size += i.getThis().length();
-            }
-            StringBuilder b = new StringBuilder(size);
-            for (var i : this.sequence) {
-                b.append(i.getThis());
-            }
             string = b.toString();
+            isFilledOut = true;
         });
     }
 
     @Override
     public Form clone(boolean deepIfPossible) {
-        return new FormImpl(sequence.clone(false), map.clone(false));
+        return copy("clone of " + title);
     }
 
     private static Or<String, BlankSpace> make(String string) {
@@ -110,15 +116,19 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     }
 
     @Override
-    public @NotNull Form fillOut(BlankSpace blankSpace, Sequential<String> values) {
-        map.addAllAtPlace(blankSpace, values);
+    public @NotNull Form copy(String title) {
+        return new FormImpl(title, sequence.clone(false), map.clone(false));
+    }
+
+    @Override
+    public @NotNull Form enter(BlankSpace blankSpace, String entry) {
+        map.addAtPlace(blankSpace, entry);
         return this;
     }
 
     @Override
-    public @NotNull Form fillOut(Map.MultiValue<BlankSpace, String> map) {
-        for (BlankSpace k : map.overKeys())
-            fillOut(k, map.getAtPlace(k));
+    public @NotNull Form enter(BlankSpace blankSpace, Sequential<String> entries) {
+        map.addAllAtPlace(blankSpace, entries);
         return this;
     }
 
@@ -128,13 +138,34 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     }
 
     @Override
+    public @NotNull Form enter(Map.MultiValue<BlankSpace, String> mappedEntries) {
+        map.addAllFrom(mappedEntries);
+        return this;
+    }
+
+    @Override
+    public @NotNull String generate() throws IncompleteFormException {
+        if (isFilledOut())
+            return string;
+        else if (lazyException != null)
+            throw lazyException;
+        else
+            throw new IncompleteFormException();
+    }
+
+    @Override
+    public @NotNull String getTitle() {
+        return title;
+    }
+
+    @Override
     public boolean isFilledOut() {
         return clean() && isFilledOut;
     }
 
     @Override
     public String toString() {
-        return isFilledOut() ? string : null;
+        return isFilledOut() ? string : "INCOMPLETE FORM";
     }
 
     @Override

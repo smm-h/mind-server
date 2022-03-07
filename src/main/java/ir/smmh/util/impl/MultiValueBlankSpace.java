@@ -6,10 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.StringJoiner;
 
-public class MultiValueBlankSpace implements Form.BlankSpace.ZeroOrMore {
+public class MultiValueBlankSpace extends Form.BlankSpace.ZeroOrMore {
     private final @NotNull String beforeEach, betweenEach, afterEach, beforeAll, afterAll, ifLeftBlank;
 
-    public MultiValueBlankSpace(String beforeEach, String betweenEach, String afterEach, String ifLeftBlank) {
+    public MultiValueBlankSpace(String title, String beforeEach, String betweenEach, String afterEach, String ifLeftBlank) {
+        super(title);
         this.beforeEach = beforeEach;
         this.betweenEach = betweenEach;
         this.afterEach = afterEach;
@@ -17,7 +18,9 @@ public class MultiValueBlankSpace implements Form.BlankSpace.ZeroOrMore {
         this.afterAll = "";
         this.ifLeftBlank = ifLeftBlank;
     }
-    public MultiValueBlankSpace(String beforeEach, String betweenEach, String afterEach, String beforeAll, String afterAll, String ifLeftBlank) {
+
+    public MultiValueBlankSpace(String title, String beforeEach, String betweenEach, String afterEach, String beforeAll, String afterAll, String ifLeftBlank) {
+        super(title);
         this.beforeEach = beforeEach;
         this.betweenEach = betweenEach;
         this.afterEach = afterEach;
@@ -27,7 +30,7 @@ public class MultiValueBlankSpace implements Form.BlankSpace.ZeroOrMore {
     }
 
     @Override
-    public @NotNull String enterValues(Sequential<String> values) {
+    public @NotNull String compose(@NotNull Sequential<String> values) {
         if (values.isEmpty()) {
             return ifLeftBlank;
         } else {
