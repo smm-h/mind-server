@@ -48,10 +48,18 @@ public interface Map<K, V> extends CanContainPlace<K>, CanContain<V> {
             @Override
             MultiValue.Mutable<K, V> clone(boolean deepIfPossible);
 
+            default void addAtPlace(K place, V toAdd) {
+                setAtPlace(place, toAdd);
+            }
+
             default void addAllAtPlace(K place, Iterable<V> toSet) {
-                for (V value : toSet) {
-                    setAtPlace(place, value);
-                }
+                for (V value : toSet)
+                    addAtPlace(place, value);
+            }
+
+            default void addAllFrom(Map.MultiValue<K, V> map) {
+                for (K key : map.overKeys())
+                    addAllAtPlace(key, map.getAtPlace(key));
             }
         }
     }
