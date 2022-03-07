@@ -18,6 +18,11 @@ import static ir.smmh.util.FunctionalUtil.with;
 @ParametersAreNonnullByDefault
 public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone<Sequential<T>>, CanGetAtIndex<T>, CanContain<T> {
 
+    @SafeVarargs
+    static <T> Sequential<T> ofArguments(T... arguments) {
+        return of(arguments);
+    }
+
     static <T> Sequential<T> of(List<? extends T> list) {
 
         return new AbstractSequential<>() {
@@ -389,6 +394,11 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
     interface Mutable<T> extends Sequential<T>, CanSwapAtIndices<T>, ir.smmh.util.Mutable.WithListeners {
 
+        @SafeVarargs
+        static <T> Sequential.Mutable<T> ofArguments(T... arguments) {
+            return of(arguments);
+        }
+
         @Override
         Sequential.Mutable<T> clone(boolean deepIfPossible);
 
@@ -412,7 +422,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 @Override
                 public void setAtIndex(int index, @Nullable T toSet) {
                     validateIndex(index);
+                    preMutate();
                     list.set(index, toSet);
+                    postMutate();
                 }
             };
         }
@@ -433,7 +445,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 @Override
                 public void setAtIndex(int index, @Nullable Integer toSet) {
                     validateIndex(index);
+                    preMutate();
                     array[index] = Objects.requireNonNull(toSet);
+                    postMutate();
                 }
             };
         }
@@ -454,7 +468,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 @Override
                 public void setAtIndex(int index, @Nullable Float toSet) {
                     validateIndex(index);
+                    preMutate();
                     array[index] = Objects.requireNonNull(toSet);
+                    postMutate();
                 }
             };
         }
@@ -475,7 +491,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 @Override
                 public void setAtIndex(int index, @Nullable Long toSet) {
                     validateIndex(index);
+                    preMutate();
                     array[index] = Objects.requireNonNull(toSet);
+                    postMutate();
                 }
             };
         }
@@ -496,7 +514,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 @Override
                 public void setAtIndex(int index, @Nullable Double toSet) {
                     validateIndex(index);
+                    preMutate();
                     array[index] = Objects.requireNonNull(toSet);
+                    postMutate();
                 }
             };
         }
@@ -517,7 +537,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 @Override
                 public void setAtIndex(int index, @Nullable Byte toSet) {
                     validateIndex(index);
+                    preMutate();
                     array[index] = Objects.requireNonNull(toSet);
+                    postMutate();
                 }
             };
         }
@@ -538,7 +560,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 @Override
                 public void setAtIndex(int index, @Nullable Character toSet) {
                     validateIndex(index);
+                    preMutate();
                     array[index] = Objects.requireNonNull(toSet);
+                    postMutate();
                 }
             };
         }
@@ -559,7 +583,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 @Override
                 public void setAtIndex(int index, @Nullable Boolean toSet) {
                     validateIndex(index);
+                    preMutate();
                     array[index] = Objects.requireNonNull(toSet);
+                    postMutate();
                 }
             };
         }
@@ -580,11 +606,16 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 @Override
                 public void setAtIndex(int index, @Nullable T toSet) {
                     validateIndex(index);
+                    preMutate();
                     array[index] = Objects.requireNonNull(toSet);
+                    postMutate();
                 }
             };
         }
 
+        /**
+         * Do not call this directly because it does not call pre/post mutate
+         */
         default void fillWithPermutations(CanAppendTo<? super Sequential<T>> permutations, int first, int last) {
             if (first == last) {
                 permutations.append(clone(false));
@@ -637,6 +668,11 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
         }
 
         interface VariableSize<T> extends Mutable<T>, CanPrependTo<T>, CanAppendTo<T>, CanRemoveIndexFrom<T>, CanClear {
+
+            @SafeVarargs
+            static <T> Sequential.Mutable.VariableSize<T> ofArguments(T... arguments) {
+                return of(arguments);
+            }
 
             @Override
             Sequential.Mutable.VariableSize<T> clone(boolean deepIfPossible);
