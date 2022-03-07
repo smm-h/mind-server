@@ -11,9 +11,8 @@ import java.util.function.Predicate;
  * that allows configurable access to its data. For example a view on a
  * collection may offer a partial and/or out-of-order access to its elements.
  * The general contract with views is that they never write to the core
- * object and they only ever read from it. If the core object is mutable,
- * the view is {@link #expire}d when it mutates. View expiration is
- * irreversible.
+ * object and they only ever read from it. If the core object is mutable, and
+ * it mutates, the view is {@link #expire}d and cannot be undone.
  */
 @ParametersAreNonnullByDefault
 public interface View<T> {
