@@ -11,8 +11,13 @@ public interface Map<K, V> extends CanContainPlace<K>, CanContain<V> {
 
     @NotNull Iterable<K> overKeys();
 
-    interface Mutable<K, V> extends Map<K, V>, CanSetAtPlace<K, V>, CanRemovePlace<K> {
+    interface Mutable<K, V> extends Map<K, V>, CanSetAtPlace<K, V>, CanRemovePlace<K>, CanClear {
         void removeAllPlaces();
+
+        @Override
+        default void clear() {
+            removeAllPlaces();
+        }
     }
 
     interface SingleValue<K, V> extends Map<K, V>, CanGetAtPlace<K, V>, CanClone<SingleValue<K, V>> {

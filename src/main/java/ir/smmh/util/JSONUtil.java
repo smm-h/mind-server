@@ -206,6 +206,12 @@ public interface JSONUtil {
 
         float getFloat(String key);
 
+        @Nullable Boolean getNullableBoolean(String key);
+
+        @Nullable Integer getNullableInt(String key);
+
+        @Nullable Long getNullableLong(String key);
+
         @Nullable Float getNullableFloat(String key);
 
         @NotNull String getString(String key);
@@ -254,6 +260,21 @@ public interface JSONUtil {
         }
 
         @Override
+        public @Nullable Boolean getNullableBoolean(String key) {
+            return wrapped.has(key) ? wrapped.getBoolean(key) : null;
+        }
+
+        @Override
+        public @Nullable Integer getNullableInt(String key) {
+            return wrapped.has(key) ? wrapped.getInt(key) : null;
+        }
+
+        @Override
+        public @Nullable Long getNullableLong(String key) {
+            return wrapped.has(key) ? wrapped.getLong(key) : null;
+        }
+
+        @Override
         public float getFloat(String key) {
             return wrapped.getFloat(key);
         }
@@ -291,6 +312,11 @@ public interface JSONUtil {
         @Override
         public @Nullable <T> Sequential<T> getNullableSequential(String key) {
             return has(key) ? getSequential(key) : null;
+        }
+
+        @Override
+        public String toString() {
+            return wrapped.toString(2);
         }
     }
 }

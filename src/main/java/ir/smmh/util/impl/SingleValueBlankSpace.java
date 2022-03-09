@@ -2,6 +2,7 @@ package ir.smmh.util.impl;
 
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.util.Form;
+import ir.smmh.util.Form.IncompleteFormException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,9 +40,9 @@ public class SingleValueBlankSpace implements Form.BlankSpace {
     }
 
     @Override
-    public @NotNull String compose(@NotNull Sequential<String> values) throws Form.IncompleteFormException {
+    public @NotNull String compose(@NotNull Sequential<String> values) {
         if (values.isEmpty()) {
-            if (ifLeftBlank == null) throw new Form.IncompleteFormException(this);
+            if (ifLeftBlank == null) throw new IncompleteFormException(this, "cannot be left blank");
             return ifLeftBlank;
         } else {
             return prefix + values.getSingleton() + suffix;

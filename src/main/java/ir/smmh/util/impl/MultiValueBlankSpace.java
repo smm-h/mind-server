@@ -9,6 +9,26 @@ import java.util.StringJoiner;
 public class MultiValueBlankSpace extends Form.BlankSpace.ZeroOrMore {
     private final @NotNull String beforeEach, betweenEach, afterEach, beforeAll, afterAll, ifLeftBlank;
 
+    public MultiValueBlankSpace(String title, String betweenEach, String ifLeftBlank) {
+        super(title);
+        this.beforeEach = "";
+        this.betweenEach = betweenEach;
+        this.afterEach = "";
+        this.beforeAll = "";
+        this.afterAll = "";
+        this.ifLeftBlank = ifLeftBlank;
+    }
+
+    public MultiValueBlankSpace(String title, String beforeEach, String afterEach, String ifLeftBlank) {
+        super(title);
+        this.beforeEach = beforeEach;
+        this.betweenEach = "";
+        this.afterEach = afterEach;
+        this.beforeAll = "";
+        this.afterAll = "";
+        this.ifLeftBlank = ifLeftBlank;
+    }
+
     public MultiValueBlankSpace(String title, String beforeEach, String betweenEach, String afterEach, String ifLeftBlank) {
         super(title);
         this.beforeEach = beforeEach;
@@ -16,6 +36,16 @@ public class MultiValueBlankSpace extends Form.BlankSpace.ZeroOrMore {
         this.afterEach = afterEach;
         this.beforeAll = "";
         this.afterAll = "";
+        this.ifLeftBlank = ifLeftBlank;
+    }
+
+    public MultiValueBlankSpace(String title, String beforeEach, String afterEach, String beforeAll, String afterAll, String ifLeftBlank) {
+        super(title);
+        this.beforeEach = beforeEach;
+        this.betweenEach = "";
+        this.afterEach = afterEach;
+        this.beforeAll = beforeAll;
+        this.afterAll = afterAll;
         this.ifLeftBlank = ifLeftBlank;
     }
 

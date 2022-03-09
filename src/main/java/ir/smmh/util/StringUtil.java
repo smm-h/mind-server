@@ -306,4 +306,8 @@ public interface StringUtil {
         }
         return b.toString();
     }
+
+    static String removePrefix(String string, String prefix) {
+        return string.substring(prefix.length());
+    }
 }

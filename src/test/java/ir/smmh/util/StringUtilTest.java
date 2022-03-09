@@ -76,4 +76,9 @@ class StringUtilTest {
     void replaceCharacterTest() {
         assertEquals("heehee", replaceCharacter("hoohoo", 'o', 'e'));
     }
+
+    @Test
+    void removePrefixTest() {
+        assertEquals("World", removePrefix("HelloWorld", "Hello"));
+    }
 }

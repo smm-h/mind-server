@@ -8,6 +8,7 @@ import ir.smmh.util.Mutable;
 import ir.smmh.util.jile.Or;
 import ir.smmh.util.jile.impl.FatOr;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class FormImpl implements Form, Mutable.WithListeners.Injected {
     private final String title;
@@ -15,7 +16,6 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     private final Sequential.Mutable.VariableSize<Or<String, BlankSpace>> sequence;
     private transient String string = null;
     private transient boolean isFilledOut = false;
-    private transient IncompleteFormException lazyException;
 
     public FormImpl(String title) {
         this(title, new SequentialImpl<>(), new MapImpl.MultiValue.Mutable<>());
@@ -27,24 +27,23 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
         this.map = map;
         getOnCleanListeners().add(() -> {
             isFilledOut = false;
-            lazyException = null;
-            StringBuilder b = new StringBuilder();
+            StringBuilder builder = new StringBuilder();
             int n = sequence.getSize();
             for (int i = 0; i < n; i++) {
-                var o = sequence.getAtIndex(i);
-                if (o.isThis()) {
-                    b.append(o.getThis());
+                var thisOrThat = sequence.getAtIndex(i);
+                if (thisOrThat.isThis()) {
+                    builder.append(thisOrThat.getThis());
                 } else {
-                    BlankSpace s = o.getThat();
-                    try {
-                        b.append(s.compose(map.getAtPlace(s)));
-                    } catch (IncompleteFormException e) {
-                        lazyException = e;
-                        return;
-                    }
+                    BlankSpace blankSpace = thisOrThat.getThat();
+                    Sequential<String> values = map.getAtPlace(blankSpace);
+                    int count = values.getSize();
+                    if (blankSpace.acceptsCount(count))
+                        builder.append(blankSpace.compose(values));
+                    else
+                        throw new IncompleteFormException(blankSpace, blankSpace.countErrorMessage(count));
                 }
             }
-            string = b.toString();
+            string = builder.toString();
             isFilledOut = true;
         });
     }
@@ -121,8 +120,8 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     }
 
     @Override
-    public @NotNull Form enter(BlankSpace blankSpace, String entry) {
-        map.addAtPlace(blankSpace, entry);
+    public @NotNull Form enter(BlankSpace blankSpace, @Nullable String entry) {
+        if (entry != null) map.addAtPlace(blankSpace, entry);
         return this;
     }
 
@@ -144,13 +143,9 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     }
 
     @Override
-    public @NotNull String generate() throws IncompleteFormException {
-        if (isFilledOut())
-            return string;
-        else if (lazyException != null)
-            throw lazyException;
-        else
-            throw new IncompleteFormException();
+    public @NotNull String generate() {
+        if (isFilledOut()) return string;
+        throw new IncompleteFormException("the form is not filled out");
     }
 
     @Override

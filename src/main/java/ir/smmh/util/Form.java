@@ -1,8 +1,9 @@
 package ir.smmh.util;
 
 import ir.smmh.nile.adj.Sequential;
+import ir.smmh.nile.adj.impl.DoubleSequence;
+import ir.smmh.nile.adj.impl.SingleSequence;
 import ir.smmh.nile.verbs.CanClone;
-import ir.smmh.util.impl.FormImpl;
 import ir.smmh.util.jile.Or;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 
 /**
  * A form is a plain text document with blank spaces to fill out or leave blank.
@@ -20,30 +22,28 @@ import java.nio.file.Path;
  * form, meaning you can use it more than once.
  */
 public interface Form extends Mutable, CanClone<Form> {
-    static @NotNull Form emptyForm(String title) {
-        return new FormImpl(title);
-    }
-
     @NotNull Form copy(String title);
 
     /**
      * This method helps you use a pre-made string form, fill it, and write its
-     * contents to a file. However, it does not actually mutate the source form
-     * like all other fill methods.
+     * contents to a file.
      *
      * @throws IncompleteFormException If filling out the form fails
      * @throws IOException             If writing to file fails
      */
-    default void generateToFile(Path destination) throws IncompleteFormException, IOException {
+    default void generateToFile(Path destination) throws IOException {
         Files.writeString(destination, generate());
     }
 
-    @NotNull String generate() throws IncompleteFormException;
+    /**
+     * @throws IncompleteFormException If filling out the form fails
+     */
+    @NotNull String generate();
 
     @NotNull String getTitle();
 
     @Contract("_, _->this")
-    @NotNull Form enter(BlankSpace blankSpace, String entry);
+    @NotNull Form enter(BlankSpace blankSpace, @Nullable String entry);
 
     boolean isFilledOut();
 
@@ -103,11 +103,52 @@ public interface Form extends Mutable, CanClone<Form> {
             return count >= min && (max == -1 || count <= max);
         }
 
+        static String countToString(int count) {
+            return count == 1 ? "1 entry" : count + " entries";
+        }
+
+        default String countErrorMessage(int count) {
+            int min = getMinimumCount();
+            int max = getMaximumCount();
+            StringBuilder builder = new StringBuilder();
+            builder
+                    .append("needs ");
+            if (min == max) {
+                builder
+                        .append("exactly ")
+                        .append(countToString(min));
+            } else {
+                builder
+                        .append("at least ")
+                        .append(countToString(min));
+                if (max != -1) builder
+                        .append(", and at most ")
+                        .append(countToString(max));
+            }
+            builder
+                    .append(", got ")
+                    .append(countToString(count))
+                    .append(" instead");
+            return builder.toString();
+        }
+
         int getMinimumCount();
 
         int getMaximumCount();
 
-        @NotNull String compose(Sequential<String> values) throws IncompleteFormException;
+        @NotNull String compose(Sequential<String> values);
+
+        default @NotNull String compose() {
+            return compose(Sequential.empty());
+        }
+
+        default @NotNull String compose(String singleValue) {
+            return compose(new SingleSequence<>(singleValue));
+        }
+
+        default @NotNull String compose(String value1, String value2) {
+            return compose(new DoubleSequence<>(value1, value2));
+        }
 
         abstract class ZeroOrMore extends BlankSpace.Impl {
             public ZeroOrMore(String title) {
@@ -163,17 +204,33 @@ public interface Form extends Mutable, CanClone<Form> {
         }
     }
 
-    class IncompleteFormException extends Exception {
+    class IncompleteFormException extends RuntimeException {
         private final BlankSpace blankSpace;
 
+        public IncompleteFormException() {
+            this(null, null);
+        }
+
         public IncompleteFormException(BlankSpace blankSpace) {
-            super("missing blank space: " + blankSpace.getTitle());
+            this(blankSpace, null);
+        }
+
+        public IncompleteFormException(String message) {
+            this(null, message);
+        }
+
+        public IncompleteFormException(@Nullable BlankSpace blankSpace, @Nullable String extraMessage) {
+            super(makeMessage(blankSpace, extraMessage));
             this.blankSpace = blankSpace;
         }
 
-        public IncompleteFormException() {
-            super("missing blank space");
-            this.blankSpace = null;
+        private static String makeMessage(@Nullable BlankSpace blankSpace, @Nullable String extraMessage) {
+            String message = "Missing blankspace";
+            if (blankSpace != null)
+                message += ": " + blankSpace.getTitle().toUpperCase(Locale.ROOT);
+            if (extraMessage != null)
+                message += ", " + extraMessage;
+            return message;
         }
 
         public @Nullable BlankSpace getBlankSpace() {
