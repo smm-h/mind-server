@@ -1,8 +1,6 @@
 package ir.smmh.nile.adj.impl;
 
 import ir.smmh.nile.adj.Sequential;
-import ir.smmh.util.impl.MutableImpl;
-import org.jetbrains.annotations.NotNull;
 
 public class SingleSequence<T> extends Sequential.AbstractMutableSequential<T> {
 

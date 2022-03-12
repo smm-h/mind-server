@@ -2,7 +2,6 @@ package ir.smmh.util;
 
 import ir.smmh.Backward;
 import ir.smmh.nile.adj.Sequential;
-import ir.smmh.nile.adj.impl.SequentialImpl;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;

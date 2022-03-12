@@ -399,9 +399,6 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
             return of(arguments);
         }
 
-        @Override
-        Sequential.Mutable<T> clone(boolean deepIfPossible);
-
         static Sequential.Mutable<Character> of(String string) {
             return of(string.toCharArray());
         }
@@ -622,6 +619,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
             };
         }
 
+        @Override
+        Sequential.Mutable<T> clone(boolean deepIfPossible);
+
         /**
          * Do not call this directly because it does not call pre/post mutate
          */
@@ -683,9 +683,6 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 return of(arguments);
             }
 
-            @Override
-            Sequential.Mutable.VariableSize<T> clone(boolean deepIfPossible);
-
             static <T> Sequential.Mutable.VariableSize<T> of(List<T> list) {
                 return new SequentialImpl<>(list);
             }
@@ -695,6 +692,9 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
                 list.addAll(Arrays.asList(array));
                 return of(list);
             }
+
+            @Override
+            Sequential.Mutable.VariableSize<T> clone(boolean deepIfPossible);
 
             default void filterInPlace(Predicate<? super T> toTest) {
                 if (!isEmpty()) {

@@ -1,6 +1,5 @@
 package ir.smmh.tgbot.types;
 
-import ir.smmh.tgbot.types.impl.*;
 import ir.smmh.tgbot.types.impl.ChosenInlineResultImpl;
 import ir.smmh.tgbot.types.impl.InlineQueryImpl;
 import org.jetbrains.annotations.NotNull;

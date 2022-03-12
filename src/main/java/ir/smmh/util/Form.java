@@ -92,16 +92,16 @@ public interface Form extends Mutable, CanClone<Form> {
             };
         }
 
+        static String countToString(int count) {
+            return count == 1 ? "1 entry" : count + " entries";
+        }
+
         @NotNull String getTitle();
 
         default boolean acceptsCount(int count) {
             int min = getMinimumCount();
             int max = getMaximumCount();
             return count >= min && (max == -1 || count <= max);
-        }
-
-        static String countToString(int count) {
-            return count == 1 ? "1 entry" : count + " entries";
         }
 
         default String countErrorMessage(int count) {

@@ -52,17 +52,17 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
         });
     }
 
-    @Override
-    public Form clone(boolean deepIfPossible) {
-        return copy("clone of " + title);
-    }
-
     private static Or<String, BlankSpace> make(String string) {
         return FatOr.makeThis(string);
     }
 
     private static Or<String, BlankSpace> make(BlankSpace blankSpace) {
         return FatOr.makeThat(blankSpace);
+    }
+
+    @Override
+    public Form clone(boolean deepIfPossible) {
+        return copy("clone of " + title);
     }
 
     @Override
