@@ -1,4 +1,4 @@
-package ir.smmh.tgbot.impl;
+package ir.smmh.tgbot.types.impl;
 
 import ir.smmh.tgbot.types.User;
 import ir.smmh.util.JSONUtil;

@@ -3,10 +3,12 @@ package ir.smmh.tgbot;
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.SingleSequence;
 import ir.smmh.tgbot.types.InlineQueryResult;
+import ir.smmh.tgbot.types.Message;
 import ir.smmh.tgbot.types.Update;
 import ir.smmh.tgbot.types.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,17 +31,17 @@ public interface TelegramBot {
 
     @NotNull User.Myself getMe() throws MethodFailedException;
 
-    void sendMessage(long chatId, String text, @Nullable Integer replyToMessageId);
+    @Nullable Message sendMessage(long chatId, String text, @Nullable Integer replyToMessageId);
 
-    void sendPhoto(long chatId, File file, String caption, @Nullable Integer replyToMessageId) throws FileNotFoundException;
+    @Nullable Message sendPhoto(long chatId, File file, String caption, @Nullable Integer replyToMessageId) throws FileNotFoundException;
 
-    default void answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results) {
-        answerInlineQuery(inline_query_id, results, false);
+    default JSONObject answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results) {
+        return answerInlineQuery(inline_query_id, results, false);
     }
 
-    default void answerInlineQuery(String inline_query_id, InlineQueryResult result) {
-        answerInlineQuery(inline_query_id, new SingleSequence<>(result), false);
+    default JSONObject answerInlineQuery(String inline_query_id, InlineQueryResult result) {
+        return answerInlineQuery(inline_query_id, new SingleSequence<>(result));
     }
 
-    void answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results, boolean is_personal);
+    JSONObject answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results, boolean is_personal);
 }

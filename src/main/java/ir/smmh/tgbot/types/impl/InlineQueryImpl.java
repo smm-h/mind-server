@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class InlineQuery extends ContentImpl implements ir.smmh.tgbot.types.InlineQuery {
+public class InlineQueryImpl extends ContentImpl implements ir.smmh.tgbot.types.InlineQuery {
 
-    public InlineQuery(JSONObject wrapped) {
+    public InlineQueryImpl(JSONObject wrapped) {
         super(wrapped);
     }
 

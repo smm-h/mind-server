@@ -11,7 +11,7 @@ public class InlineQueryResultImpl extends JSONUtil.ReadOnlyJSONImpl implements 
     private final @NotNull String id;
 
     protected InlineQueryResultImpl(@NotNull JSONObject wrapped, @NotNull String id) {
-        super(wrapped);
+        super(wrapped.put("id", id));
         this.id = id;
     }
 

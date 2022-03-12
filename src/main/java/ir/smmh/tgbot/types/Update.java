@@ -1,8 +1,8 @@
 package ir.smmh.tgbot.types;
 
+import ir.smmh.tgbot.types.impl.*;
 import ir.smmh.tgbot.types.impl.ChosenInlineResultImpl;
-import ir.smmh.tgbot.types.impl.InlineQuery;
-import ir.smmh.tgbot.types.impl.Message;
+import ir.smmh.tgbot.types.impl.InlineQueryImpl;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
@@ -25,7 +25,7 @@ interface Update<C extends UpdateContent> {
         interface MessageHandler extends Handler<ir.smmh.tgbot.types.Message> {
             @Override
             default @NotNull ir.smmh.tgbot.types.Message create(JSONObject object) {
-                return new Message(object);
+                return Message.of(object);
             }
         }
 
@@ -85,7 +85,7 @@ interface Update<C extends UpdateContent> {
 
             @Override
             default @NotNull ir.smmh.tgbot.types.InlineQuery create(JSONObject object) {
-                return new InlineQuery(object);
+                return new InlineQueryImpl(object);
             }
         }
 
@@ -107,142 +107,142 @@ interface Update<C extends UpdateContent> {
             }
         }
 
-        /**
-         * New incoming callback query
-         */
-        @FunctionalInterface
-        interface callback_query extends Handler<CallbackQuery> {
-            @Override
-            default @NotNull String allowedUpdateType() {
-                return "callback_query";
-            }
-
-            @Override
-            default @NotNull CallbackQuery create(JSONObject object) {
-                return new ir.smmh.tgbot.types.impl.CallbackQuery(object);
-            }
-        }
-
-        /**
-         * New incoming shipping query. Only for invoices with flexible price
-         */
-        @FunctionalInterface
-        interface shipping_query extends Handler<ShippingQuery> {
-            @Override
-            default @NotNull String allowedUpdateType() {
-                return "shipping_query";
-            }
-
-            @Override
-            default @NotNull ShippingQuery create(JSONObject object) {
-                return new ir.smmh.tgbot.types.impl.ShippingQuery(object);
-            }
-        }
-
-        /**
-         * New incoming pre-checkout query. Contains full information about
-         * checkout
-         */
-        @FunctionalInterface
-        interface pre_checkout_query extends Handler<PreCheckoutQuery> {
-            @Override
-            default @NotNull String allowedUpdateType() {
-                return "pre_checkout_query";
-            }
-
-            @Override
-            default @NotNull PreCheckoutQuery create(JSONObject object) {
-                return new ir.smmh.tgbot.types.impl.PreCheckoutQuery(object);
-            }
-        }
-
-        /**
-         * New poll state. Bots receive only updates about stopped polls and
-         * polls, which are sent by the bot
-         */
-        @FunctionalInterface
-        interface poll extends Handler<Poll> {
-            @Override
-            default @NotNull String allowedUpdateType() {
-                return "poll";
-            }
-
-            @Override
-            default @NotNull Poll create(JSONObject object) {
-                return new ir.smmh.tgbot.types.impl.Poll(object);
-            }
-        }
-
-        /**
-         * A user changed their answer in a non-anonymous poll. Bots receive
-         * new votes only in polls that were sent by the bot itself.
-         */
-        @FunctionalInterface
-        interface poll_answer extends Handler<PollAnswer> {
-            @Override
-            default @NotNull String allowedUpdateType() {
-                return "poll_answer";
-            }
-
-            @Override
-            default @NotNull PollAnswer create(JSONObject object) {
-                return new ir.smmh.tgbot.types.impl.PollAnswer(object);
-            }
-        }
-
-        /**
-         * The bot's chat member status was updated in a chat. For private chats,
-         * this update is received only when the bot is blocked or unblocked
-         * by the user.
-         */
-        @FunctionalInterface
-        interface my_chat_member extends Handler<ChatMemberUpdated> {
-            @Override
-            default @NotNull String allowedUpdateType() {
-                return "my_chat_member";
-            }
-
-            @Override
-            default @NotNull ChatMemberUpdated create(JSONObject object) {
-                return new ir.smmh.tgbot.types.impl.ChatMemberUpdated(object);
-            }
-        }
-
-        /**
-         * A chat member's status was updated in a chat. The bot must be an
-         * administrator in the chat and must explicitly specify `chat_member`
-         * in the list of allowed_updates to receive these updates.
-         */
-        @FunctionalInterface
-        interface chat_member extends Handler<ChatMemberUpdated> {
-            @Override
-            default @NotNull String allowedUpdateType() {
-                return "chat_member";
-            }
-
-            @Override
-            default @NotNull ChatMemberUpdated create(JSONObject object) {
-                return new ir.smmh.tgbot.types.impl.ChatMemberUpdated(object);
-            }
-        }
-
-        /**
-         * A request to join the chat has been sent. The bot must have the
-         * can_invite_users administrator right in the chat to receive these
-         * updates.
-         */
-        @FunctionalInterface
-        interface chat_join_request extends Handler<ChatJoinRequest> {
-            @Override
-            default @NotNull String allowedUpdateType() {
-                return "chat_join_request";
-            }
-
-            @Override
-            default @NotNull ChatJoinRequest create(JSONObject object) {
-                return new ir.smmh.tgbot.types.impl.ChatJoinRequest(object);
-            }
-        }
+//        /**
+//         * New incoming callback query
+//         */
+//        @FunctionalInterface
+//        interface callback_query extends Handler<CallbackQuery> {
+//            @Override
+//            default @NotNull String allowedUpdateType() {
+//                return "callback_query";
+//            }
+//
+//            @Override
+//            default @NotNull CallbackQuery create(JSONObject object) {
+//                return new CallbackQueryImpl(object);
+//            }
+//        }
+//
+//        /**
+//         * New incoming shipping query. Only for invoices with flexible price
+//         */
+//        @FunctionalInterface
+//        interface shipping_query extends Handler<ShippingQuery> {
+//            @Override
+//            default @NotNull String allowedUpdateType() {
+//                return "shipping_query";
+//            }
+//
+//            @Override
+//            default @NotNull ShippingQuery create(JSONObject object) {
+//                return new ShippingQueryImpl(object);
+//            }
+//        }
+//
+//        /**
+//         * New incoming pre-checkout query. Contains full information about
+//         * checkout
+//         */
+//        @FunctionalInterface
+//        interface pre_checkout_query extends Handler<PreCheckoutQuery> {
+//            @Override
+//            default @NotNull String allowedUpdateType() {
+//                return "pre_checkout_query";
+//            }
+//
+//            @Override
+//            default @NotNull PreCheckoutQuery create(JSONObject object) {
+//                return new PreCheckoutQueryImpl(object);
+//            }
+//        }
+//
+//        /**
+//         * New poll state. Bots receive only updates about stopped polls and
+//         * polls, which are sent by the bot
+//         */
+//        @FunctionalInterface
+//        interface poll extends Handler<Poll> {
+//            @Override
+//            default @NotNull String allowedUpdateType() {
+//                return "poll";
+//            }
+//
+//            @Override
+//            default @NotNull Poll create(JSONObject object) {
+//                return new PollImpl(object);
+//            }
+//        }
+//
+//        /**
+//         * A user changed their answer in a non-anonymous poll. Bots receive
+//         * new votes only in polls that were sent by the bot itself.
+//         */
+//        @FunctionalInterface
+//        interface poll_answer extends Handler<PollAnswer> {
+//            @Override
+//            default @NotNull String allowedUpdateType() {
+//                return "poll_answer";
+//            }
+//
+//            @Override
+//            default @NotNull PollAnswer create(JSONObject object) {
+//                return new PollAnswerImpl(object);
+//            }
+//        }
+//
+//        /**
+//         * The bot's chat member status was updated in a chat. For private chats,
+//         * this update is received only when the bot is blocked or unblocked
+//         * by the user.
+//         */
+//        @FunctionalInterface
+//        interface my_chat_member extends Handler<ChatMemberUpdated> {
+//            @Override
+//            default @NotNull String allowedUpdateType() {
+//                return "my_chat_member";
+//            }
+//
+//            @Override
+//            default @NotNull ChatMemberUpdated create(JSONObject object) {
+//                return new ChatMemberUpdatedImpl(object);
+//            }
+//        }
+//
+//        /**
+//         * A chat member's status was updated in a chat. The bot must be an
+//         * administrator in the chat and must explicitly specify `chat_member`
+//         * in the list of allowed_updates to receive these updates.
+//         */
+//        @FunctionalInterface
+//        interface chat_member extends Handler<ChatMemberUpdated> {
+//            @Override
+//            default @NotNull String allowedUpdateType() {
+//                return "chat_member";
+//            }
+//
+//            @Override
+//            default @NotNull ChatMemberUpdated create(JSONObject object) {
+//                return new ChatMemberUpdatedImpl(object);
+//            }
+//        }
+//
+//        /**
+//         * A request to join the chat has been sent. The bot must have the
+//         * can_invite_users administrator right in the chat to receive these
+//         * updates.
+//         */
+//        @FunctionalInterface
+//        interface chat_join_request extends Handler<ChatJoinRequest> {
+//            @Override
+//            default @NotNull String allowedUpdateType() {
+//                return "chat_join_request";
+//            }
+//
+//            @Override
+//            default @NotNull ChatJoinRequest create(JSONObject object) {
+//                return new ChatJoinRequestImpl(object);
+//            }
+//        }
     }
 
 }

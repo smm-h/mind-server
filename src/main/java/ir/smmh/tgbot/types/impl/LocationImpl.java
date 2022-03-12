@@ -45,17 +45,17 @@ public class LocationImpl extends JSONUtil.ReadOnlyJSONImpl implements Location 
 
         @Override
         public @Nullable Integer live_period() {
-            return has("live_period") ? getInt("live_period") : null;
+            return has("live_period") ? getInteger("live_period") : null;
         }
 
         @Override
         public @Nullable Integer heading() {
-            return has("heading") ? getInt("heading") : null;
+            return has("heading") ? getInteger("heading") : null;
         }
 
         @Override
         public @Nullable Integer proximity_alert_radius() {
-            return has("proximity_alert_radius") ? getInt("proximity_alert_radius") : null;
+            return has("proximity_alert_radius") ? getInteger("proximity_alert_radius") : null;
         }
     }
 }

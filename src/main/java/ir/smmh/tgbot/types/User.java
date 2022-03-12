@@ -1,6 +1,6 @@
 package ir.smmh.tgbot.types;
 
-import ir.smmh.tgbot.impl.UserImpl;
+import ir.smmh.tgbot.types.impl.UserImpl;
 import ir.smmh.util.JSONUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

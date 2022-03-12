@@ -4,8 +4,10 @@ import ir.smmh.nile.adj.Sequential;
 import ir.smmh.tgbot.MethodFailedException;
 import ir.smmh.tgbot.TelegramBot;
 import ir.smmh.tgbot.types.InlineQueryResult;
+import ir.smmh.tgbot.types.Message;
 import ir.smmh.tgbot.types.Update;
 import ir.smmh.tgbot.types.User;
+import ir.smmh.tgbot.types.impl.UserImpl;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.NetworkUtil;
 import okhttp3.*;
@@ -52,7 +54,7 @@ public abstract class TelegramBotImpl implements TelegramBot {
     }
 
     @Override
-    public void answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results, boolean is_personal) {
+    public JSONObject answerInlineQuery(String inline_query_id, Sequential<InlineQueryResult> results, boolean is_personal) {
         JSONObject p = new JSONObject();
         int count = 0;
         JSONArray resultsArray = new JSONArray();
@@ -64,17 +66,26 @@ public abstract class TelegramBotImpl implements TelegramBot {
             p.put("inline_query_id", inline_query_id);
             p.put("results", resultsArray);
             p.put("is_personal", is_personal);
+            System.out.println(p);
             RequestBody body = RequestBody.create(p.toString(), NetworkUtil.JSON);
             Request request = new Request.Builder()
-                    .url(makeURL("sendMessage"))
+                    .url(makeURL("answerInlineQuery"))
                     .addHeader("Content-Type", "application/json")
                     .post(body)
                     .build();
             Response response = client.newCall(request).execute();
-//            System.out.println(response.body().string());
-            response.close();
+            ResponseBody responseBody = response.body();
+            if (responseBody == null) {
+                response.close();
+                return null;
+            } else {
+                String json = responseBody.string();
+                response.close();
+                return JSONUtil.parse(json);
+            }
         } catch (JSONException | IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
@@ -102,7 +113,7 @@ public abstract class TelegramBotImpl implements TelegramBot {
     }
 
     @Override
-    public final void sendMessage(long chatId, String text, @Nullable Integer replyToMessageId) {
+    public final @Nullable Message sendMessage(long chatId, String text, @Nullable Integer replyToMessageId) {
         JSONObject p = new JSONObject();
 //        System.out.println(text);
         try {
@@ -122,15 +133,23 @@ public abstract class TelegramBotImpl implements TelegramBot {
                     .post(body)
                     .build();
             Response response = client.newCall(request).execute();
-//            System.out.println(response.body().string());
-            response.close();
+            ResponseBody responseBody = response.body();
+            if (responseBody == null) {
+                response.close();
+                return null;
+            } else {
+                String json = responseBody.string();
+                response.close();
+                return Message.of(JSONUtil.parse(json).optJSONObject("result"));
+            }
         } catch (JSONException | IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
     @Override
-    public final void sendPhoto(long chatId, File file, @Nullable String caption, @Nullable Integer replyToMessageId) throws FileNotFoundException {
+    public final @Nullable Message sendPhoto(long chatId, File file, @Nullable String caption, @Nullable Integer replyToMessageId) throws FileNotFoundException {
         if (!file.exists()) throw new FileNotFoundException();
         try {
             MultipartBody.Builder builder = new MultipartBody.Builder()
@@ -150,25 +169,33 @@ public abstract class TelegramBotImpl implements TelegramBot {
             int tries = 0;
             while (true) {
                 try {
-                    client.newCall(new Request.Builder()
+                    Response response = client.newCall(new Request.Builder()
                             .url(makeURL("sendPhoto"))
                             .post(builder.build())
                             .build()
                     )
-                            .execute()
-                            .close();
-                    break;
+                            .execute();
+                    ResponseBody responseBody = response.body();
+                    if (responseBody == null) {
+                        response.close();
+                        return null;
+                    } else {
+                        String json = responseBody.string();
+                        response.close();
+                        return Message.of(JSONUtil.parse(json).optJSONObject("result"));
+                    }
                 } catch (SocketTimeoutException e) {
                     if (tries++ < maxTries) {
                         System.err.println("SOCKET TIMED OUT; TRYING AGAIN");
                     } else {
                         System.err.println("SOCKET TIMED OUT; NOT TRYING AGAIN");
-                        break;
+                        return null;
                     }
                 }
             }
         } catch (JSONException | IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 

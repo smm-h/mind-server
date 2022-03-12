@@ -186,7 +186,7 @@ public class ChatMemberImpl extends JSONUtil.ReadOnlyJSONImpl implements ChatMem
 
         @Override
         public int until_date() {
-            return getInt("until_date");
+            return getInteger("until_date");
         }
     }
 
@@ -203,7 +203,7 @@ public class ChatMemberImpl extends JSONUtil.ReadOnlyJSONImpl implements ChatMem
 
         @Override
         public int until_date() {
-            return getInt("until_date");
+            return getInteger("until_date");
         }
     }
 }

@@ -1,20 +1,28 @@
 package ir.smmh.tgbot.types.impl;
 
 import ir.smmh.tgbot.types.Chat;
+import ir.smmh.tgbot.types.Message;
 import ir.smmh.tgbot.types.User;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class Message extends ContentImpl implements ir.smmh.tgbot.types.Message {
+public class MessageImpl extends ContentImpl implements Message {
 
-    public Message(JSONObject wrapped) {
+    private MessageImpl(JSONObject wrapped) {
         super(wrapped);
+    }
+
+    @Contract("!null -> !null")
+    public static Message of(@Nullable JSONObject wrapped) {
+        if (wrapped == null) return null;
+        return new MessageImpl(wrapped);
     }
 
     @Override
     public int message_id() {
-        return getInt("message_id");
+        return getInteger("message_id");
     }
 
     @Override
