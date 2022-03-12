@@ -35,20 +35,24 @@ public interface JavaType extends Form {
                         paragraphs.append(trimmedParagraph);
                         int trimmedParagraphLength = trimmedParagraph.length();
                         totalLength += trimmedParagraphLength;
-                        estimatedLineBreaks += 2 + trimmedParagraphLength / softLimit;
+                        estimatedLineBreaks += Math.ceil(trimmedParagraphLength / (float) softLimit);
                     }
                 }
             }
-            int estimatedCapacity = totalLength + estimatedLineBreaks * 4 + 8;
+            int estimatedCapacity = totalLength + (estimatedLineBreaks + 1) * 4 + Math.max(0, paragraphs.getSize() - 1) * 7 + 8;
             StringBuilder builder = new StringBuilder(estimatedCapacity);
-            builder.append("/**\n");
+            builder.append("/**\n"); // 4
             boolean firstTime = true;
             for (String paragraph : paragraphs) {
+                if (firstTime)
+                    firstTime = false;
+                else
+                    builder.append(" * <p>\n"); // 7*(P-1)
                 int i = 0; // overall index
                 int x = 0; // in-line index
                 int n = paragraph.length();
                 while (i < n) {
-                    builder.append(" * ");
+                    builder.append(" * "); // (3+1)*(LB+1)
                     while (true) {
                         if (i == n)
                             break;
@@ -63,14 +67,10 @@ public interface JavaType extends Form {
                     builder.append("\n");
                     x = 0;
                 }
-                if (firstTime)
-                    firstTime = false;
-                else
-                    builder.append("\n\n");
             }
-            builder.append(" */\n");
+            builder.append(" */\n"); // 4
             int actualSize = builder.length();
-            if (actualSize > estimatedCapacity)
+            if (actualSize - estimatedCapacity == 5)
                 System.out.println("CAPACITY ESTIMATION RESULTS: " + (actualSize - estimatedCapacity));
             return builder.toString();
         }
@@ -109,6 +109,10 @@ public interface JavaType extends Form {
 
     default void addImport(JavaType type) {
         addImport(type.getFullyQualifiedName());
+    }
+
+    default void addImport(JavaPackage pkg) {
+        addImport(pkg.star());
     }
 
     void addImport(String canonicalName);

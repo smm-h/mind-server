@@ -39,8 +39,10 @@ public interface StringUtil {
             } else {
                 builder.append(LINEBREAK);
             }
-            builder.append(prefix);
-            builder.append(line);
+            if (!line.isEmpty()) {
+                builder.append(prefix);
+                builder.append(line);
+            }
         }
         return builder.toString();
     }

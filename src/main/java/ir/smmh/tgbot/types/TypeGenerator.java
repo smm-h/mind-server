@@ -33,9 +33,7 @@ class TypeGenerator {
         JavaPackage pkg = JavaPackage.of("ir.smmh.tgbot.types.gen");
         JavaPackage impl = pkg.subpackage("impl");
         Sequential<String> commonImports = Sequential.ofArguments(
-                pkg.star(),
                 JSONUtil.class.getCanonicalName(),
-                Sequential.class.getCanonicalName(),
                 Contract.class.getCanonicalName(),
                 NotNull.class.getCanonicalName(),
                 Nullable.class.getCanonicalName(),
@@ -86,6 +84,9 @@ class TypeGenerator {
                             abstractType.enter(JavaType.IMPORTS, commonImports);
                             concreteType.enter(JavaType.IMPORTS, commonImports);
 
+                            // import all abstract types in each concrete type
+                            concreteType.addImport(pkg);
+
                             // define their super-types
                             abstractType.enter(JavaInterface.SUPER_INTERFACES, "JSONUtil.ReadOnlyJSON");
                             concreteType.enter(JavaClass.SUPER_CLASS, "JSONUtil.ReadOnlyJSONImpl");
@@ -131,6 +132,8 @@ class TypeGenerator {
                                         final String getter;
                                         boolean isPrimitive = false;
                                         if (returnType.startsWith(PREFIX_ARRAY_2D)) {
+                                            abstractType.addImport(Sequential.class);
+                                            concreteType.addImport(Sequential.class);
                                             String typeName = StringUtil.removePrefix(returnType, PREFIX_ARRAY_2D);
                                             if (useLongInsteadOfInt && typeName.equals("Integer")) typeName = "Long";
                                             returnType = "Sequential<Sequential<" + typeName + ">>";
@@ -143,6 +146,8 @@ class TypeGenerator {
                                             }
                                             getter = "get" + (isNullable ? "Nullable" : "") + "2DSequential(\"" + name + "\", " + convertor + ")";
                                         } else if (returnType.startsWith(PREFIX_ARRAY)) {
+                                            abstractType.addImport(Sequential.class);
+                                            concreteType.addImport(Sequential.class);
                                             String typeName = StringUtil.removePrefix(returnType, PREFIX_ARRAY);
                                             if (useLongInsteadOfInt && typeName.equals("Integer")) typeName = "Long";
                                             returnType = "Sequential<" + typeName + ">";
