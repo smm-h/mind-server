@@ -2,6 +2,7 @@ package ir.smmh.meta;
 
 import ir.smmh.meta.impl.TypeSpecifierImpl;
 import ir.smmh.nile.adj.Sequential;
+import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.util.Form;
 import ir.smmh.util.StringUtil;
 import ir.smmh.util.impl.MultiValueBlankSpace;
@@ -16,32 +17,65 @@ public interface JavaType extends Form {
 
     BlankSpace NAME = BlankSpace.itself("type name");
     BlankSpace PACKAGE = new SingleValueBlankSpace("package address", "package ", ";\n");
-    BlankSpace IMPORTS = new MultiValueBlankSpace("list of imports", "import ", "\n", ";", "\n", "\n", "");
+    BlankSpace IMPORTS = new MultiValueBlankSpace("list of imports", "import ", ";\n", "\n", "\n", "");
     BlankSpace JAVADOC = new BlankSpace.ZeroOrMore("documentation") {
         @Override
         public @NotNull String compose(@NotNull Sequential<String> values) {
-            int n = values.getSize();
-            if (n == 0) return "";
-            String value = values.getSingleton();
-            int limit = 80;
-            int capacity = n + (StringUtil.count(value, '\n') + n / limit + 8) * 4;
-            StringBuilder builder = new StringBuilder(capacity);
-            builder.append("\n/**\n");
+            if (values.isEmpty()) return "";
+            int indent = 1;
+            int softLimit = 80 - indent * 4;
+            int hardLimit = 120 - indent * 4;
+            Sequential.Mutable.VariableSize<String> paragraphs = new SequentialImpl<>();
+            int totalLength = 0;
+            int estimatedLineBreaks = 0;
+            for (String value : values) {
+                for (String paragraph : StringUtil.splitByCharacter(value, '\n')) {
+                    String trimmedParagraph = paragraph.trim();
+                    if (!trimmedParagraph.isEmpty()) {
+                        paragraphs.append(trimmedParagraph);
+                        int trimmedParagraphLength = trimmedParagraph.length();
+                        totalLength += trimmedParagraphLength;
+                        estimatedLineBreaks += 2 + trimmedParagraphLength / softLimit;
+                    }
+                }
+            }
+            int estimatedCapacity = totalLength + estimatedLineBreaks * 4 + 8;
+            StringBuilder builder = new StringBuilder(estimatedCapacity);
+            builder.append("/**\n");
             boolean firstTime = true;
-            for (String s : StringUtil.splitByCharacter(value, '\n')) {
-                for (String line : StringUtil.splitByLength(s, limit - 3)) {
-                    builder.append(" * ").append(line).append('\n');
+            for (String paragraph : paragraphs) {
+                int i = 0; // overall index
+                int x = 0; // in-line index
+                int n = paragraph.length();
+                while (i < n) {
+                    builder.append(" * ");
+                    while (true) {
+                        if (i == n)
+                            break;
+                        char c = paragraph.charAt(i++);
+                        x++;
+                        if (x > softLimit && c == 32)
+                            break;
+                        builder.append(c);
+                        if (x > hardLimit)
+                            break;
+                    }
+                    builder.append("\n");
+                    x = 0;
                 }
                 if (firstTime)
                     firstTime = false;
                 else
-                    builder.append("\n");
+                    builder.append("\n\n");
             }
             builder.append(" */\n");
-//            System.out.println("CAPACITY ESTIMATION RESULTS: ACTUAL=" + b.length() + " ESTIMATED=" + capacity);
+            int actualSize = builder.length();
+            if (actualSize > estimatedCapacity)
+                System.out.println("CAPACITY ESTIMATION RESULTS: " + (actualSize - estimatedCapacity));
             return builder.toString();
         }
     };
+
     BlankSpace METHODS = new BlankSpace.ZeroOrMore("methods") {
         @Override
         public @NotNull String compose(@NotNull Sequential<String> values) {
@@ -59,7 +93,7 @@ public interface JavaType extends Form {
 
     @NotNull JavaPackage getPackage();
 
-    void generateToFile() throws IOException;
+    void generateToFile(boolean overwrite) throws IOException;
 
     void addDocumentation(String text);
 
@@ -68,4 +102,14 @@ public interface JavaType extends Form {
     }
 
     void addMethod(Method method);
+
+    default void addImport(Class<?> c) {
+        addImport(c.getCanonicalName());
+    }
+
+    default void addImport(JavaType type) {
+        addImport(type.getFullyQualifiedName());
+    }
+
+    void addImport(String canonicalName);
 }

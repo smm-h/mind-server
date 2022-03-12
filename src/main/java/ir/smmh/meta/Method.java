@@ -10,11 +10,11 @@ import org.jetbrains.annotations.Nullable;
 public interface Method extends Form {
 
     BlankSpace ANNOTATIONS = new MultiValueBlankSpace("annotations", "@", "\n", "");
-    BlankSpace QUALIFIERS = new MultiValueBlankSpace("qualifier", " ", "");
+    BlankSpace QUALIFIERS = new MultiValueBlankSpace("qualifier", "", " ", "");
     BlankSpace RETURN_TYPE = new BlankSpace.ZeroOrOne("return type") {
         @Override
         public @NotNull String compose(Sequential<String> values) {
-            return values.isEmpty() ? "" : values.getSingleton();
+            return values.isEmpty() ? "" : values.getSingleton() + " ";
         }
     };
     BlankSpace NAME = BlankSpace.itself("method name");

@@ -31,8 +31,8 @@ public class JavaTypeImpl extends FormImpl implements JavaType {
     }
 
     @Override
-    public void generateToFile() throws IOException {
-        generateToFile(path);
+    public void generateToFile(boolean overwrite) throws IOException {
+        generateToFile(path, overwrite);
     }
 
     @Override
@@ -48,5 +48,10 @@ public class JavaTypeImpl extends FormImpl implements JavaType {
     @Override
     public void addMethod(Method method) {
         enter(METHODS, method.generate());
+    }
+
+    @Override
+    public void addImport(String canonicalName) {
+        enter(IMPORTS, canonicalName);
     }
 }

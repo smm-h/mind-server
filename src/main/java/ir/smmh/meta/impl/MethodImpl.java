@@ -25,9 +25,7 @@ abstract class MethodImpl extends FormImpl implements Method {
         append(JavaType.JAVADOC);
         append(ANNOTATIONS);
         append(QUALIFIERS);
-        append(' ');
         append(RETURN_TYPE);
-        append(' ');
         append(NAME);
         append(ARGUMENTS);
         append(BODY);
