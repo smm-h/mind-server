@@ -38,7 +38,8 @@ public interface FunctionalUtil {
         if (it != null) consumer.accept(it);
     }
 
-    static <T, R> R with(@Nullable T it, @NotNull Function<? super T, ? extends R> function, R defaultValue) {
+    @Contract("_, _, !null -> !null")
+    static <T, R> R with(@Nullable T it, @NotNull Function<? super T, ? extends R> function, @Nullable R defaultValue) {
         return it == null ? defaultValue : function.apply(it);
     }
 

@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 
@@ -31,9 +30,7 @@ public interface Form extends Mutable, CanClone<Form> {
      * @throws IncompleteFormException If filling out the form fails
      * @throws IOException             If writing to file fails
      */
-    default void generateToFile(Path destination) throws IOException {
-        Files.writeString(destination, generate());
-    }
+    void generateToFile(Path destination, boolean overwrite) throws IOException;
 
     /**
      * @throws IncompleteFormException If filling out the form fails

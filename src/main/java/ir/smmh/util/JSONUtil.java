@@ -200,7 +200,7 @@ public interface JSONUtil {
 
         boolean getBoolean(String key);
 
-        int getInt(String key);
+        int getInteger(String key);
 
         long getLong(String key);
 
@@ -208,7 +208,7 @@ public interface JSONUtil {
 
         @Nullable Boolean getNullableBoolean(String key);
 
-        @Nullable Integer getNullableInt(String key);
+        @Nullable Integer getNullableInteger(String key);
 
         @Nullable Long getNullableLong(String key);
 
@@ -222,9 +222,13 @@ public interface JSONUtil {
 
         @Nullable String getNullableString(String key);
 
-        @NotNull <T> Sequential<T> getSequential(String key);
+        @NotNull <T> Sequential<T> getSequential(String key, Function<Object, T> convertor);
 
-        @Nullable <T> Sequential<T> getNullableSequential(String key);
+        @Nullable <T> Sequential<T> getNullableSequential(String key, Function<Object, T> convertor);
+
+        @NotNull <T> Sequential<Sequential<T>> get2DSequential(String key, Function<Object, T> convertor);
+
+        @Nullable <T> Sequential<Sequential<T>> getNullable2DSequential(String key, Function<Object, T> convertor);
     }
 
     class ReadOnlyJSONImpl implements ReadOnlyJSON {
@@ -250,7 +254,7 @@ public interface JSONUtil {
         }
 
         @Override
-        public int getInt(String key) {
+        public int getInteger(String key) {
             return wrapped.getInt(key);
         }
 
@@ -265,7 +269,7 @@ public interface JSONUtil {
         }
 
         @Override
-        public @Nullable Integer getNullableInt(String key) {
+        public @Nullable Integer getNullableInteger(String key) {
             return wrapped.has(key) ? wrapped.getInt(key) : null;
         }
 
@@ -305,13 +309,46 @@ public interface JSONUtil {
         }
 
         @Override
-        public @NotNull <T> Sequential<T> getSequential(String key) {
-            return arrayOfJSONObjects(wrapped, key, new SequentialImpl<>(), FunctionalUtil::cast);
+        public @NotNull <T> Sequential<T> getSequential(String key, Function<Object, T> convertor) {
+            if (wrapped.has(key)) {
+                JSONArray array = wrapped.getJSONArray(key);
+                Sequential.Mutable.VariableSize<T> sequence = new SequentialImpl<>(array.length());
+                for (Object object : array) {
+                    sequence.add(convertor.apply(object));
+                }
+                return sequence;
+            } else {
+                throw new JSONException("key does not exist: " + key);
+            }
         }
 
         @Override
-        public @Nullable <T> Sequential<T> getNullableSequential(String key) {
-            return has(key) ? getSequential(key) : null;
+        public @Nullable <T> Sequential<T> getNullableSequential(String key, Function<Object, T> convertor) {
+            return has(key) ? getSequential(key, convertor) : null;
+        }
+
+        @Override
+        public @NotNull <T> Sequential<Sequential<T>> get2DSequential(String key, Function<Object, T> convertor) {
+            if (wrapped.has(key)) {
+                JSONArray outerArray = wrapped.getJSONArray(key);
+                Sequential.Mutable.VariableSize<Sequential<T>> outerSequence = new SequentialImpl<>(outerArray.length());
+                for (Object object : outerArray) {
+                    JSONArray innerArray = (JSONArray) object;
+                    Sequential.Mutable.VariableSize<T> innerSequence = new SequentialImpl<>(innerArray.length());
+                    outerSequence.append(innerSequence);
+                    for (Object innerObject : innerArray) {
+                        innerSequence.add(convertor.apply(innerObject));
+                    }
+                }
+                return outerSequence;
+            } else {
+                throw new JSONException("key does not exist: " + key);
+            }
+        }
+
+        @Override
+        public @Nullable <T> Sequential<Sequential<T>> getNullable2DSequential(String key, Function<Object, T> convertor) {
+            return has(key) ? get2DSequential(key, convertor) : null;
         }
 
         @Override

@@ -10,6 +10,10 @@ import ir.smmh.util.jile.impl.FatOr;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 public class FormImpl implements Form, Mutable.WithListeners.Injected {
     private final String title;
     private final Map.MultiValue.Mutable<BlankSpace, String> map;
@@ -117,6 +121,13 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     @Override
     public @NotNull Form copy(String title) {
         return new FormImpl(title, sequence.clone(false), map.clone(false));
+    }
+
+    @Override
+    public void generateToFile(Path destination, boolean overwrite) throws IOException {
+        if (overwrite || !Files.exists(destination)) {
+            Files.writeString(destination, generate());
+        }
     }
 
     @Override

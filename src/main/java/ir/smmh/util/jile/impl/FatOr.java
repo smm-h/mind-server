@@ -29,16 +29,18 @@ public class FatOr<This, That> extends AbstractOr<This, That> {
     }
 
     public static <This, That> Or<This, That> makeThis(This object) {
-        return either(object, true);
+        return either(object, null);
     }
 
     public static <This, That> Or<This, That> makeThat(That object) {
-        return either(object, false);
+        return either(null, object);
     }
 
-    @SuppressWarnings("BooleanParameter")
-    public static <This, That> Or<This, That> either(Object object, boolean isThis) {
-        return new FatOr<>(object, isThis);
+    public static <This, That> Or<This, That> either(This thisObject, That thatObject) {
+        if ((thisObject == null) == (thatObject == null))
+            throw new IllegalArgumentException("either both or neither of values are null");
+        boolean isThis = thatObject == null;
+        return new FatOr<>(isThis ? thisObject : thatObject, isThis);
     }
 
     @Override

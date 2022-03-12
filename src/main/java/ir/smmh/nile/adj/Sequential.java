@@ -411,6 +411,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
             return new AbstractMutableSequential<>() {
                 @Override
                 public T getAtIndex(int index) {
+                    validateIndex(index);
                     return list.get(index);
                 }
 
@@ -434,6 +435,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
                 @Override
                 public Integer getAtIndex(int index) {
+                    validateIndex(index);
                     return array[index];
                 }
 
@@ -457,6 +459,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
                 @Override
                 public Float getAtIndex(int index) {
+                    validateIndex(index);
                     return array[index];
                 }
 
@@ -480,6 +483,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
                 @Override
                 public Long getAtIndex(int index) {
+                    validateIndex(index);
                     return array[index];
                 }
 
@@ -503,6 +507,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
                 @Override
                 public Double getAtIndex(int index) {
+                    validateIndex(index);
                     return array[index];
                 }
 
@@ -526,6 +531,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
                 @Override
                 public Byte getAtIndex(int index) {
+                    validateIndex(index);
                     return array[index];
                 }
 
@@ -549,6 +555,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
                 @Override
                 public Character getAtIndex(int index) {
+                    validateIndex(index);
                     return array[index];
                 }
 
@@ -572,6 +579,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
                 @Override
                 public Boolean getAtIndex(int index) {
+                    validateIndex(index);
                     return array[index];
                 }
 
@@ -595,6 +603,7 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
 
                 @Override
                 public T getAtIndex(int index) {
+                    validateIndex(index);
                     return array[index];
                 }
 

@@ -2,6 +2,7 @@ package ir.smmh.util;
 
 import ir.smmh.Backward;
 import ir.smmh.nile.adj.Sequential;
+import ir.smmh.nile.adj.impl.SequentialImpl;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -250,23 +251,6 @@ public interface StringUtil {
         return count;
     }
 
-    static @NotNull Sequential<String> splitByLength(String string, int limit) {
-        int l = string.length();
-        int n = l / limit + (l % limit > 0 ? 1 : 0);
-        String[] array = new String[n];
-
-        for (int i = 0; i < n; i += 1) {
-            int a = i * limit;
-            if (a > l - limit) {
-                array[i] = string.substring(a);
-            } else {
-                array[i] = string.substring(a, a + limit);
-            }
-        }
-
-        return Sequential.of(array);
-    }
-
     static @NotNull Sequential<String> splitByCharacter(String string, char splitter) {
 
         int n = count(string, splitter) + 1;
@@ -284,6 +268,23 @@ public interface StringUtil {
             else
                 array[i] = string.substring(a, b);
             a = b + 1;
+        }
+
+        return Sequential.of(array);
+    }
+
+    static @NotNull Sequential<String> splitByLength(String string, int limit) {
+        int l = string.length();
+        int n = l / limit + (l % limit > 0 ? 1 : 0);
+        String[] array = new String[n];
+
+        for (int i = 0; i < n; i += 1) {
+            int a = i * limit;
+            if (a > l - limit) {
+                array[i] = string.substring(a);
+            } else {
+                array[i] = string.substring(a, a + limit);
+            }
         }
 
         return Sequential.of(array);

@@ -70,6 +70,8 @@ class StringUtilTest {
         String s = "\na\nbcd\nefgh\n\nij";
         assertEquals("[, a, bcd, efgh, , ij]", splitByCharacter(s, '\n').toString());
         assertEquals("[\na\n, bcd, \nef, gh\n, \nij]", splitByLength(s, 3).toString());
+        assertEquals("[" + s + "]", splitByCharacter(s, 'x').toString());
+        assertEquals("[" + s + "]", splitByLength(s, 30).toString());
     }
 
     @Test
