@@ -3,6 +3,7 @@ package ir.smmh.util;
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.verbs.*;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -11,7 +12,7 @@ public interface Map<K, V> extends CanContainPlace<K>, CanContain<V> {
 
     @NotNull Iterable<K> overKeys();
 
-    interface Mutable<K, V> extends Map<K, V>, CanSetAtPlace<K, V>, CanRemovePlace<K>, CanClear {
+    interface Mutable<K, V> extends Map<K, V>, CanSetAtPlace<K, V>, CanRemoveAtPlace<K>, CanClear {
         void removeAllPlaces();
 
         @Override
@@ -49,9 +50,19 @@ public interface Map<K, V> extends CanContainPlace<K>, CanContain<V> {
             return getAtPlace(key).getSize();
         }
 
+        @Nullable K containingKey(V toCheck);
+
         interface Mutable<K, V> extends Map.Mutable<K, V>, MultiValue<K, V> {
             @Override
             MultiValue.Mutable<K, V> clone(boolean deepIfPossible);
+
+            void removeAtPlace(K place, V toRemove);
+
+            void removeAllAtPlace(K place);
+
+            default void clearAtPlace(K place) {
+                removeAllAtPlace(place);
+            }
 
             default void addAtPlace(K place, V toAdd) {
                 setAtPlace(place, toAdd);

@@ -40,4 +40,9 @@ public class TypeSpecifierImpl implements TypeSpecifier {
     public @NotNull String generate() {
         return (isPrimitive || isNullable == null ? "" : "@" + (isNullable ? "Nullable" : "NotNull") + " ") + type;
     }
+
+    @Override
+    public String toString() {
+        return "[Type-specifier] " + generate();
+    }
 }

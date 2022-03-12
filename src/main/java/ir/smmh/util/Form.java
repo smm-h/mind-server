@@ -39,6 +39,9 @@ public interface Form extends Mutable, CanClone<Form> {
 
     @NotNull String getTitle();
 
+    @Contract("_->this")
+    @NotNull Form clear(BlankSpace blankSpace);
+
     @Contract("_, _->this")
     @NotNull Form enter(BlankSpace blankSpace, @Nullable String entry);
 

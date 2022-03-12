@@ -17,8 +17,8 @@ import static ir.smmh.util.FunctionalUtil.with;
 public abstract class MapImpl<K, V> implements Map<K, V> {
 
     @Override
-    public final String toString() {
-        StringJoiner joiner = new StringJoiner(", ", "Lookup: {", "}");
+    public String toString() {
+        StringJoiner joiner = new StringJoiner(", ", "Map: {", "}");
         for (K key : overKeys()) {
             joiner.add(key.toString());
         }
@@ -35,6 +35,15 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
 
         private SingleValue(java.util.Map<K, V> map) {
             this.map = map;
+        }
+
+        @Override
+        public final String toString() {
+            StringJoiner joiner = new StringJoiner(", ", "Map: {", "}");
+            for (K key : overKeys()) {
+                joiner.add(key.toString() + " -> " + getAtPlace(key));
+            }
+            return joiner.toString();
         }
 
         @Override
@@ -96,7 +105,9 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
 
             @Override
             public final void setAtPlace(K place, V toSet) {
+                preMutate();
                 map.put(place, toSet);
+                postMutate();
             }
 
             @Override
@@ -106,12 +117,16 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
 
             @Override
             public void removeAtPlace(K toRemove) {
+                preMutate();
                 map.remove(toRemove);
+                postMutate();
             }
 
             @Override
             public void removeAllPlaces() {
+                preMutate();
                 map.clear();
+                postMutate();
             }
 
             @Override
@@ -133,6 +148,15 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
         }
 
         @Override
+        public final String toString() {
+            StringJoiner joiner = new StringJoiner(", ", "Map: {", "}");
+            for (K key : overKeys()) {
+                joiner.add(key.toString() + " -> " + getAtPlace(key));
+            }
+            return joiner.toString();
+        }
+
+        @Override
         public boolean contains(V toCheck) {
             for (K key : map.keySet()) {
                 if (map.get(key).contains(toCheck)) {
@@ -140,6 +164,16 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
                 }
             }
             return false;
+        }
+
+        @Override
+        public @Nullable K containingKey(V toCheck) {
+            for (K key : map.keySet()) {
+                if (map.get(key).contains(toCheck)) {
+                    return key;
+                }
+            }
+            return null;
         }
 
         @Override
@@ -190,8 +224,10 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
 
             @Override
             public final void setAtPlace(K place, V toSet) {
+                preMutate();
                 Sequential.Mutable.VariableSize<V> s = map.computeIfAbsent(place, k -> new SequentialImpl<>(new ArrayList<>()));
                 s.append(toSet);
+                postMutate();
             }
 
             @Override
@@ -201,12 +237,39 @@ public abstract class MapImpl<K, V> implements Map<K, V> {
 
             @Override
             public void removeAtPlace(K toRemove) {
+                preMutate();
                 map.remove(toRemove);
+                postMutate();
+            }
+
+            @Override
+            public void removeAtPlace(K place, V toRemove) {
+                var s = map.get(place);
+                if (s != null) {
+                    int i = s.findFirst(toRemove);
+                    if (i != -1) {
+                        preMutate();
+                        s.removeIndexFrom(i);
+                        postMutate();
+                    }
+                }
+            }
+
+            @Override
+            public void removeAllAtPlace(K place) {
+                var s = map.get(place);
+                if (s != null) {
+                    preMutate();
+                    s.clear();
+                    postMutate();
+                }
             }
 
             @Override
             public void removeAllPlaces() {
+                preMutate();
                 map.clear();
+                postMutate();
             }
 
             @Override

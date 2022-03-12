@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class JavaTypeImpl extends FormImpl implements JavaType {
+abstract class JavaTypeImpl extends FormImpl implements JavaType {
     private final JavaPackage pkg;
     private final Path path;
     private final String name;

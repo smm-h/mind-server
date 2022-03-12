@@ -82,4 +82,9 @@ abstract class MethodImpl extends FormImpl implements Method {
     public boolean isStatic() {
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "[Method] " + name + " of " + type.getTypeName();
+    }
 }

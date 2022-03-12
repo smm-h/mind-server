@@ -46,4 +46,9 @@ public class JavaClassImpl extends JavaTypeImpl implements JavaClass {
         enter(JavaClass.SUPER_INTERFACES, impls.getTypeName());
         addImport(impls);
     }
+
+    @Override
+    public String toString() {
+        return "[Class] " + getTypeName();
+    }
 }

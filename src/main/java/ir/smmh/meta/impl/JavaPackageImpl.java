@@ -33,4 +33,9 @@ public class JavaPackageImpl implements JavaPackage {
     public @NotNull String getAddress() {
         return address;
     }
+
+    @Override
+    public String toString() {
+        return "[Package] " + moduleName + ":" + address;
+    }
 }

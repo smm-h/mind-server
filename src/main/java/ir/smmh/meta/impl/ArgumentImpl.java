@@ -27,4 +27,9 @@ public class ArgumentImpl implements Argument {
     public @NotNull String generate() {
         return type.generate() + " " + name;
     }
+
+    @Override
+    public String toString() {
+        return "[Argument] " + generate();
+    }
 }

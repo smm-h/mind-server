@@ -289,6 +289,11 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
         return findFirst(toCheck) != -1;
     }
 
+    @Override
+    default boolean doesNotContain(T toCheck) {
+        return findFirst(toCheck) == -1;
+    }
+
     default int count(Predicate<? super T> toTest) {
         return count(toTest, 0, getSize());
     }

@@ -13,4 +13,9 @@ public class JavaInterfaceImpl extends JavaTypeImpl implements JavaInterface {
         append(METHODS);
         enter(NAME, name);
     }
+
+    @Override
+    public String toString() {
+        return "[Interface] " + getTypeName();
+    }
 }

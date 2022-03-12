@@ -165,6 +165,12 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     }
 
     @Override
+    public @NotNull Form clear(BlankSpace blankSpace) {
+        map.clearAtPlace(blankSpace);
+        return this;
+    }
+
+    @Override
     public boolean isFilledOut() {
         return clean() && isFilledOut;
     }
