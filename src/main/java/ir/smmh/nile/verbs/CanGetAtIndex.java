@@ -2,6 +2,7 @@ package ir.smmh.nile.verbs;
 
 import ir.smmh.nile.adj.Indexible;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.IntFunction;
 
@@ -22,6 +23,10 @@ public interface CanGetAtIndex<T> extends Indexible, IntFunction<T> {
      * @throws IndexOutOfBoundsException If index is invalid
      */
     T getAtIndex(int index);
+
+    default @Nullable T getNullableAtIndex(int index) {
+        return hasIndex(index) ? getAtIndex(index) : null;
+    }
 
     default T getAtIndexWrapAround(int index) {
         return getAtIndex(index % getSize());

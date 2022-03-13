@@ -94,4 +94,8 @@ public interface MathUtil {
     static int sign(int n) {
         return Integer.compare(n, 0);
     }
+
+    static int sum(int n) {
+        return n * (n + 1) / 2;
+    }
 }
