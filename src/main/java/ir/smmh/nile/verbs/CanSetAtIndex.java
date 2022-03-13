@@ -6,9 +6,14 @@ import org.jetbrains.annotations.Nullable;
 
 public interface CanSetAtIndex<T> extends CanContain<T>, Indexible, Mutable {
 
-    static <T> void setAtIndex(CanSetAtIndex<T> canSetAtIndex, int index, T toSet) throws IndexOutOfBoundsException {
+    static <T> void setAtIndex(CanSetAtIndex<T> canSetAtIndex, int index, T toSet) {
         canSetAtIndex.setAtIndex(index, toSet);
     }
 
-    void setAtIndex(int index, @Nullable T toSet) throws IndexOutOfBoundsException;
+    /**
+     * @param index Index
+     * @param toSet The object to assign to that index
+     * @throws IndexOutOfBoundsException If index is invalid
+     */
+    void setAtIndex(int index, @Nullable T toSet);
 }

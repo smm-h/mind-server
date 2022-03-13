@@ -22,7 +22,7 @@ public class DoubleSequence<T> extends Sequential.AbstractMutableSequential<T> {
     }
 
     @Override
-    public final T getAtIndex(int index) throws IndexOutOfBoundsException {
+    public final T getAtIndex(int index) {
         validateIndex(index);
         return index == 0 ? first : second;
     }

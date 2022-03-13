@@ -17,7 +17,7 @@ public class SequenceJoiner<T> extends Sequential.AbstractSequential<T> implemen
     }
 
     @Override
-    public final T getAtIndex(int index) throws IndexOutOfBoundsException {
+    public final T getAtIndex(int index) {
         for (Sequential<? extends T> s : subSequences) {
             int n = s.getSize();
             if (index < n) {

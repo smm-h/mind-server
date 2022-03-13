@@ -91,4 +91,7 @@ public interface MathUtil {
         return sqrt(sqr(x1 - x2) + sqr(y1 - y2));
     }
 
+    static int sign(int n) {
+        return Integer.compare(n, 0);
+    }
 }

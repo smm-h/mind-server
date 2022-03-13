@@ -3,9 +3,16 @@ package ir.smmh.nile.adj;
 import ir.smmh.nile.verbs.CanContainPlace;
 
 public interface Indexible extends CanContainPlace<Integer> {
-    boolean hasIndex(int index);
 
-    default void validateIndex(int index) throws IndexOutOfBoundsException {
+    default boolean hasIndex(int index) {
+        return index >= 0 && index < getSize();
+    }
+
+    /**
+     * @param index Index
+     * @throws IndexOutOfBoundsException If index is invalid
+     */
+    default void validateIndex(int index) {
         if (!hasIndex(index)) throw new IndexOutOfBoundsException();
     }
 

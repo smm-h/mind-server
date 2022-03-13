@@ -41,7 +41,7 @@ public class SequentialImpl<T> extends Sequential.AbstractMutableSequential<T> i
     }
 
     @Override
-    public final void removeIndexFrom(int toRemove) throws IndexOutOfBoundsException {
+    public final void removeIndexFrom(int toRemove) {
         preMutate();
         list.remove(toRemove);
         postMutate();
@@ -62,7 +62,7 @@ public class SequentialImpl<T> extends Sequential.AbstractMutableSequential<T> i
     }
 
     @Override
-    public final T getAtIndex(int index) throws IndexOutOfBoundsException {
+    public final T getAtIndex(int index) {
         return list.get(index);
     }
 

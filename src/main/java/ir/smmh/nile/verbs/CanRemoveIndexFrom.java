@@ -9,5 +9,9 @@ public interface CanRemoveIndexFrom<T> extends Indexible, Multitude.VariableSize
         canRemoveIndexFrom.removeIndexFrom(toRemove);
     }
 
-    void removeIndexFrom(int toRemove) throws IndexOutOfBoundsException;
+    /**
+     * @param toRemove Index to remove
+     * @throws IndexOutOfBoundsException If index is invalid
+     */
+    void removeIndexFrom(int toRemove);
 }

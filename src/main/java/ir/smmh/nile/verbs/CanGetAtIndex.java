@@ -7,7 +7,7 @@ import java.util.function.IntFunction;
 
 public interface CanGetAtIndex<T> extends Indexible, IntFunction<T> {
 
-    static <T> T getAtIndex(CanGetAtIndex<T> canGetAtIndex, int index) throws IndexOutOfBoundsException {
+    static <T> T getAtIndex(CanGetAtIndex<T> canGetAtIndex, int index) {
         return canGetAtIndex.getAtIndex(index);
     }
 
@@ -16,7 +16,12 @@ public interface CanGetAtIndex<T> extends Indexible, IntFunction<T> {
         return getAtIndex(index);
     }
 
-    T getAtIndex(int index) throws IndexOutOfBoundsException;
+    /**
+     * @param index Index
+     * @return Object at that index
+     * @throws IndexOutOfBoundsException If index is invalid
+     */
+    T getAtIndex(int index);
 
     default T getAtIndexWrapAround(int index) {
         return getAtIndex(index % getSize());

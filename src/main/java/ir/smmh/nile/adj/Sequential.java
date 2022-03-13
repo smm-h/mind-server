@@ -186,11 +186,6 @@ public interface Sequential<T> extends Iterable<T>, ReverseIterable<T>, CanClone
         };
     }
 
-    @Override
-    default boolean hasIndex(int index) {
-        return index >= 0 && index < getSize();
-    }
-
     default boolean[] toBooleanArray(Predicate<? super T> toBoolean) {
         boolean[] array = new boolean[getSize()];
         for (int i = 0; i < array.length; i++) {

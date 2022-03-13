@@ -20,7 +20,7 @@ public class SingleSequence<T> extends Sequential.AbstractMutableSequential<T> {
     }
 
     @Override
-    public final T getAtIndex(int index) throws IndexOutOfBoundsException {
+    public final T getAtIndex(int index) {
         validateIndex(index);
         return singleton;
     }

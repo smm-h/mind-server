@@ -9,5 +9,10 @@ public interface CanInsertAtIndex<T> extends Indexible, Multitude.VariableSize {
         canInsertAtIndex.insertAtIndex(index, toInsert);
     }
 
-    void insertAtIndex(int index, T toInsert) throws IndexOutOfBoundsException;
+    /**
+     * @param index Index
+     * @param toInsert The object to insert at that index
+     * @throws IndexOutOfBoundsException If index is invalid
+     */
+    void insertAtIndex(int index, T toInsert);
 }
