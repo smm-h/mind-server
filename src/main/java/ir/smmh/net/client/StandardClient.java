@@ -9,5 +9,6 @@ public interface StandardClient extends Client {
 
     JSONObject send(String method, JSONObject parameters);
 
+    // override this to add common stuff like authentication to your parameters
     @NotNull JSONObject reviseParameters(JSONObject parameters);
 }

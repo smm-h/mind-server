@@ -10,5 +10,7 @@ public interface Client {
 
     String getHostAddress();
 
+    @Nullable String getUpdates();
+
     @Nullable String sendRequest(@NotNull String request);
 }
