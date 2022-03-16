@@ -136,7 +136,7 @@ public class FigureMakerImpl extends LanguageImpl implements FigureMaker {
         List<Figure.Part> figureParts = new ArrayList<>();
         Code code = new CodeImpl(text, "plt");
         List<Token.Individual> tokens = TokenizerImpl.tokenized.read(code);
-//        System.out.println(((Comprehension.List<Token.Individual, String>) token -> token.getTypeString() + ":" + token.getData()).comprehend(tokens));
+//        System.out.println(Comprehend.list(tokens, token -> token.getTypeString() + ":" + token.getData()));
         java.util.Map<Token.Individual, Set<Mishap>> mishaps = CodeImpl.mishaps.read(code);
         if (mishaps.isEmpty()) {
             if (tokens == null) throw new MakingException("Tokenized port empty");

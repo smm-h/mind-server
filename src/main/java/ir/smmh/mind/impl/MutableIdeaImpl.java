@@ -4,7 +4,7 @@ import ir.smmh.mind.*;
 import ir.smmh.nile.verbs.CanSerialize;
 import ir.smmh.storage.Storage;
 import ir.smmh.storage.impl.StorageImpl;
-import ir.smmh.util.Comprehension;
+import ir.smmh.util.Comprehend;
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.Mutable;
 import ir.smmh.util.MutableCollection;
@@ -24,8 +24,6 @@ import static java.util.Map.entry;
 @SuppressWarnings("ThrowsRuntimeException")
 public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Injected, CanSerialize.JSON {
 
-    private static final Comprehension.Map<PropertyImpl, String, PropertyImpl> c = p -> entry(p.getName(), p);
-    private static final Comprehension.Map<StaticPropertyImpl, String, StaticPropertyImpl> sc = p -> entry(p.getName(), p);
     private final Mind mind;
     private final String name;
     private final MutableCollection<String> intensions;
@@ -40,8 +38,8 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Inje
         this.mind = mind;
         this.name = name;
         this.intensions = intensions;
-        this.properties = c.comprehend(properties);
-        this.staticProperties = sc.comprehend(staticProperties);
+        this.properties = Comprehend.map(properties, p -> entry(p.getName(), p));
+        this.staticProperties = Comprehend.map(staticProperties, p -> entry(p.getName(), p));
         storage = StorageImpl.of(mind.getName());
         setup();
     }
@@ -51,8 +49,8 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Inje
         this.mind = mind;
         name = object.getString("name");
         intensions = JSONUtil.arrayOfStrings(object, "intensions", MutableCollectionImpl.of(new HashSet<>()));
-        properties = c.comprehend(JSONUtil.arrayOfJSONObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)));
-        staticProperties = sc.comprehend(JSONUtil.arrayOfJSONObjects(object, "static-properties", new HashSet<>(), o -> new StaticPropertyImpl(this, o)));
+        properties = Comprehend.map(JSONUtil.arrayOfJSONObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)), p -> entry(p.getName(), p));
+        staticProperties = Comprehend.map(JSONUtil.arrayOfJSONObjects(object, "static-properties", new HashSet<>(), o -> new StaticPropertyImpl(this, o)), p -> entry(p.getName(), p));
         storage = StorageImpl.of(mind.getName());
         setup();
     }
@@ -63,8 +61,8 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Inje
         try {
             object.put("name", name);
             object.put("intensions", intensions);
-            object.put("properties", properties.values()); // ((Comprehension.List<String, PropertyImpl>) properties::get).comprehend(properties.keySet()));
-            object.put("static-properties", staticProperties.values()); // ((Comprehension.List<String, PropertyImpl>) staticProperties::get).comprehend(staticProperties.keySet()));
+            object.put("properties", properties.values());
+            object.put("static-properties", staticProperties.values());
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -73,7 +71,7 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Inje
 
     private void setup() {
         setupStored();
-        intensions.getOnCleanListeners().add(() -> intensionsCache = ((Comprehension.Set<String, Idea>) mind::findIdeaByName).comprehend(intensions));
+        intensions.getOnCleanListeners().add(() -> intensionsCache = Comprehend.set(intensions, mind::findIdeaByName));
     }
 
     @Override
