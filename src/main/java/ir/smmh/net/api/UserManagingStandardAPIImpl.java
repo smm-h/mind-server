@@ -1,4 +1,4 @@
-package ir.smmh.api;
+package ir.smmh.net.api;
 
 import ir.smmh.util.RandomUtil;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ParametersAreNonnullByDefault
-public abstract class UserManagingJSONAPIImpl<U extends User, S extends Session<U>> extends JSONAPIImpl implements UserManagingJSONAPI<U, S> {
+public abstract class UserManagingStandardAPIImpl<U extends User, S extends Session<U>> extends StandardAPIImpl implements UserManagingStandardAPI<U, S> {
     public final int AUTHENTICATION_FAILED = defineError("Authentication failed");
     public final int USERNAME_EMPTY = defineError("The username cannot be empty");
     public final int USERNAME_DOES_NOT_EXIST = defineError("The entered username does not match any accounts");
@@ -41,11 +41,11 @@ public abstract class UserManagingJSONAPIImpl<U extends User, S extends Session<
             method = (Method.AuthenticatedMethod<U>) uncheckedMethod;
         } catch (ClassCastException e) {
             System.err.println("Failed to cast an unchecked authenticated method");
-            return respond(BUG);
+            return notOk(BUG);
         }
         @Nullable U user = authentication == null ? null : authenticate(authentication);
         if (method.isAuthenticationRequired()) {
-            return user == null ? respond(AUTHENTICATION_FAILED) : method.process(user, parameters);
+            return user == null ? notOk(AUTHENTICATION_FAILED) : method.process(user, parameters);
         } else {
             //noinspection ConstantConditions
             return method.process(user, parameters);

@@ -1,6 +1,6 @@
 package ir.smmh.net.server;
 
-import ir.smmh.api.API;
+import ir.smmh.net.api.API;
 
 public interface Server {
 

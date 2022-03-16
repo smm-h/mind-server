@@ -1,4 +1,4 @@
-package ir.smmh.api;
+package ir.smmh.net.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 @SuppressWarnings({"NonConstantFieldWithUpperCaseName", "UseOfSystemOutOrSystemErr"})
 @ParametersAreNonnullByDefault
-public abstract class JSONAPIImpl implements JSONAPI {
+public class StandardAPIImpl implements StandardAPI {
 
     private final Map<String, Method> methods = new HashMap<>(16);
     private final Map<Integer, String> errorCodes = new HashMap<>(16);
@@ -41,25 +41,48 @@ public abstract class JSONAPIImpl implements JSONAPI {
     }
 
     @Override
-    public final @NotNull JSONObject respond(int errorCode) {
-        return respond(errorCode, null, null);
+    public final @NotNull JSONObject notOk(String errorDescription) {
+        return makeResponse(-1, errorDescription, null, null);
     }
 
     @Override
-    public final @NotNull JSONObject respond(int errorCode, Throwable thrown) {
-        return respond(errorCode, thrown, null);
+    public final @NotNull JSONObject notOk(int errorCode) {
+        return makeResponse(errorCode, errorCodes.get(errorCode), null, null);
     }
 
     @Override
-    public final @NotNull JSONObject respond(JSONObject results) {
-        return respond(NO_ERROR, null, results);
+    public final @NotNull JSONObject notOk(int errorCode, Throwable thrown) {
+        return makeResponse(errorCode, errorCodes.get(errorCode), thrown, null);
     }
 
-    private @NotNull JSONObject respond(int errorCode, @Nullable Throwable thrown, @Nullable JSONObject results) {
+    @Override
+    public final @NotNull JSONObject ok() {
+        return makeResponse(NO_ERROR, null, null, null);
+    }
+
+    @Override
+    public final @NotNull JSONObject ok(JSONObject results) {
+        return makeResponse(NO_ERROR, null, null, results);
+    }
+
+    @Override
+    public final @NotNull JSONObject ok(String key, Object value) {
+        return makeResponse(NO_ERROR, null, null, new JSONObject().put(key, value));
+    }
+
+    private @NotNull JSONObject makeResponse(int error_code, @Nullable String errorDescription, @Nullable Throwable thrown, @Nullable JSONObject results) {
         JSONObject response = new JSONObject();
         try {
-            response.put("error_code", errorCode);
-            response.put("description", errorCodes.get(errorCode));
+            boolean ok = error_code == NO_ERROR;
+            response.put("ok", ok);
+            if (!ok) {
+                if (error_code != -1) {
+                    response.put("error_code", error_code);
+                }
+                if (errorDescription != null) {
+                    response.put("error_description", errorDescription);
+                }
+            }
             if (thrown != null) {
                 response.put("error_message", thrown.getMessage());
                 //            response.put("error_stack_trace", Arrays.toString(thrown.getStackTrace()));
@@ -79,9 +102,9 @@ public abstract class JSONAPIImpl implements JSONAPI {
         PrintStream log;
         try {
             response = processJSON(new JSONObject(new JSONTokener(request)));
-            log = response.getInt("error_code") == 0 ? System.out : System.err;
+            log = response.getBoolean("ok") ? System.out : System.err;
         } catch (JSONException e) {
-            response = respond(COULD_NOT_PARSE_REQUEST, e);
+            response = notOk(COULD_NOT_PARSE_REQUEST, e);
             log = System.err;
         }
         log.println("=== " + response);
@@ -94,43 +117,43 @@ public abstract class JSONAPIImpl implements JSONAPI {
             try {
                 methodName = request.getString("method");
             } catch (JSONException e) {
-                return respond(COULD_NOT_PARSE_REQUEST, e);
+                return notOk(COULD_NOT_PARSE_REQUEST, e);
             }
             Method method = methods.get(methodName);
             if (method == null) {
-                return respond(METHOD_NOT_FOUND);
+                return notOk(METHOD_NOT_FOUND);
             } else {
                 @NotNull JSONObject parameters;
                 try {
                     parameters = request.getJSONObject("parameters");
                 } catch (JSONException e) {
-                    return respond(COULD_NOT_PARSE_REQUEST, e);
+                    return notOk(COULD_NOT_PARSE_REQUEST, e);
                 }
                 if (method instanceof Method.AuthenticatedMethod) {
                     @SuppressWarnings("rawtypes") Method.AuthenticatedMethod am = (Method.AuthenticatedMethod) method;
-                    if (this instanceof UserManagingJSONAPIImpl) {
-                        UserManagingJSONAPIImpl<?, ?> me = ((UserManagingJSONAPIImpl<?, ?>) this);
+                    if (this instanceof UserManagingStandardAPIImpl) {
+                        UserManagingStandardAPIImpl<?, ?> me = ((UserManagingStandardAPIImpl<?, ?>) this);
                         @Nullable JSONObject authentication;
                         try {
                             authentication = request.optJSONObject("authentication", null);
                         } catch (JSONException e) {
-                            return respond(COULD_NOT_PARSE_REQUEST, e);
+                            return notOk(COULD_NOT_PARSE_REQUEST, e);
                         }
                         return me.processAuthenticatedMethod(am, authentication, parameters);
                     } else {
                         System.err.println("You can have authenticated methods only within an authenticated API");
-                        return respond(BUG);
+                        return notOk(BUG);
                     }
                 } else if (method instanceof Method.Plain) {
                     return ((Method.Plain) method).process(parameters);
                 } else {
                     System.err.println("You must not extend/implement Method directly");
-                    return respond(BUG);
+                    return notOk(BUG);
                 }
             }
         } catch (Throwable throwable) {
             throwable.printStackTrace();
-            return respond(UNEXPECTED_ERROR, throwable);
+            return notOk(UNEXPECTED_ERROR, throwable);
         }
     }
 }

@@ -1,6 +1,6 @@
 package ir.smmh.apps.pybot;
 
-import ir.smmh.api.API;
+import ir.smmh.net.api.API;
 import ir.smmh.net.server.impl.ServerImpl;
 import org.jetbrains.annotations.NotNull;
 import org.python.util.PythonInterpreter;

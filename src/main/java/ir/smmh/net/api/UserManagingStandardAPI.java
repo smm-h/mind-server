@@ -1,4 +1,4 @@
-package ir.smmh.api;
+package ir.smmh.net.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -8,7 +8,7 @@ import org.json.JSONObject;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-public interface UserManagingJSONAPI<U extends User, S extends Session<U>> extends JSONAPI {
+public interface UserManagingStandardAPI<U extends User, S extends Session<U>> extends StandardAPI {
     @NotNull JSONObject processAuthenticatedMethod(Method.AuthenticatedMethod<?> uncheckedMethod, @Nullable JSONObject authentication, JSONObject parameters);
 
     @NotNull String hashPassword(String password);

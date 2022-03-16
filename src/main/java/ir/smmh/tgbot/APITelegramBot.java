@@ -1,6 +1,6 @@
 package ir.smmh.tgbot;
 
-import ir.smmh.api.API;
+import ir.smmh.net.api.API;
 import ir.smmh.tgbot.types.Message;
 
 public interface APITelegramBot extends TelegramBot {

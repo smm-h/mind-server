@@ -1,6 +1,6 @@
 package ir.smmh.tgbot.impl;
 
-import ir.smmh.api.API;
+import ir.smmh.net.api.API;
 import ir.smmh.tgbot.APITelegramBot;
 import org.jetbrains.annotations.Nullable;
 

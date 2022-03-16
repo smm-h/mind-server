@@ -6,17 +6,9 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("SameReturnValue")
 public interface Client {
 
-    int getDefaultPort();
+    int getPort();
 
-    @Nullable String connectToHost(@NotNull String address, int port, @NotNull String request);
+    String getHostAddress();
 
-    @Nullable
-    default String connectToHost(@NotNull String address, @NotNull String request) {
-        return connectToHost(address, getDefaultPort(), request);
-    }
-
-    @Nullable
-    default String connectToLocalHost(@NotNull String request) {
-        return connectToHost("127.0.0.1", request);
-    }
+    @Nullable String sendRequest(@NotNull String request);
 }

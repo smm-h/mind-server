@@ -1,12 +1,12 @@
 package ir.smmh.tgbot;
 
-import ir.smmh.api.JSONAPIImpl;
+import ir.smmh.net.api.StandardAPIImpl;
 import ir.smmh.tgbot.types.Message;
 import org.json.JSONObject;
 
 public interface StandardAPITelegramBot extends APITelegramBot {
     @Override
-    JSONAPIImpl getAPI();
+    StandardAPIImpl getAPI();
 
     default void handleViaStandardAPI(Message message) {
         String text = message.text();
@@ -19,7 +19,7 @@ public interface StandardAPITelegramBot extends APITelegramBot {
         } else if (response.has("error_message")) {
             string = response.getString("error_message");
         } else {
-            string = response.getString("description");
+            string = response.getString("error_description");
         }
         sendMessage(chatId, string, message.message_id());
     }

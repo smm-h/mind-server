@@ -1,6 +1,6 @@
 package ir.smmh.apps.cmdbot;
 
-import ir.smmh.api.API;
+import ir.smmh.net.api.API;
 import ir.smmh.net.server.impl.ServerImpl;
 import ir.smmh.util.Map;
 import ir.smmh.util.impl.MapImpl;
