@@ -10,7 +10,7 @@ public interface CanInsertAtIndex<T> extends Indexible, Multitude.VariableSize {
     }
 
     /**
-     * @param index Index
+     * @param index    Index
      * @param toInsert The object to insert at that index
      * @throws IndexOutOfBoundsException If index is invalid
      */
