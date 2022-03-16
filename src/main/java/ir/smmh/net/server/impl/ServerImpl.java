@@ -29,15 +29,14 @@ public class ServerImpl implements Server {
     @Override
     public final void start(int port) {
         System.out.println("Server started...");
-        try {
-            ServerSocket serverSocket = new ServerSocket(port);
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             running = true;
             while (running)
                 new RequestHandlerImpl(serverSocket.accept(), getAPI()::sendRequest).start();
         } catch (IOException e) {
             System.err.println("Failed to keep the server running");
         }
-        System.out.println("Server shutting down...");
+        System.out.println("Server stopped...");
     }
 
 }

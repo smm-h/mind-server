@@ -25,40 +25,28 @@ public class RequestHandlerImpl extends Thread implements RequestHandler {
 
     @Override
     public final void run() {
-        DataInputStream req;
-        DataOutputStream res;
         try {
-            req = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
-            res = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
-        } catch (IOException e) {
-            System.err.println("Failed to communicate with the socket");
-            return;
-        }
-        String request;
-        try {
-            request = req.readUTF();
-            System.out.println(request);
-            String response;
-            try {
-                response = request(request);
-                System.out.println(response);
-                try {
-                    res.writeUTF(response);
-                } catch (IOException e) {
-                    System.err.println("Failed to write response");
+            try (DataInputStream req = new DataInputStream(new BufferedInputStream(socket.getInputStream()))) {
+                try (DataOutputStream res = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()))) {
+                    try {
+                        String request = req.readUTF();
+                        try {
+                            String response = request(request);
+                            try {
+                                res.writeUTF(response);
+                            } catch (IOException e) {
+                                System.err.println("Failed to write response");
+                            }
+                        } catch (Throwable e) {
+                            System.err.println("Failed to process request");
+                        }
+                    } catch (IOException e) {
+                        System.err.println("Failed to read request");
+                    }
                 }
-            } catch (Throwable e) {
-                System.err.println("Failed to process request");
             }
         } catch (IOException e) {
-            System.err.println("Failed to read request");
-        }
-        try {
-            res.close();
-            req.close();
-            socket.close();
-        } catch (IOException e) {
-            System.err.println("Failed to close socket");
+            System.err.println("Failed to communicate with the socket");
         }
     }
 }
