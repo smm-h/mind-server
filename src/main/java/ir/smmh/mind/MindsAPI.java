@@ -2,18 +2,26 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MutableMindImpl;
 import ir.smmh.net.api.StandardAPIImpl;
+import ir.smmh.net.server.StandardServer;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings({"ClassNamePrefixedWithPackageName", "MagicNumber"})
 public class MindsAPI extends StandardAPIImpl {
 
     private final Map<String, Mind.Mutable> minds = new HashMap<>(8);
 
     public MindsAPI() {
-        super();
+        //noinspection ConstantConditions
+        defineAll(null);
+    }
+
+    @Override
+    public void defineAll(@NotNull StandardServer<?> server) {
+        super.defineAll(server);
+
         defineMethod("mind", (Method) (p) -> {
             String name = p.getString("name");
             if (!minds.containsKey(name)) {

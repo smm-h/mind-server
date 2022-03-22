@@ -1,5 +1,6 @@
 package ir.smmh.net.api;
 
+import ir.smmh.net.server.StandardServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
@@ -11,14 +12,13 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
-@SuppressWarnings({"NonConstantFieldWithUpperCaseName", "UseOfSystemOutOrSystemErr"})
-@ParametersAreNonnullByDefault
 public class StandardAPIImpl implements StandardAPI {
 
     private final Map<String, Method> methods = new HashMap<>();
     private final Map<Integer, String> errorCodes = new HashMap<>();
 
-    {
+    @Override
+    public void defineAll(StandardServer<?> server) {
         defineError(NO_ERROR, "Successful");
         defineError(COULD_NOT_PARSE_REQUEST, "Missing keys or bad values in request");
         defineError(METHOD_NOT_FOUND, "Method not found");

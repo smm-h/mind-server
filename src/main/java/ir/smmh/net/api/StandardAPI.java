@@ -1,5 +1,6 @@
 package ir.smmh.net.api;
 
+import ir.smmh.net.server.StandardServer;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
@@ -9,7 +10,10 @@ import javax.annotation.ParametersAreNonnullByDefault;
  * An standard API is an API whose requests are JSON maps that contain 'method',
  * 'parameters', and sometimes 'authentication' keys, and whose responses are
  * JSON maps that contain the keys 'ok', 'description' if not ok, and possibly
- * 'results' if ok.
+ * 'results' if ok. Standard APIs are also designed to work exclusively with
+ * standard servers.
+ *
+ * @see StandardServer
  */
 @ParametersAreNonnullByDefault
 public interface StandardAPI extends API {
@@ -18,6 +22,8 @@ public interface StandardAPI extends API {
     int METHOD_NOT_FOUND = 2;
     int UNEXPECTED_ERROR = 3;
     int BUG = 4;
+
+    void defineAll(StandardServer<?> server);
 
     void defineMethod(String name, Method method);
 

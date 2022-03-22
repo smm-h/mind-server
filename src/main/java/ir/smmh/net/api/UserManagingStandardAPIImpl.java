@@ -1,5 +1,6 @@
 package ir.smmh.net.api;
 
+import ir.smmh.net.server.StandardServer;
 import ir.smmh.util.RandomUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,7 +23,9 @@ public abstract class UserManagingStandardAPIImpl<U extends User, S extends Sess
      */
     private final Map<String, Map<String, S>> sessions = new HashMap<>();
 
-    {
+    @Override
+    public void defineAll(StandardServer<?> server) {
+        super.defineAll(server);
         defineError(AUTHENTICATION_FAILED, "Authentication failed");
         defineError(USERNAME_EMPTY, "The username cannot be empty");
         defineError(USERNAME_DOES_NOT_EXIST, "The entered username does not match any accounts");
