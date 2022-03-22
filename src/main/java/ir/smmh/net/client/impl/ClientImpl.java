@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -14,16 +15,14 @@ public class ClientImpl implements Client {
 
     private final int port;
     private final String hostAddress;
-    private final DataInputStream input;
-    private final DataOutputStream output;
+    private final DataInputStream updateStream;
 
     public ClientImpl(int port, String hostAddress) {
         this.port = port;
+        this.hostAddress = hostAddress;
         try {
-            this.hostAddress = hostAddress;
             Socket socket = new Socket(hostAddress, port);
-            this.input = new DataInputStream(socket.getInputStream());
-            this.output = new DataOutputStream(socket.getOutputStream());
+            this.updateStream = new DataInputStream(socket.getInputStream());
         } catch (UnknownHostException u) {
             throw new RuntimeException("Could not find the host");
         } catch (IOException e) {
@@ -44,25 +43,35 @@ public class ClientImpl implements Client {
     @Override
     public @Nullable String getUpdates() {
         try {
-            return input.readUTF();
+            return updateStream.readUTF();
+        } catch (EOFException e) {
+            return null;
         } catch (IOException e) {
             System.err.println("Could not read updates");
+            e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
     @Override
-    public @Nullable String sendRequest(@NotNull String request) {
-        try {
-            output.writeUTF(request);
-            try {
-                return input.readUTF();
-            } catch (IOException e) {
-                System.err.println("Could not read response");
+    public @NotNull String sendRequest(@NotNull String request) {
+        try (Socket s = new Socket(hostAddress, port)) {
+            try (DataInputStream i = new DataInputStream(s.getInputStream())) {
+                try (DataOutputStream o = new DataOutputStream(s.getOutputStream())) {
+                    try {
+                        o.writeUTF(request);
+                        try {
+                            return i.readUTF();
+                        } catch (IOException e) {
+                            throw new RuntimeException("Could not read response");
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException("Could not write request");
+                    }
+                }
             }
         } catch (IOException e) {
-            System.err.println("Could not write request");
+            throw new RuntimeException("Could not establish connection to send request");
         }
-        return null;
     }
 }
