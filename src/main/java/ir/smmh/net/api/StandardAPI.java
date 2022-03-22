@@ -13,9 +13,15 @@ import javax.annotation.ParametersAreNonnullByDefault;
  */
 @ParametersAreNonnullByDefault
 public interface StandardAPI extends API {
+    int NO_ERROR = 0;
+    int COULD_NOT_PARSE_REQUEST = 1;
+    int METHOD_NOT_FOUND = 2;
+    int UNEXPECTED_ERROR = 3;
+    int BUG = 4;
+
     void defineMethod(String name, Method method);
 
-    int defineError(String description);
+    void defineError(int errorCode, String description);
 
     @NotNull JSONObject notOk(String errorDescription);
 

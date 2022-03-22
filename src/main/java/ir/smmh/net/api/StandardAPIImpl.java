@@ -15,14 +15,16 @@ import java.util.Map;
 @ParametersAreNonnullByDefault
 public class StandardAPIImpl implements StandardAPI {
 
-    private final Map<String, Method> methods = new HashMap<>(16);
-    private final Map<Integer, String> errorCodes = new HashMap<>(16);
-    private int lastErrorCode = 0;
-    public final int BUG = defineError("Internal bug encountered");
-    public final int NO_ERROR = defineError("Successful");
-    public final int COULD_NOT_PARSE_REQUEST = defineError("Missing keys or bad values in request");
-    public final int METHOD_NOT_FOUND = defineError("Method not found");
-    public final int UNEXPECTED_ERROR = defineError("Unexpected error occurred");
+    private final Map<String, Method> methods = new HashMap<>();
+    private final Map<Integer, String> errorCodes = new HashMap<>();
+
+    {
+        defineError(NO_ERROR, "Successful");
+        defineError(COULD_NOT_PARSE_REQUEST, "Missing keys or bad values in request");
+        defineError(METHOD_NOT_FOUND, "Method not found");
+        defineError(UNEXPECTED_ERROR, "Unexpected error occurred");
+        defineError(BUG, "Internal bug encountered");
+    }
 
     @Override
     public final void defineMethod(String name, Method method) {
@@ -34,10 +36,8 @@ public class StandardAPIImpl implements StandardAPI {
     }
 
     @Override
-    public final int defineError(String description) {
-        int code = lastErrorCode++;
-        errorCodes.put(code, description);
-        return code;
+    public final void defineError(int errorCode, String description) {
+        errorCodes.put(errorCode, description);
     }
 
     @Override

@@ -15,24 +15,27 @@ import java.util.Map;
 
 @ParametersAreNonnullByDefault
 public abstract class UserManagingStandardAPIImpl<U extends User, S extends Session<U>> extends StandardAPIImpl implements UserManagingStandardAPI<U, S> {
-    public final int AUTHENTICATION_FAILED = defineError("Authentication failed");
-    public final int USERNAME_EMPTY = defineError("The username cannot be empty");
-    public final int USERNAME_DOES_NOT_EXIST = defineError("The entered username does not match any accounts");
-    public final int USERNAME_ALREADY_EXISTS = defineError("The entered username already exists");
-    public final int USERNAME_INVALID = defineError("The entered username is not a valid username");
-    public final int PASSWORD_EMPTY = defineError("The password cannot be empty");
-    public final int PASSWORD_TOO_WEAK = defineError("The password is not secure enough");
-    public final int PASSWORD_INCORRECT = defineError("The password you entered was incorrect");
-    public final int TOKEN_EMPTY = defineError("The token is invalid");
-    public final int USER_NOT_FOUND = defineError("User not found");
-    public final int SESSION_NOT_FOUND = defineError("Session not found; it may been terminated or expired");
-    public final int SESSION_NOT_STRONG_ENOUGH = defineError("Session could not terminate stronger session");
-    private final @NotNull PasswordHashFunction hash = createMessageDigest();
 
+    private final @NotNull PasswordHashFunction hash = createMessageDigest();
     /**
      * A map of usernames, mapped to a map of session IDs, mapped to a session
      */
     private final Map<String, Map<String, S>> sessions = new HashMap<>();
+
+    {
+        defineError(AUTHENTICATION_FAILED, "Authentication failed");
+        defineError(USERNAME_EMPTY, "The username cannot be empty");
+        defineError(USERNAME_DOES_NOT_EXIST, "The entered username does not match any accounts");
+        defineError(USERNAME_ALREADY_EXISTS, "The entered username already exists");
+        defineError(USERNAME_INVALID, "The entered username is not a valid username");
+        defineError(PASSWORD_EMPTY, "The password cannot be empty");
+        defineError(PASSWORD_TOO_WEAK, "The password is not secure enough");
+        defineError(PASSWORD_INCORRECT, "The password you entered was incorrect");
+        defineError(TOKEN_EMPTY, "The token is invalid");
+        defineError(USER_NOT_FOUND, "User not found");
+        defineError(SESSION_NOT_FOUND, "Session not found; it may been terminated or expired");
+        defineError(SESSION_NOT_STRONG_ENOUGH, "Session could not terminate stronger session");
+    }
 
     @SuppressWarnings("unchecked")
     public final @NotNull JSONObject processAuthenticatedMethod(Method.AuthenticatedMethod<?> uncheckedMethod, @Nullable JSONObject authentication, JSONObject parameters) {

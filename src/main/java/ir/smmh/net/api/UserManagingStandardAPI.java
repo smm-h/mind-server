@@ -9,6 +9,20 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 public interface UserManagingStandardAPI<U extends User, S extends Session<U>> extends StandardAPI {
+
+    int AUTHENTICATION_FAILED = 100;
+    int USERNAME_EMPTY = 101;
+    int USERNAME_DOES_NOT_EXIST = 102;
+    int USERNAME_ALREADY_EXISTS = 103;
+    int USERNAME_INVALID = 104;
+    int PASSWORD_EMPTY = 105;
+    int PASSWORD_TOO_WEAK = 106;
+    int PASSWORD_INCORRECT = 107;
+    int TOKEN_EMPTY = 108;
+    int USER_NOT_FOUND = 200;
+    int SESSION_NOT_FOUND = 201;
+    int SESSION_NOT_STRONG_ENOUGH = 202;
+
     @NotNull JSONObject processAuthenticatedMethod(Method.AuthenticatedMethod<?> uncheckedMethod, @Nullable JSONObject authentication, JSONObject parameters);
 
     @NotNull String hashPassword(String password);

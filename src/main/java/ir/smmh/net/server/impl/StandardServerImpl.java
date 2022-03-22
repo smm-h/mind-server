@@ -3,6 +3,7 @@ package ir.smmh.net.server.impl;
 import ir.smmh.net.api.StandardAPI;
 import ir.smmh.net.server.Client;
 import ir.smmh.net.server.StandardServer;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -14,6 +15,11 @@ public class StandardServerImpl<C extends Client> extends ServerImpl implements 
 
     public StandardServerImpl(StandardAPI api) {
         super(api);
+    }
+
+    @Override
+    public @NotNull StandardAPI getAPI() {
+        return (StandardAPI) super.getAPI();
     }
 
     @Override

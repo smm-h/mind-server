@@ -1,5 +1,8 @@
 package ir.smmh.net.server;
 
+import ir.smmh.net.api.StandardAPI;
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 
 /**
@@ -9,6 +12,9 @@ import java.io.IOException;
  * automatically removed, so you only need to worry about adding them.
  */
 public interface StandardServer<C extends Client> extends Server {
+
+    @Override
+    @NotNull StandardAPI getAPI();
 
     void addConnection(C connection);
 

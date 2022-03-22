@@ -3,6 +3,7 @@ package ir.smmh.net.server.impl;
 import ir.smmh.net.api.API;
 import ir.smmh.net.server.Server;
 import ir.smmh.net.server.SocketHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -11,16 +12,18 @@ import java.util.function.Supplier;
 
 public class ServerImpl implements Server {
 
+    private final API api;
     private final Supplier<SocketHandler> connectionHandlerSupplier;
     private boolean running;
 
-    public ServerImpl(Supplier<SocketHandler> connectionHandlerSupplier) {
-        super();
-        this.connectionHandlerSupplier = connectionHandlerSupplier;
+    public ServerImpl(API api) {
+        this.api = api;
+        this.connectionHandlerSupplier = () -> new SocketHandlerImpl(api::sendRequest);
     }
 
-    public ServerImpl(API api) {
-        this(() -> new SocketHandlerImpl(api::sendRequest));
+    @Override
+    public @NotNull API getAPI() {
+        return api;
     }
 
     @Override

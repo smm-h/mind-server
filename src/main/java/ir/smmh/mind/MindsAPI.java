@@ -49,7 +49,8 @@ public class MindsAPI extends StandardAPIImpl {
             return notOk(NO_ERROR);
         });
 
-        int INSTANTIATION_FAILED = defineError("Instantiation failed");
+        int INSTANTIATION_FAILED = 500;
+        defineError(INSTANTIATION_FAILED, "Instantiation failed");
 
         defineMethod("instantiate", (Method) (p) -> {
             Idea.Mutable idea = getIdea(p);
