@@ -33,6 +33,16 @@ public interface Map<K, V> extends CanContainPlace<K>, CanContain<V> {
         interface Mutable<K, V> extends Map.Mutable<K, V>, SingleValue<K, V> {
             @Override
             SingleValue.Mutable<K, V> clone(boolean deepIfPossible);
+
+            default void setAllFrom(Map.SingleValue<K, V> map) {
+                for (K key : map.overKeys())
+                    setAtPlace(key, map.getAtPlace(key));
+            }
+
+            default void setAllFrom(java.util.Map<K, V> map) {
+                for (K key : map.keySet())
+                    setAtPlace(key, map.get(key));
+            }
         }
     }
 

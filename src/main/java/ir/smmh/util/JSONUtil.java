@@ -193,6 +193,14 @@ public interface JSONUtil {
         return object;
     }
 
+    static JSONObject mapN(Object... parameters) {
+        JSONObject p = new JSONObject();
+        for (int i = 0; i < parameters.length; i += 2) {
+            p.put((String) parameters[i], parameters[i + 1]);
+        }
+        return p;
+    }
+
     interface ReadOnlyJSON {
         @NotNull JSONObject toJSONObject();
 

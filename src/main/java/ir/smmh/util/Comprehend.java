@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.*;
-import java.util.Map.Entry;
 
 public interface Comprehend {
     // list without counter
@@ -113,5 +112,24 @@ public interface Comprehend {
     @FunctionalInterface
     interface WithCounter<Input, Output> {
         Output forEach(Input input, int counter);
+    }
+
+    interface Entry<K, V> {
+        K getKey();
+        V getValue();
+    }
+
+    static <K, V> Entry<K, V> entry(K key, V value) {
+        return new Entry<>() {
+            @Override
+            public K getKey() {
+                return key;
+            }
+
+            @Override
+            public V getValue() {
+                return value;
+            }
+        };
     }
 }

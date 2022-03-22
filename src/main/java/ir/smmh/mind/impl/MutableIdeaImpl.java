@@ -19,7 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import static java.util.Map.entry;
+import static ir.smmh.util.Comprehend.entry;
 
 @SuppressWarnings("ThrowsRuntimeException")
 public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Injected, CanSerialize.JSON {

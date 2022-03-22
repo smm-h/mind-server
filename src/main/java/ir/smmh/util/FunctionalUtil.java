@@ -17,7 +17,8 @@ import java.util.function.Supplier;
 @SuppressWarnings("StaticMethodOnlyUsedInOneClass")
 public interface FunctionalUtil {
 
-    static <T> T itself(T self) {
+    @Contract("_->_")
+    static @NotNull <T> T itself(@NotNull T self) {
         return self;
     }
 

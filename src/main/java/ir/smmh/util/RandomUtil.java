@@ -3,6 +3,7 @@ package ir.smmh.util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
+import java.util.Set;
 
 /**
  * This interface is used to generate random things like strings or numbers.
@@ -32,5 +33,13 @@ public interface RandomUtil {
         for (int i = 0; i < count; i++)
             array[i] = generate.nextInt(bound);
         return array;
+    }
+
+    static <T> T chooseRandomly(Set<T> choices) {
+        int size = choices.size();
+        if (size == 0) throw new UnsupportedOperationException("cannot choose randomly from empty set");
+        int i = generate.nextInt(size);
+        for (T t : choices) if (i-- == 0) return t;
+        return null;
     }
 }
