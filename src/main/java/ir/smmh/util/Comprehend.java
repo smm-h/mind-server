@@ -104,21 +104,6 @@ public interface Comprehend {
         return map;
     }
 
-    @FunctionalInterface
-    interface WithoutCounter<Input, Output> {
-        Output forEach(Input input);
-    }
-
-    @FunctionalInterface
-    interface WithCounter<Input, Output> {
-        Output forEach(Input input, int counter);
-    }
-
-    interface Entry<K, V> {
-        K getKey();
-        V getValue();
-    }
-
     static <K, V> Entry<K, V> entry(K key, V value) {
         return new Entry<>() {
             @Override
@@ -131,5 +116,21 @@ public interface Comprehend {
                 return value;
             }
         };
+    }
+
+    @FunctionalInterface
+    interface WithoutCounter<Input, Output> {
+        Output forEach(Input input);
+    }
+
+    @FunctionalInterface
+    interface WithCounter<Input, Output> {
+        Output forEach(Input input, int counter);
+    }
+
+    interface Entry<K, V> {
+        K getKey();
+
+        V getValue();
     }
 }
