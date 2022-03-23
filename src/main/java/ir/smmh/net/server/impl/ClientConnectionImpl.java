@@ -1,32 +1,45 @@
 package ir.smmh.net.server.impl;
 
-import ir.smmh.net.server.Client;
+import ir.smmh.net.server.ClientConnection;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.Socket;
 
-public class ClientImpl implements Client {
+public class ClientConnectionImpl implements ClientConnection {
     private final Socket socket;
-    private final String uniqueId;
     private final DataInputStream i;
     private final DataOutputStream o;
+    private boolean manuallyClosed = false;
 
-    public ClientImpl(@NotNull Socket socket, @NotNull String uniqueId) throws IOException {
+    public ClientConnectionImpl(@NotNull Socket socket) throws IOException {
         this.socket = socket;
-        this.uniqueId = uniqueId;
         i = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
         o = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
     }
 
     @Override
-    public @NotNull String getUniqueId() {
-        return uniqueId;
+    public void close() {
+        if (!manuallyClosed) {
+            manuallyClosed = true;
+            try {
+                i.close();
+            } catch (IOException ignored) {
+            }
+            try {
+                o.close();
+            } catch (IOException ignored) {
+            }
+            try {
+                socket.close();
+            } catch (IOException ignored) {
+            }
+        }
     }
 
     @Override
     public boolean isClosed() {
-        return socket.isClosed();
+        return manuallyClosed || socket.isClosed();
     }
 
     @Override
@@ -38,23 +51,5 @@ public class ClientImpl implements Client {
     @Override
     public String receive() throws IOException {
         return i.readUTF();
-    }
-
-    @Override
-    public String toString() {
-        return "Connection@" + uniqueId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Client)) return false;
-        Client that = (Client) o;
-        return uniqueId.equals(that.getUniqueId());
-    }
-
-    @Override
-    public int hashCode() {
-        return uniqueId.hashCode();
     }
 }

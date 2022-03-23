@@ -1,12 +1,10 @@
 package ir.smmh.net.server;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 
-public interface Client {
+public interface ClientConnection {
 
-    @NotNull String getUniqueId();
+    void close();
 
     boolean isClosed();
 

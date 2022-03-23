@@ -1,5 +1,6 @@
-package ir.smmh.apps.rule;
+package ir.smmh.mpg.rule;
 
+import ir.smmh.mpg.lobby.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;

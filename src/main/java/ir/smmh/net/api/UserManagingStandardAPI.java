@@ -23,7 +23,7 @@ public interface UserManagingStandardAPI<U extends User, S extends Session<U>> e
     int SESSION_NOT_FOUND = 201;
     int SESSION_NOT_STRONG_ENOUGH = 202;
 
-    @NotNull JSONObject processAuthenticatedMethod(Method.AuthenticatedMethod<?> uncheckedMethod, @Nullable JSONObject authentication, JSONObject parameters);
+    @NotNull JSONObject processAuthenticatedMethod(Method.Authenticated<?> uncheckedMethod, @Nullable JSONObject authentication, JSONObject parameters);
 
     @NotNull String hashPassword(String password);
 
@@ -43,7 +43,9 @@ public interface UserManagingStandardAPI<U extends User, S extends Session<U>> e
 
     int terminateSession(U user, S currentSession, String toTerminate);
 
-    void createUser(String username, String passwordHash);
+    @Nullable U createUser(String username, String passwordHash);
+
+    void addUser(U user);
 
     boolean doesUsernameExist(String username);
 

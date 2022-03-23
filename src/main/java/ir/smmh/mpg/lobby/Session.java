@@ -1,12 +1,8 @@
-package ir.smmh.apps.rule.impl;
+package ir.smmh.mpg.lobby;
 
-import ir.smmh.apps.rule.Player;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.ParametersAreNonnullByDefault;
-
-@ParametersAreNonnullByDefault
-public class Session implements ir.smmh.api.Session<Player> {
+public class Session implements ir.smmh.net.api.Session<Player> {
 
     private final @NotNull Player player;
     private final @NotNull String token;

@@ -1,13 +1,11 @@
 package ir.smmh.net.api;
 
-import ir.smmh.net.server.StandardServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +15,7 @@ public class StandardAPIImpl implements StandardAPI {
     private final Map<String, Method> methods = new HashMap<>();
     private final Map<Integer, String> errorCodes = new HashMap<>();
 
-    @Override
-    public void defineAll(StandardServer<?> server) {
+    public StandardAPIImpl() {
         defineError(NO_ERROR, "Successful");
         defineError(COULD_NOT_PARSE_REQUEST, "Missing keys or bad values in request");
         defineError(METHOD_NOT_FOUND, "Method not found");
@@ -46,13 +43,14 @@ public class StandardAPIImpl implements StandardAPI {
     }
 
     @Override
-    public final @NotNull JSONObject notOk(int errorCode) {
-        return makeResponse(errorCode, errorCodes.get(errorCode), null, null);
+    public final @NotNull JSONObject notOk(int errorCode, Throwable throwable) {
+        assert errorCode != NO_ERROR;
+        return makeResponse(errorCode, errorCodes.get(errorCode), throwable, null);
     }
 
     @Override
-    public final @NotNull JSONObject notOk(int errorCode, Throwable thrown) {
-        return makeResponse(errorCode, errorCodes.get(errorCode), thrown, null);
+    public final @NotNull JSONObject maybeOk(int errorCode) {
+        return makeResponse(errorCode, errorCodes.get(errorCode), null, null);
     }
 
     @Override
@@ -121,7 +119,7 @@ public class StandardAPIImpl implements StandardAPI {
             }
             Method method = methods.get(methodName);
             if (method == null) {
-                return notOk(METHOD_NOT_FOUND);
+                return maybeOk(METHOD_NOT_FOUND);
             } else {
                 @NotNull JSONObject parameters;
                 try {
@@ -129,8 +127,8 @@ public class StandardAPIImpl implements StandardAPI {
                 } catch (JSONException e) {
                     return notOk(COULD_NOT_PARSE_REQUEST, e);
                 }
-                if (method instanceof Method.AuthenticatedMethod) {
-                    @SuppressWarnings("rawtypes") Method.AuthenticatedMethod am = (Method.AuthenticatedMethod) method;
+                if (method instanceof Method.Authenticated) {
+                    @SuppressWarnings("rawtypes") Method.Authenticated am = (Method.Authenticated) method;
                     if (this instanceof UserManagingStandardAPIImpl) {
                         UserManagingStandardAPIImpl<?, ?> me = ((UserManagingStandardAPIImpl<?, ?>) this);
                         @Nullable JSONObject authentication;
@@ -142,13 +140,13 @@ public class StandardAPIImpl implements StandardAPI {
                         return me.processAuthenticatedMethod(am, authentication, parameters);
                     } else {
                         System.err.println("You can have authenticated methods only within an authenticated API");
-                        return notOk(BUG);
+                        return maybeOk(BUG);
                     }
                 } else if (method instanceof Method.Plain) {
                     return ((Method.Plain) method).process(parameters);
                 } else {
                     System.err.println("You must not extend/implement Method directly");
-                    return notOk(BUG);
+                    return maybeOk(BUG);
                 }
             }
         } catch (Throwable throwable) {

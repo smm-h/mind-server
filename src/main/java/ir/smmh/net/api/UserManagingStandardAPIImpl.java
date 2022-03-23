@@ -1,20 +1,19 @@
 package ir.smmh.net.api;
 
-import ir.smmh.net.server.StandardServer;
+import ir.smmh.util.JSONUtil;
 import ir.smmh.util.RandomUtil;
+import ir.smmh.util.impl.MapImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.annotation.ParametersAreNonnullByDefault;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-@ParametersAreNonnullByDefault
 public abstract class UserManagingStandardAPIImpl<U extends User, S extends Session<U>> extends StandardAPIImpl implements UserManagingStandardAPI<U, S> {
 
     private final @NotNull PasswordHashFunction hash = createMessageDigest();
@@ -22,10 +21,9 @@ public abstract class UserManagingStandardAPIImpl<U extends User, S extends Sess
      * A map of usernames, mapped to a map of session IDs, mapped to a session
      */
     private final Map<String, Map<String, S>> sessions = new HashMap<>();
+    private final ir.smmh.util.Map.SingleValue.Mutable<String, U> users = new MapImpl.SingleValue.Mutable<>();
 
-    @Override
-    public void defineAll(StandardServer<?> server) {
-        super.defineAll(server);
+    public UserManagingStandardAPIImpl() {
         defineError(AUTHENTICATION_FAILED, "Authentication failed");
         defineError(USERNAME_EMPTY, "The username cannot be empty");
         defineError(USERNAME_DOES_NOT_EXIST, "The entered username does not match any accounts");
@@ -38,20 +36,23 @@ public abstract class UserManagingStandardAPIImpl<U extends User, S extends Sess
         defineError(USER_NOT_FOUND, "User not found");
         defineError(SESSION_NOT_FOUND, "Session not found; it may been terminated or expired");
         defineError(SESSION_NOT_STRONG_ENOUGH, "Session could not terminate stronger session");
+        defineMethod("sign_up", (Method.Plain) p -> maybeOk(signUp(p.getString("username"), p.getString("password"))));
+        defineMethod("sign_in", (Method.Plain) p -> maybeOk(signIn(p.getString("username"), p.getString("password"), p.getString("token"))));
+        defineMethod("list_users", (Method.Plain) p -> ok(new JSONObject().put("users", JSONUtil.toArray(users.overKeys()))));
     }
 
     @SuppressWarnings("unchecked")
-    public final @NotNull JSONObject processAuthenticatedMethod(Method.AuthenticatedMethod<?> uncheckedMethod, @Nullable JSONObject authentication, JSONObject parameters) {
-        Method.AuthenticatedMethod<U> method;
+    public final @NotNull JSONObject processAuthenticatedMethod(Method.Authenticated<?> uncheckedMethod, @Nullable JSONObject authentication, JSONObject parameters) {
+        Method.Authenticated<U> method;
         try {
-            method = (Method.AuthenticatedMethod<U>) uncheckedMethod;
+            method = (Method.Authenticated<U>) uncheckedMethod;
         } catch (ClassCastException e) {
             System.err.println("Failed to cast an unchecked authenticated method");
-            return notOk(BUG);
+            return maybeOk(BUG);
         }
         @Nullable U user = authentication == null ? null : authenticate(authentication);
         if (method.isAuthenticationRequired()) {
-            return user == null ? notOk(AUTHENTICATION_FAILED) : method.process(user, parameters);
+            return user == null ? maybeOk(AUTHENTICATION_FAILED) : method.process(user, parameters);
         } else {
             //noinspection ConstantConditions
             return method.process(user, parameters);
@@ -75,6 +76,16 @@ public abstract class UserManagingStandardAPIImpl<U extends User, S extends Sess
     }
 
     @Override
+    public @Nullable U findUser(String username) {
+        return users.getAtPlace(username);
+    }
+
+    @Override
+    public boolean doesUsernameExist(String username) {
+        return users.containsPlace(username);
+    }
+
+    @Override
     public int signUp(String caseInsensitiveUsername, String password) {
 
         String username = caseInsensitiveUsername.toLowerCase();
@@ -94,7 +105,11 @@ public abstract class UserManagingStandardAPIImpl<U extends User, S extends Sess
         if (!isPasswordStrongEnough(password))
             return PASSWORD_TOO_WEAK;
 
-        createUser(username, hashPassword(password));
+        U user = createUser(username, hashPassword(password));
+        if (user == null)
+            return BUG;
+
+        addUser(user);
         return NO_ERROR;
     }
 
@@ -162,6 +177,11 @@ public abstract class UserManagingStandardAPIImpl<U extends User, S extends Sess
         } else {
             return SESSION_NOT_FOUND;
         }
+    }
+
+    @Override
+    public void addUser(U user) {
+        users.setAtPlace(user.getUsername(), user);
     }
 
     @Override

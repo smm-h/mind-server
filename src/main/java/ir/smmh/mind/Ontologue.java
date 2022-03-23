@@ -97,7 +97,7 @@ public class Ontologue extends StandardAPITelegramBotImpl {
                 break;
             }
         }
-        return getAPI().notOk(getAPI().METHOD_NOT_FOUND);
+        return getAPI().maybeOk(getAPI().METHOD_NOT_FOUND);
     }
 
     final JSONObject process(String method, JSONObject parameters) {

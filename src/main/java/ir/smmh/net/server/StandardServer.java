@@ -3,29 +3,11 @@ package ir.smmh.net.server;
 import ir.smmh.net.api.StandardAPI;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-
 /**
- * A standard server is a server that A) uses a standard API instead of any API,
- * and B) can keep track of its clients in a thread-safe manner and broadcast
- * data to them whenever necessary. Disconnected clients (closed sockets) are
- * automatically removed, so you only need to worry about adding them.
+ * A standard server is a server that uses a standard API instead of any API
  */
-public interface StandardServer<C extends Client> extends Server {
+public interface StandardServer extends Server {
 
     @Override
     @NotNull StandardAPI getAPI();
-
-    void addConnection(C connection);
-
-    int getConnectionCount();
-
-    void forEach(ConnectionAction<C> action);
-
-    void broadcast(String data);
-
-    @FunctionalInterface
-    interface ConnectionAction<C extends Client> {
-        void accept(C connection) throws IOException;
-    }
 }

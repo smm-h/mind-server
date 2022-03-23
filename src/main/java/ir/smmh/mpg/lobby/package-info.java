@@ -1,4 +1,4 @@
 @ParametersAreNonnullByDefault
-package ir.smmh.apps.rule;
+package ir.smmh.mpg.lobby;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -10,19 +10,19 @@ public interface Method {
     }
 
     @FunctionalInterface
-    interface AuthenticatedMethod<U> extends Method {
+    interface Authenticated<U> extends Method {
         @NotNull JSONObject process(@NotNull U user, @NotNull JSONObject parameters);
 
         default boolean isAuthenticationRequired() {
             return true;
         }
-    }
 
-    @FunctionalInterface
-    interface OptionallyAuthenticatedMethod<U> extends AuthenticatedMethod<U> {
-        @Override
-        default boolean isAuthenticationRequired() {
-            return false;
+        @FunctionalInterface
+        interface Optionally<U> extends Authenticated<U> {
+            @Override
+            default boolean isAuthenticationRequired() {
+                return false;
+            }
         }
     }
 }

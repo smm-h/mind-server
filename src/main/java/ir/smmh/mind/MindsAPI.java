@@ -2,8 +2,6 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MutableMindImpl;
 import ir.smmh.net.api.StandardAPIImpl;
-import ir.smmh.net.server.StandardServer;
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -14,20 +12,12 @@ public class MindsAPI extends StandardAPIImpl {
     private final Map<String, Mind.Mutable> minds = new HashMap<>(8);
 
     public MindsAPI() {
-        //noinspection ConstantConditions
-        defineAll(null);
-    }
-
-    @Override
-    public void defineAll(@NotNull StandardServer<?> server) {
-        super.defineAll(server);
-
         defineMethod("mind", (Method) (p) -> {
             String name = p.getString("name");
             if (!minds.containsKey(name)) {
                 minds.put(name, MutableMindImpl.createBlank(name, null));
             }
-            return notOk(NO_ERROR);
+            return maybeOk(NO_ERROR);
         });
 
         defineMethod("idea", (Method) (p) -> {
@@ -39,22 +29,22 @@ public class MindsAPI extends StandardAPIImpl {
         defineMethod("imagine", (Method) (p) -> {
             //noinspection resource
             getMind(p).imagine(p.getString("name"));
-            return notOk(NO_ERROR);
+            return maybeOk(NO_ERROR);
         });
 
         defineMethod("become", (Method) (p) -> {
             getIdea(p).become(getIdea(p, "intension"));
-            return notOk(NO_ERROR);
+            return maybeOk(NO_ERROR);
         });
 
         defineMethod("possess", (Method) (p) -> {
             getIdea(p).possess(p.getString("name"), p.getString("type"), getMind(p).makeValueGenerator(p.getJSONObject("defaultValue")));
-            return notOk(NO_ERROR);
+            return maybeOk(NO_ERROR);
         });
 
         defineMethod("reify", (Method) (p) -> {
             getIdea(p).reify(p.getString("name"), p.getString("type"), Value.of(p.getJSONObject("value"), getMind(p)::findIdeaByName));
-            return notOk(NO_ERROR);
+            return maybeOk(NO_ERROR);
         });
 
         int INSTANTIATION_FAILED = 500;
@@ -64,12 +54,12 @@ public class MindsAPI extends StandardAPIImpl {
             Idea.Mutable idea = getIdea(p);
             if (p.has("serialization")) {
                 if (idea.instantiate(p.getJSONObject("serialization")) == null) {
-                    return notOk(INSTANTIATION_FAILED);
+                    return maybeOk(INSTANTIATION_FAILED);
                 }
             } else {
                 idea.instantiate();
             }
-            return notOk(NO_ERROR);
+            return maybeOk(NO_ERROR);
         });
 
         defineMethod("is", (Method) (p) -> {

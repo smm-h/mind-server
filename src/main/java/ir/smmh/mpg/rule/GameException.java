@@ -1,4 +1,4 @@
-package ir.smmh.apps.rule;
+package ir.smmh.mpg.rule;
 
 @SuppressWarnings("PublicConstructor")
 public final class GameException extends Exception {

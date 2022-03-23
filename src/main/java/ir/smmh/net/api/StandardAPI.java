@@ -23,17 +23,15 @@ public interface StandardAPI extends API {
     int UNEXPECTED_ERROR = 3;
     int BUG = 4;
 
-    void defineAll(StandardServer<?> server);
-
     void defineMethod(String name, Method method);
 
     void defineError(int errorCode, String description);
 
     @NotNull JSONObject notOk(String errorDescription);
 
-    @NotNull JSONObject notOk(int errorCode);
-
     @NotNull JSONObject notOk(int errorCode, Throwable thrown);
+
+    @NotNull JSONObject maybeOk(int errorCode);
 
     @NotNull JSONObject ok();
 

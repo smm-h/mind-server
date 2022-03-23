@@ -1,7 +1,8 @@
-package ir.smmh.apps.rule.impl;
+package ir.smmh.mpg.rule.impl;
 
-import ir.smmh.apps.rule.Player;
-import ir.smmh.apps.rule.World;
+import ir.smmh.mpg.lobby.Player;
+import ir.smmh.mpg.rule.Position;
+import ir.smmh.mpg.rule.World;
 import ir.smmh.nile.adj.Order;
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.LinkedQueue;

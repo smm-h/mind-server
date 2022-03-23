@@ -1,22 +1,18 @@
-package ir.smmh.apps.rule;
+package ir.smmh.mpg.rule;
 
 import annotations.MutatingMethod;
-import ir.smmh.nile.adj.Order;
+import ir.smmh.mpg.lobby.Player;
+import ir.smmh.mpg.rule.impl.AbstractSearch;
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.ArrayQueue;
 import ir.smmh.nile.adj.impl.ArrayStack;
 import ir.smmh.nile.adj.impl.Priority;
-import ir.smmh.nile.adj.impl.SequentialImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @SuppressWarnings("unused")
 public interface World {
@@ -118,10 +114,6 @@ public interface World {
         return list;
     }
 
-    @Target({ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE, ElementType.TYPE_USE})
-    @interface Position {
-    }
-
     interface Building {
         @NotNull String getPatternId();
 
@@ -199,120 +191,6 @@ public interface World {
                 } else {
                     adder.add(this);
                 }
-            }
-        }
-    }
-
-    abstract class AbstractSearch implements Search {
-        private final World world;
-        private final @NotNull Set<@Position Integer> goals = new HashSet<>();
-        private final Order<Node> fringe;
-        private final @Position int start;
-
-        private AbstractSearch(World world, Order<Node> fringe, @Position int start) {
-            this.world = world;
-            this.fringe = fringe;
-            this.start = start;
-        }
-
-        public AbstractSearch(World world, Order<Node> fringe, @Position int start, @Position int goal) {
-            this(world, fringe, start);
-            this.goals.add(goal);
-        }
-
-        public AbstractSearch(World world, Order<Node> fringe, @Position int start, Iterable<@Position Integer> goals) {
-            this(world, fringe, start);
-            for (@Position int goal : goals)
-                this.goals.add(goal);
-        }
-
-        @Override
-        public @NotNull World getWorld() {
-            return world;
-        }
-
-        @Override
-
-        public @Position int getStart() {
-            return start;
-        }
-
-        @Override
-        public boolean isGoal(@Position int p) {
-            return goals.contains(p);
-        }
-
-        @Override
-        public @Nullable Sequential<@Position Integer> search() {
-            fringe.clear();
-            final Set<@Position Integer> explored = new HashSet<>();
-            @Position Node pointer = new NodeImpl(start, null);
-            while (true) {
-                int pp = pointer.getPosition();
-                if (isGoal(pp)) {
-                    return pointer.getSteps();
-                } else {
-                    if (!explored.contains(pp)) {
-                        explored.add(pp);
-                        for (@Position int p : getWorld().nextMoves(pp)) {
-                            if (!explored.contains(p)) {
-                                fringe.enter(new NodeImpl(p, pointer));
-                            }
-                        }
-                    }
-                    Node poll = fringe.poll();
-                    if (poll == null) {
-                        return null;
-                    } else {
-                        pointer = poll;
-                    }
-                }
-            }
-        }
-
-        interface Node {
-            @Position int getPosition();
-
-            @Nullable Node getParent();
-
-            default int getCost() {
-                int cost = 0;
-                Node node = this;
-                do {
-                    cost++;
-                    node = node.getParent();
-                } while (node != null);
-                return cost;
-            }
-
-            default @NotNull Sequential<@Position Integer> getSteps() {
-                Sequential.Mutable.VariableSize<@Position Integer> steps = new SequentialImpl<>();
-                Node node = this;
-                do {
-                    steps.append(node.getPosition());
-                    node = node.getParent();
-                } while (node != null);
-                return Sequential.View.reversed(steps);
-            }
-        }
-
-        private static class NodeImpl implements Node {
-            private final @Position int position;
-            private final Node parent;
-
-            private NodeImpl(int position, @Nullable Node parent) {
-                this.position = position;
-                this.parent = parent;
-            }
-
-            @Override
-            public @Position int getPosition() {
-                return position;
-            }
-
-            @Override
-            public @Nullable Node getParent() {
-                return parent;
             }
         }
     }

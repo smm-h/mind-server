@@ -1,6 +1,10 @@
-package ir.smmh.apps.rule.impl;
+package ir.smmh.mpg.rule.impl;
 
-import ir.smmh.apps.rule.*;
+import ir.smmh.mpg.lobby.LobbyAPI;
+import ir.smmh.mpg.lobby.Player;
+import ir.smmh.mpg.rule.GameException;
+import ir.smmh.mpg.rule.Simulation;
+import ir.smmh.mpg.rule.World;
 import ir.smmh.util.Map;
 import ir.smmh.util.impl.MapImpl;
 import org.jetbrains.annotations.NotNull;
@@ -75,15 +79,15 @@ public class SimulationImpl implements Simulation {
         World world = findWorldById(worldId);
         if (world == null)
             throw new GameException("world not found: " + worldId);
-        Player player = RuleAPI.getInstance().findUser(id);
+        Player player = LobbyAPI.getInstance().findUser(id);
         if (player == null)
             throw new GameException("player not found: " + id);
-        players.setAtPlace(player.getId(), player);
+        players.setAtPlace(player.getUsername(), player);
         return player;
     }
 
     @Override
     public void playerDisconnect(Player player) {
-        players.removeAtPlace(player.getId());
+        players.removeAtPlace(player.getUsername());
     }
 }
