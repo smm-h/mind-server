@@ -27,10 +27,10 @@ public class CmdAPI implements API {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         API api = new CmdAPI();
 //        new APIBotImpl(api).start(TOKEN);
-        new ServerImpl(api).start(7000);
+        new ServerImpl(api, 7000).start();
     }
 
     @Override

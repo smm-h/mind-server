@@ -79,7 +79,10 @@ public class SimulationImpl implements Simulation {
         World world = findWorldById(worldId);
         if (world == null)
             throw new GameException("world not found: " + worldId);
-        Player player = LobbyAPI.getInstance().findUser(id);
+        var authenticator = LobbyAPI.getInstance().getAuthenticator();
+        if (authenticator == null)
+            throw new GameException("no authenticator");
+        Player player = (Player) authenticator.findUser(id);
         if (player == null)
             throw new GameException("player not found: " + id);
         players.setAtPlace(player.getUsername(), player);

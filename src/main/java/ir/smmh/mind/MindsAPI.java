@@ -17,7 +17,7 @@ public class MindsAPI extends StandardAPIImpl {
             if (!minds.containsKey(name)) {
                 minds.put(name, MutableMindImpl.createBlank(name, null));
             }
-            return maybeOk(NO_ERROR);
+            return errorCode(NO_ERROR);
         });
 
         defineMethod("idea", (Method) (p) -> {
@@ -29,22 +29,22 @@ public class MindsAPI extends StandardAPIImpl {
         defineMethod("imagine", (Method) (p) -> {
             //noinspection resource
             getMind(p).imagine(p.getString("name"));
-            return maybeOk(NO_ERROR);
+            return errorCode(NO_ERROR);
         });
 
         defineMethod("become", (Method) (p) -> {
             getIdea(p).become(getIdea(p, "intension"));
-            return maybeOk(NO_ERROR);
+            return errorCode(NO_ERROR);
         });
 
         defineMethod("possess", (Method) (p) -> {
             getIdea(p).possess(p.getString("name"), p.getString("type"), getMind(p).makeValueGenerator(p.getJSONObject("defaultValue")));
-            return maybeOk(NO_ERROR);
+            return errorCode(NO_ERROR);
         });
 
         defineMethod("reify", (Method) (p) -> {
             getIdea(p).reify(p.getString("name"), p.getString("type"), Value.of(p.getJSONObject("value"), getMind(p)::findIdeaByName));
-            return maybeOk(NO_ERROR);
+            return errorCode(NO_ERROR);
         });
 
         int INSTANTIATION_FAILED = 500;
@@ -54,12 +54,12 @@ public class MindsAPI extends StandardAPIImpl {
             Idea.Mutable idea = getIdea(p);
             if (p.has("serialization")) {
                 if (idea.instantiate(p.getJSONObject("serialization")) == null) {
-                    return maybeOk(INSTANTIATION_FAILED);
+                    return errorCode(INSTANTIATION_FAILED);
                 }
             } else {
                 idea.instantiate();
             }
-            return maybeOk(NO_ERROR);
+            return errorCode(NO_ERROR);
         });
 
         defineMethod("is", (Method) (p) -> {

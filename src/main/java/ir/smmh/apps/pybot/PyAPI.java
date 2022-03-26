@@ -5,15 +5,17 @@ import ir.smmh.net.server.impl.ServerImpl;
 import org.jetbrains.annotations.NotNull;
 import org.python.util.PythonInterpreter;
 
+import java.io.IOException;
+
 import static ir.smmh.util.FunctionalUtil.with;
 
 public class PyAPI implements API {
     private final PythonInterpreter interpreter = new PythonInterpreter();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         API api = new PyAPI();
 //        new APITelegramBotImpl(api, null).start(TOKEN);
-        new ServerImpl(api).start(7000);
+        new ServerImpl(api, 7000).start();
     }
 
     @Override
