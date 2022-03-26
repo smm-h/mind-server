@@ -8,8 +8,9 @@ import org.json.JSONObject;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
-public interface UserManagingStandardAPI<U extends User, S extends Session<U>> extends StandardAPI {
+public interface Authenticator<U extends User, S extends Session<U>> {
 
+    int NO_ERROR = StandardAPI.NO_ERROR;
     int AUTHENTICATION_FAILED = 100;
     int USERNAME_EMPTY = 101;
     int USERNAME_DOES_NOT_EXIST = 102;
@@ -23,7 +24,7 @@ public interface UserManagingStandardAPI<U extends User, S extends Session<U>> e
     int SESSION_NOT_FOUND = 201;
     int SESSION_NOT_STRONG_ENOUGH = 202;
 
-    @NotNull JSONObject processAuthenticatedMethod(Method.Authenticated<?> uncheckedMethod, @Nullable JSONObject authentication, JSONObject parameters);
+    void define(StandardAPI api);
 
     @NotNull String hashPassword(String password);
 
@@ -43,7 +44,7 @@ public interface UserManagingStandardAPI<U extends User, S extends Session<U>> e
 
     int terminateSession(U user, S currentSession, String toTerminate);
 
-    @Nullable U createUser(String username, String passwordHash);
+    @NotNull U createUser(String username, String passwordHash);
 
     void addUser(U user);
 

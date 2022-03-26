@@ -3,6 +3,9 @@ package ir.smmh.net.client;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.net.Socket;
+
 @SuppressWarnings("SameReturnValue")
 public interface Client {
 
@@ -10,7 +13,7 @@ public interface Client {
 
     String getHostAddress();
 
-    @Nullable String getUpdates();
+    Socket connect() throws IOException;
 
-    @Nullable String sendRequest(@NotNull String request);
+    @NotNull String sendRequest(@NotNull String request);
 }

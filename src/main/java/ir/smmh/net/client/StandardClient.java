@@ -2,8 +2,12 @@ package ir.smmh.net.client;
 
 import org.json.JSONObject;
 
-public interface StandardClient extends Client {
-    JSONObject send(String method);
+import java.net.Socket;
 
-    JSONObject send(String method, JSONObject parameters);
+public interface StandardClient extends Client {
+    JSONObject send(String method) throws NotOkException;
+
+    JSONObject send(String method, JSONObject parameters) throws NotOkException;
+
+    Socket reconnect() throws NotOkException;
 }

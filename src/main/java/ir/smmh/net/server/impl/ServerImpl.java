@@ -8,15 +8,20 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 
 public class ServerImpl implements Server {
 
     private final API api;
+    private final ServerSocket listeningSocket;
     private boolean running;
 
-    public ServerImpl(API api) {
+    public ServerImpl(API api) throws IOException {
+        this(api, 0);
+    }
+
+    public ServerImpl(API api, int port) throws IOException {
         this.api = api;
+        listeningSocket = new ServerSocket(port);
     }
 
     @Override
@@ -25,20 +30,20 @@ public class ServerImpl implements Server {
     }
 
     @Override
-    public final void start(int port) {
+    public int getPort() {
+        return listeningSocket.getLocalPort();
+    }
+
+    @Override
+    public final void start() {
         System.out.println("Server started...");
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            running = true;
-            while (running) {
-                Socket socket = serverSocket.accept();
-                try {
-                    new ClientConnectionThreadImpl(new ClientConnectionImpl(socket)).start();
-                } catch (IOException e) {
-                    System.err.println("Failed to communicate with the socket");
-                }
+        running = true;
+        while (running) {
+            try {
+                new ClientConnectionThreadImpl(new ClientConnectionImpl(listeningSocket.accept())).start();
+            } catch (IOException e) {
+                System.err.println("Error while listening for incoming connections");
             }
-        } catch (IOException e) {
-            System.err.println("Failed to listen for incoming connections");
         }
         System.out.println("Server stopped.");
     }
@@ -47,6 +52,10 @@ public class ServerImpl implements Server {
     public final void stop() {
         System.out.println("Stopping the server...");
         running = false;
+        try {
+            listeningSocket.close();
+        } catch (IOException ignored) {
+        }
     }
 
     private class ClientConnectionThreadImpl extends Thread implements ClientConnectionThread {

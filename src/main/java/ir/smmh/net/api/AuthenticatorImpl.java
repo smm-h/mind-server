@@ -14,7 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class UserManagingStandardAPIImpl<U extends User, S extends Session<U>> extends StandardAPIImpl implements UserManagingStandardAPI<U, S> {
+public abstract class AuthenticatorImpl<U extends User, S extends Session<U>> implements Authenticator<U, S> {
 
     private final @NotNull PasswordHashFunction hash = createMessageDigest();
     /**
@@ -23,40 +23,23 @@ public abstract class UserManagingStandardAPIImpl<U extends User, S extends Sess
     private final Map<String, Map<String, S>> sessions = new HashMap<>();
     private final ir.smmh.util.Map.SingleValue.Mutable<String, U> users = new MapImpl.SingleValue.Mutable<>();
 
-    public UserManagingStandardAPIImpl() {
-        defineError(AUTHENTICATION_FAILED, "Authentication failed");
-        defineError(USERNAME_EMPTY, "The username cannot be empty");
-        defineError(USERNAME_DOES_NOT_EXIST, "The entered username does not match any accounts");
-        defineError(USERNAME_ALREADY_EXISTS, "The entered username already exists");
-        defineError(USERNAME_INVALID, "The entered username is not a valid username");
-        defineError(PASSWORD_EMPTY, "The password cannot be empty");
-        defineError(PASSWORD_TOO_WEAK, "The password is not secure enough");
-        defineError(PASSWORD_INCORRECT, "The password you entered was incorrect");
-        defineError(TOKEN_EMPTY, "The token is invalid");
-        defineError(USER_NOT_FOUND, "User not found");
-        defineError(SESSION_NOT_FOUND, "Session not found; it may been terminated or expired");
-        defineError(SESSION_NOT_STRONG_ENOUGH, "Session could not terminate stronger session");
-        defineMethod("sign_up", (Method.Plain) p -> maybeOk(signUp(p.getString("username"), p.getString("password"))));
-        defineMethod("sign_in", (Method.Plain) p -> maybeOk(signIn(p.getString("username"), p.getString("password"), p.getString("token"))));
-        defineMethod("list_users", (Method.Plain) p -> ok(new JSONObject().put("users", JSONUtil.toArray(users.overKeys()))));
-    }
-
-    @SuppressWarnings("unchecked")
-    public final @NotNull JSONObject processAuthenticatedMethod(Method.Authenticated<?> uncheckedMethod, @Nullable JSONObject authentication, JSONObject parameters) {
-        Method.Authenticated<U> method;
-        try {
-            method = (Method.Authenticated<U>) uncheckedMethod;
-        } catch (ClassCastException e) {
-            System.err.println("Failed to cast an unchecked authenticated method");
-            return maybeOk(BUG);
-        }
-        @Nullable U user = authentication == null ? null : authenticate(authentication);
-        if (method.isAuthenticationRequired()) {
-            return user == null ? maybeOk(AUTHENTICATION_FAILED) : method.process(user, parameters);
-        } else {
-            //noinspection ConstantConditions
-            return method.process(user, parameters);
-        }
+    @Override
+    public void define(StandardAPI api) {
+        api.defineError(AUTHENTICATION_FAILED, "Authentication failed");
+        api.defineError(USERNAME_EMPTY, "The username cannot be empty");
+        api.defineError(USERNAME_DOES_NOT_EXIST, "The entered username does not match any accounts");
+        api.defineError(USERNAME_ALREADY_EXISTS, "The entered username already exists");
+        api.defineError(USERNAME_INVALID, "The entered username is not a valid username");
+        api.defineError(PASSWORD_EMPTY, "The password cannot be empty");
+        api.defineError(PASSWORD_TOO_WEAK, "The password is not secure enough");
+        api.defineError(PASSWORD_INCORRECT, "The password you entered was incorrect");
+        api.defineError(TOKEN_EMPTY, "The token is invalid");
+        api.defineError(USER_NOT_FOUND, "User not found");
+        api.defineError(SESSION_NOT_FOUND, "Session not found; it may been terminated or expired");
+        api.defineError(SESSION_NOT_STRONG_ENOUGH, "Session could not terminate stronger session");
+        api.defineMethod("sign_up", (Method.Plain) p -> api.errorCode(signUp(p.getString("username"), p.getString("password"))));
+        api.defineMethod("sign_in", (Method.Plain) p -> api.errorCode(signIn(p.getString("username"), p.getString("password"), p.getString("token"))));
+        api.defineMethod("list_users", (Method.Plain) p -> api.ok(new JSONObject().put("users", JSONUtil.toArray(users.overKeys()))));
     }
 
     @NotNull
@@ -105,11 +88,7 @@ public abstract class UserManagingStandardAPIImpl<U extends User, S extends Sess
         if (!isPasswordStrongEnough(password))
             return PASSWORD_TOO_WEAK;
 
-        U user = createUser(username, hashPassword(password));
-        if (user == null)
-            return BUG;
-
-        addUser(user);
+        addUser(createUser(username, hashPassword(password)));
         return NO_ERROR;
     }
 

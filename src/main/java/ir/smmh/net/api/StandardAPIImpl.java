@@ -2,6 +2,7 @@ package ir.smmh.net.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -14,13 +15,32 @@ public class StandardAPIImpl implements StandardAPI {
 
     private final Map<String, Method> methods = new HashMap<>();
     private final Map<Integer, String> errorCodes = new HashMap<>();
+    private final Authenticator<?, ?> authenticator;
 
     public StandardAPIImpl() {
+        this(null);
+    }
+
+    @Override
+    public @Nullable Authenticator<?, ?> getAuthenticator() {
+        return authenticator;
+    }
+
+    public StandardAPIImpl(@Nullable Authenticator<?, ?> authenticator) {
+        this.authenticator = authenticator;
         defineError(NO_ERROR, "Successful");
         defineError(COULD_NOT_PARSE_REQUEST, "Missing keys or bad values in request");
         defineError(METHOD_NOT_FOUND, "Method not found");
         defineError(UNEXPECTED_ERROR, "Unexpected error occurred");
         defineError(BUG, "Internal bug encountered");
+        defineMethod("methods", (Method.Plain) parameters -> {
+            JSONArray array = new JSONArray();
+            for (String i : methods.keySet()) {
+                array.put(i);
+            }
+            return ok("methods", array);
+        });
+        if (authenticator != null) authenticator.define(this);
     }
 
     @Override
@@ -49,7 +69,7 @@ public class StandardAPIImpl implements StandardAPI {
     }
 
     @Override
-    public final @NotNull JSONObject maybeOk(int errorCode) {
+    public final @NotNull JSONObject errorCode(int errorCode) {
         return makeResponse(errorCode, errorCodes.get(errorCode), null, null);
     }
 
@@ -109,6 +129,7 @@ public class StandardAPIImpl implements StandardAPI {
         return response;
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked", "ConstantConditions"})
     private @NotNull JSONObject processJSON(JSONObject request) {
         try {
             String methodName;
@@ -119,7 +140,7 @@ public class StandardAPIImpl implements StandardAPI {
             }
             Method method = methods.get(methodName);
             if (method == null) {
-                return maybeOk(METHOD_NOT_FOUND);
+                return errorCode(METHOD_NOT_FOUND);
             } else {
                 @NotNull JSONObject parameters;
                 try {
@@ -128,25 +149,28 @@ public class StandardAPIImpl implements StandardAPI {
                     return notOk(COULD_NOT_PARSE_REQUEST, e);
                 }
                 if (method instanceof Method.Authenticated) {
-                    @SuppressWarnings("rawtypes") Method.Authenticated am = (Method.Authenticated) method;
-                    if (this instanceof UserManagingStandardAPIImpl) {
-                        UserManagingStandardAPIImpl<?, ?> me = ((UserManagingStandardAPIImpl<?, ?>) this);
+                    Method.Authenticated am = (Method.Authenticated) method;
+                    if (this.authenticator != null) {
                         @Nullable JSONObject authentication;
                         try {
                             authentication = request.optJSONObject("authentication", null);
                         } catch (JSONException e) {
                             return notOk(COULD_NOT_PARSE_REQUEST, e);
                         }
-                        return me.processAuthenticatedMethod(am, authentication, parameters);
+                        @Nullable var user = authentication == null ? null : authenticator.authenticate(authentication);
+                        if (am.isAuthenticationRequired())
+                            if (user == null) return errorCode(Authenticator.AUTHENTICATION_FAILED);
+                        if (user != null) user.isOnlineNow();
+                        return am.process(user, parameters);
                     } else {
-                        System.err.println("You can have authenticated methods only within an authenticated API");
-                        return maybeOk(BUG);
+                        System.err.println("You cannot have authenticated methods without an authenticator");
+                        return errorCode(BUG);
                     }
                 } else if (method instanceof Method.Plain) {
                     return ((Method.Plain) method).process(parameters);
                 } else {
                     System.err.println("You must not extend/implement Method directly");
-                    return maybeOk(BUG);
+                    return errorCode(BUG);
                 }
             }
         } catch (Throwable throwable) {

@@ -2,6 +2,7 @@ package ir.smmh.net.api;
 
 import ir.smmh.net.server.StandardServer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -23,6 +24,8 @@ public interface StandardAPI extends API {
     int UNEXPECTED_ERROR = 3;
     int BUG = 4;
 
+    @Nullable Authenticator<?, ?> getAuthenticator();
+
     void defineMethod(String name, Method method);
 
     void defineError(int errorCode, String description);
@@ -31,7 +34,7 @@ public interface StandardAPI extends API {
 
     @NotNull JSONObject notOk(int errorCode, Throwable thrown);
 
-    @NotNull JSONObject maybeOk(int errorCode);
+    @NotNull JSONObject errorCode(int errorCode);
 
     @NotNull JSONObject ok();
 
