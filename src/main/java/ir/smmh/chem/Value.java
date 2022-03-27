@@ -1,6 +1,5 @@
 package ir.smmh.chem;
 
-import ir.smmh.chem.impl.ValueImpl;
 import ir.smmh.util.StringUtil;
 
 import java.util.Set;
