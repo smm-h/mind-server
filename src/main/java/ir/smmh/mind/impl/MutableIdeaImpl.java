@@ -49,14 +49,28 @@ public class MutableIdeaImpl implements Idea.Mutable, Mutable.WithListeners.Inje
         this.mind = mind;
         name = object.getString("name");
         intensions = JSONUtil.arrayOfStrings(object, "intensions", MutableCollectionImpl.of(new HashSet<>()));
-        properties = Comprehend.map(JSONUtil.arrayOfJSONObjects(object, "properties", new HashSet<>(), o -> new PropertyImpl(this, o)), p -> entry(p.getName(), p));
-        staticProperties = Comprehend.map(JSONUtil.arrayOfJSONObjects(object, "static-properties", new HashSet<>(), o -> new StaticPropertyImpl(this, o)), p -> entry(p.getName(), p));
+        properties = Comprehend.map(JSONUtil.arrayOfJSONObjects(object, "properties", new HashSet<>(), o -> {
+            try {
+                return new PropertyImpl(this, o);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }), p -> entry(p.getName(), p));
+        staticProperties = Comprehend.map(JSONUtil.arrayOfJSONObjects(object, "static-properties", new HashSet<>(), o -> {
+            try {
+                return new StaticPropertyImpl(this, o);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }), p -> entry(p.getName(), p));
         storage = StorageImpl.of(mind.getName());
         setup();
     }
 
     @Override
-    public final @NotNull JSONObject serializeJSON() throws JSONException {
+    public final @NotNull JSONObject serializeJSON() {
         JSONObject object = new JSONObject();
         try {
             object.put("name", name);

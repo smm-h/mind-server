@@ -11,6 +11,8 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import static ir.smmh.util.JSONUtil.map;
+
 public class StandardAPIImpl implements StandardAPI {
 
     private final Map<String, Method> methods = new HashMap<>();
@@ -19,11 +21,6 @@ public class StandardAPIImpl implements StandardAPI {
 
     public StandardAPIImpl() {
         this(null);
-    }
-
-    @Override
-    public @Nullable Authenticator<?, ?> getAuthenticator() {
-        return authenticator;
     }
 
     public StandardAPIImpl(@Nullable Authenticator<?, ?> authenticator) {
@@ -41,6 +38,11 @@ public class StandardAPIImpl implements StandardAPI {
             return ok("methods", array);
         });
         if (authenticator != null) authenticator.define(this);
+    }
+
+    @Override
+    public @Nullable Authenticator<?, ?> getAuthenticator() {
+        return authenticator;
     }
 
     @Override
@@ -85,7 +87,7 @@ public class StandardAPIImpl implements StandardAPI {
 
     @Override
     public final @NotNull JSONObject ok(String key, Object value) {
-        return makeResponse(NO_ERROR, null, null, new JSONObject().put(key, value));
+        return makeResponse(NO_ERROR, null, null, map(key, value));
     }
 
     private @NotNull JSONObject makeResponse(int error_code, @Nullable String errorDescription, @Nullable Throwable thrown, @Nullable JSONObject results) {
@@ -152,11 +154,7 @@ public class StandardAPIImpl implements StandardAPI {
                     Method.Authenticated am = (Method.Authenticated) method;
                     if (this.authenticator != null) {
                         @Nullable JSONObject authentication;
-                        try {
-                            authentication = request.optJSONObject("authentication", null);
-                        } catch (JSONException e) {
-                            return notOk(COULD_NOT_PARSE_REQUEST, e);
-                        }
+                        authentication = request.optJSONObject("authentication");
                         @Nullable var user = authentication == null ? null : authenticator.authenticate(authentication);
                         if (am.isAuthenticationRequired())
                             if (user == null) return errorCode(Authenticator.AUTHENTICATION_FAILED);

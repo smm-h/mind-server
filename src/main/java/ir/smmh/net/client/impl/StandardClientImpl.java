@@ -4,6 +4,7 @@ import ir.smmh.net.client.NotOkException;
 import ir.smmh.net.client.StandardClient;
 import ir.smmh.util.JSONUtil;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.DataInputStream;
@@ -24,12 +25,12 @@ public class StandardClientImpl extends ClientImpl implements StandardClient {
     }
 
     @Override
-    public JSONObject send(String method) throws NotOkException {
+    public JSONObject send(String method) throws NotOkException, JSONException {
         return send(method, "{}");
     }
 
     @Override
-    public JSONObject send(String method, JSONObject parameters) throws NotOkException {
+    public JSONObject send(String method, JSONObject parameters) throws NotOkException, JSONException {
         return send(method, parameters.toString());
     }
 
@@ -50,7 +51,7 @@ public class StandardClientImpl extends ClientImpl implements StandardClient {
                                 ? response.getString("error_description")
                                 : "Server error");
                     }
-                } catch (IOException e) {
+                } catch (IOException | JSONException e) {
                     throw new RuntimeException("Could not read response");
                 }
             } catch (IOException e) {
@@ -65,7 +66,7 @@ public class StandardClientImpl extends ClientImpl implements StandardClient {
         return "{\"method\":\"" + method + "\"" + authentication + ",\"parameters\":" + parameters + "}";
     }
 
-    private JSONObject send(String method, String parameters) throws NotOkException {
+    private JSONObject send(String method, String parameters) throws NotOkException, JSONException {
         String responseString = sendRequest(makeRequestString(method, parameters));
         JSONObject response = JSONUtil.parse(responseString);
         if (response.getBoolean("ok")) {

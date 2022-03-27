@@ -1,13 +1,13 @@
 package ir.smmh.tgbot.types.impl;
 
 import ir.smmh.tgbot.types.User;
-import ir.smmh.util.JSONUtil;
+import ir.smmh.util.impl.ReadOnlyJSONImpl;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class UserImpl extends JSONUtil.ReadOnlyJSONImpl implements User {
+public class UserImpl extends ReadOnlyJSONImpl implements User {
     private UserImpl(JSONObject wrapped) {
         super(wrapped);
     }

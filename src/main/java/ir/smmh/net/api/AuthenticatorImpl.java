@@ -2,10 +2,12 @@ package ir.smmh.net.api;
 
 import ir.smmh.util.JSONUtil;
 import ir.smmh.util.RandomUtil;
+import ir.smmh.util.StringUtil;
 import ir.smmh.util.impl.MapImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.nio.charset.StandardCharsets;
@@ -73,10 +75,10 @@ public abstract class AuthenticatorImpl<U extends User, S extends Session<U>> im
 
         String username = caseInsensitiveUsername.toLowerCase();
 
-        if (username.isEmpty() || username.isBlank())
+        if (username.isEmpty() || StringUtil.isBlank(username))
             return USERNAME_EMPTY;
 
-        if (password.isEmpty() || password.isBlank())
+        if (password.isEmpty() || StringUtil.isBlank(password))
             return PASSWORD_EMPTY;
 
         if (isUsernameInvalid(username))
@@ -97,13 +99,13 @@ public abstract class AuthenticatorImpl<U extends User, S extends Session<U>> im
 
         String username = caseInsensitiveUsername.toLowerCase();
 
-        if (username.isEmpty() || username.isBlank())
+        if (username.isEmpty() || StringUtil.isBlank(username))
             return USERNAME_EMPTY;
 
-        if (password.isEmpty() || password.isBlank())
+        if (password.isEmpty() || StringUtil.isBlank(password))
             return PASSWORD_EMPTY;
 
-        if (token.isEmpty() || token.isBlank())
+        if (token.isEmpty() || StringUtil.isBlank(token))
             return TOKEN_EMPTY;
 
         if (isUsernameInvalid(username))
@@ -164,7 +166,7 @@ public abstract class AuthenticatorImpl<U extends User, S extends Session<U>> im
     }
 
     @Override
-    public @Nullable U authenticate(JSONObject authentication) {
+    public @Nullable U authenticate(JSONObject authentication) throws JSONException {
         String username = authentication.getString("username");
         String token = authentication.getString("token");
         Map<String, S> tokens = sessions.get(username);

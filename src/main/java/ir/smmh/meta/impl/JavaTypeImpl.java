@@ -3,6 +3,7 @@ package ir.smmh.meta.impl;
 import ir.smmh.meta.JavaPackage;
 import ir.smmh.meta.JavaType;
 import ir.smmh.meta.Method;
+import ir.smmh.util.FileUtil;
 import ir.smmh.util.impl.FormImpl;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,7 +19,7 @@ abstract class JavaTypeImpl extends FormImpl implements JavaType {
         super(name + ".java");
         this.pkg = pkg;
         this.name = name;
-        this.path = Path.of(pkg.getPath() + "/" + name + ".java");
+        this.path = FileUtil.pathOf(pkg.getPath() + "/" + name + ".java");
         append(PACKAGE);
         append(IMPORTS);
         enter(PACKAGE, pkg.getAddress());

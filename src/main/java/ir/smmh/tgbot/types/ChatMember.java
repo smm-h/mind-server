@@ -1,13 +1,13 @@
 package ir.smmh.tgbot.types;
 
 import ir.smmh.tgbot.types.impl.ChatMemberImpl;
-import ir.smmh.util.JSONUtil;
+import ir.smmh.util.ReadOnlyJSON;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public interface ChatMember extends JSONUtil.ReadOnlyJSON {
+public interface ChatMember extends ReadOnlyJSON {
     @Contract("!null->!null")
     static ChatMember of(@Nullable JSONObject wrapped) {
         return ChatMemberImpl.of(wrapped);

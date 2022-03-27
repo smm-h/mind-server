@@ -1,6 +1,5 @@
 package ir.smmh.mpg.rule;
 
-import annotations.MutatingMethod;
 import ir.smmh.mpg.lobby.Player;
 import ir.smmh.mpg.rule.impl.AbstractSearch;
 import ir.smmh.nile.adj.Sequential;
@@ -26,7 +25,6 @@ public interface World {
         return getWidth() * getHeight();
     }
 
-    @MutatingMethod
     void occupy(@Position int p);
 
     default @Position int positionOf(int x, int y) {
@@ -47,14 +45,12 @@ public interface World {
         return px >= 0 && py >= 0 && px < getWidth() && py < getHeight();
     }
 
-    @MutatingMethod
     default void occupyLineHorizontal(int x0, int x1, int y) {
         for (int x = x0; x <= x1; x++) {
             occupy(positionOf(x, y));
         }
     }
 
-    @MutatingMethod
     default void occupyLineVertical(int y0, int y1, int x) {
         for (int y = y0; y <= y1; y++) {
             occupy(positionOf(x, y));

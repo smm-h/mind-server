@@ -1,10 +1,10 @@
 package ir.smmh.tgbot.types;
 
-import ir.smmh.util.JSONUtil;
+import ir.smmh.util.ReadOnlyJSON;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface InlineQueryResult extends JSONUtil.ReadOnlyJSON {
+public interface InlineQueryResult extends ReadOnlyJSON {
     @NotNull String type();
 
     /**

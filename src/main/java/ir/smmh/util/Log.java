@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.nio.charset.Charset;
 import java.nio.file.InvalidPathException;
 import java.time.Instant;
 
@@ -16,7 +15,7 @@ import java.time.Instant;
 public interface Log {
     static Log fromFile(@NotNull String filename, @NotNull PrintStream defaultStream) {
         try {
-            return new LogImpl(new PrintStream(new FileOutputStream(FileUtil.touch(filename), true), false, Charset.defaultCharset()));
+            return new LogImpl(new PrintStream(new FileOutputStream(FileUtil.touch(filename), true)));
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + filename);
         } catch (InvalidPathException e) {

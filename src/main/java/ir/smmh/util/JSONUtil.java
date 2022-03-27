@@ -1,10 +1,7 @@
 package ir.smmh.util;
 
-import ir.smmh.nile.adj.Sequential;
-import ir.smmh.nile.adj.impl.SequentialImpl;
 import ir.smmh.nile.verbs.CanAddTo;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,13 +9,14 @@ import org.json.JSONTokener;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 
 @ParametersAreNonnullByDefault
-@SuppressWarnings({"ThrowsRuntimeException", "ClassWithTooManyMethods"})
+@SuppressWarnings({"ThrowsRuntimeException", "ClassWithTooManyMethods", "unused"})
 public interface JSONUtil {
 
     static @NotNull JSONObject parse(String string) throws JSONException {
@@ -165,203 +163,76 @@ public interface JSONUtil {
 
     static JSONObject map(String key, Object value) {
         JSONObject object = new JSONObject();
-        object.put(key, value);
+        try {
+            object.put(key, value);
+        } catch (JSONException ignored) {
+        }
         return object;
     }
 
     static JSONObject map(String key1, Object value1, String key2, Object value2) {
         JSONObject object = new JSONObject();
-        object.put(key1, value1);
-        object.put(key2, value2);
+        try {
+            object.put(key1, value1);
+            object.put(key2, value2);
+        } catch (JSONException ignored) {
+        }
         return object;
     }
 
     static JSONObject map(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
         JSONObject object = new JSONObject();
-        object.put(key1, value1);
-        object.put(key2, value2);
-        object.put(key3, value3);
+        try {
+            object.put(key1, value1);
+            object.put(key2, value2);
+            object.put(key3, value3);
+        } catch (JSONException ignored) {
+        }
         return object;
     }
 
     static JSONObject map(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4) {
         JSONObject object = new JSONObject();
-        object.put(key1, value1);
-        object.put(key2, value2);
-        object.put(key3, value3);
-        object.put(key4, value4);
+        try {
+            object.put(key1, value1);
+            object.put(key2, value2);
+            object.put(key3, value3);
+            object.put(key4, value4);
+        } catch (JSONException ignored) {
+        }
         return object;
     }
 
     static JSONObject mapN(Object... parameters) {
         JSONObject p = new JSONObject();
-        for (int i = 0; i < parameters.length; i += 2) {
-            p.put((String) parameters[i], parameters[i + 1]);
+        try {
+            for (int i = 0; i < parameters.length; i += 2) {
+                p.put((String) parameters[i], parameters[i + 1]);
+            }
+        } catch (JSONException ignored) {
         }
         return p;
     }
 
-    interface ReadOnlyJSON {
-        @NotNull JSONObject toJSONObject();
+    static Iterable<Object> iterateOverArray(JSONArray array) {
+        return () -> new Iterator<>() {
+            private int i = 0;
 
-        boolean has(String key);
+            @Override
+            public boolean hasNext() {
+                return i < array.length();
+            }
 
-        boolean getBoolean(String key);
-
-        int getInteger(String key);
-
-        long getLong(String key);
-
-        float getFloat(String key);
-
-        @Nullable Boolean getNullableBoolean(String key);
-
-        @Nullable Integer getNullableInteger(String key);
-
-        @Nullable Long getNullableLong(String key);
-
-        @Nullable Float getNullableFloat(String key);
-
-        @NotNull String getString(String key);
-
-        @NotNull JSONObject getJSONObject(String key);
-
-        @Nullable JSONObject getNullableJSONObject(String key);
-
-        @Nullable String getNullableString(String key);
-
-        @NotNull <T> Sequential<T> getSequential(String key, Function<Object, T> convertor);
-
-        @Nullable <T> Sequential<T> getNullableSequential(String key, Function<Object, T> convertor);
-
-        @NotNull <T> Sequential<Sequential<T>> get2DSequential(String key, Function<Object, T> convertor);
-
-        @Nullable <T> Sequential<Sequential<T>> getNullable2DSequential(String key, Function<Object, T> convertor);
+            @Override
+            public Object next() {
+                try {
+                    return array.get(i++);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        };
     }
 
-    class ReadOnlyJSONImpl implements ReadOnlyJSON {
-        private final JSONObject wrapped;
-
-        public ReadOnlyJSONImpl(JSONObject wrapped) {
-            this.wrapped = wrapped;
-        }
-
-        @Override
-        public @NotNull JSONObject toJSONObject() {
-            return wrapped;
-        }
-
-        @Override
-        public boolean has(String key) {
-            return wrapped.has(key);
-        }
-
-        @Override
-        public boolean getBoolean(String key) {
-            return wrapped.getBoolean(key);
-        }
-
-        @Override
-        public int getInteger(String key) {
-            return wrapped.getInt(key);
-        }
-
-        @Override
-        public long getLong(String key) {
-            return wrapped.getLong(key);
-        }
-
-        @Override
-        public @Nullable Boolean getNullableBoolean(String key) {
-            return wrapped.has(key) ? wrapped.getBoolean(key) : null;
-        }
-
-        @Override
-        public @Nullable Integer getNullableInteger(String key) {
-            return wrapped.has(key) ? wrapped.getInt(key) : null;
-        }
-
-        @Override
-        public @Nullable Long getNullableLong(String key) {
-            return wrapped.has(key) ? wrapped.getLong(key) : null;
-        }
-
-        @Override
-        public float getFloat(String key) {
-            return wrapped.getFloat(key);
-        }
-
-        @Override
-        public @Nullable Float getNullableFloat(String key) {
-            return wrapped.has(key) ? wrapped.getFloat(key) : null;
-        }
-
-        @Override
-        public @NotNull String getString(String key) {
-            return wrapped.getString(key);
-        }
-
-        @Override
-        public @NotNull JSONObject getJSONObject(String key) {
-            return wrapped.getJSONObject(key);
-        }
-
-        @Override
-        public @Nullable JSONObject getNullableJSONObject(String key) {
-            return wrapped.optJSONObject(key);
-        }
-
-        @Override
-        public @Nullable String getNullableString(String key) {
-            return wrapped.optString(key, null);
-        }
-
-        @Override
-        public @NotNull <T> Sequential<T> getSequential(String key, Function<Object, T> convertor) {
-            if (wrapped.has(key)) {
-                JSONArray array = wrapped.getJSONArray(key);
-                Sequential.Mutable.VariableSize<T> sequence = new SequentialImpl<>(array.length());
-                for (Object object : array) {
-                    sequence.add(convertor.apply(object));
-                }
-                return sequence;
-            } else {
-                throw new JSONException("key does not exist: " + key);
-            }
-        }
-
-        @Override
-        public @Nullable <T> Sequential<T> getNullableSequential(String key, Function<Object, T> convertor) {
-            return has(key) ? getSequential(key, convertor) : null;
-        }
-
-        @Override
-        public @NotNull <T> Sequential<Sequential<T>> get2DSequential(String key, Function<Object, T> convertor) {
-            if (wrapped.has(key)) {
-                JSONArray outerArray = wrapped.getJSONArray(key);
-                Sequential.Mutable.VariableSize<Sequential<T>> outerSequence = new SequentialImpl<>(outerArray.length());
-                for (Object object : outerArray) {
-                    JSONArray innerArray = (JSONArray) object;
-                    Sequential.Mutable.VariableSize<T> innerSequence = new SequentialImpl<>(innerArray.length());
-                    outerSequence.append(innerSequence);
-                    for (Object innerObject : innerArray) {
-                        innerSequence.add(convertor.apply(innerObject));
-                    }
-                }
-                return outerSequence;
-            } else {
-                throw new JSONException("key does not exist: " + key);
-            }
-        }
-
-        @Override
-        public @Nullable <T> Sequential<Sequential<T>> getNullable2DSequential(String key, Function<Object, T> convertor) {
-            return has(key) ? get2DSequential(key, convertor) : null;
-        }
-
-        @Override
-        public String toString() {
-            return wrapped.toString(2);
-        }
-    }
 }

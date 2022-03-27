@@ -1,12 +1,12 @@
 package ir.smmh.tgbot.types.impl;
 
 import ir.smmh.tgbot.types.InlineQueryResult;
-import ir.smmh.util.JSONUtil;
+import ir.smmh.util.impl.ReadOnlyJSONImpl;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class InlineQueryResultImpl extends JSONUtil.ReadOnlyJSONImpl implements InlineQueryResult {
+public class InlineQueryResultImpl extends ReadOnlyJSONImpl implements InlineQueryResult {
 
     private final @NotNull String id;
 

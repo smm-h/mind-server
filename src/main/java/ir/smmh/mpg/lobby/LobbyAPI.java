@@ -3,13 +3,11 @@ package ir.smmh.mpg.lobby;
 
 import ir.smmh.mpg.lobby.impl.PlayerImpl;
 import ir.smmh.mpg.lobby.impl.SessionImpl;
-import ir.smmh.mpg.ttt.DesktopClient;
 import ir.smmh.mpg.ttt.TTTGame;
 import ir.smmh.net.api.AuthenticatorImpl;
 import ir.smmh.net.api.Method;
 import ir.smmh.net.api.StandardAPIImpl;
 import ir.smmh.net.client.Client;
-import ir.smmh.net.client.impl.StandardClientImpl;
 import ir.smmh.net.server.ClientConnectionThread;
 import ir.smmh.net.server.Server;
 import ir.smmh.net.server.impl.StandardServerImpl;
@@ -18,6 +16,7 @@ import ir.smmh.util.Map;
 import ir.smmh.util.RandomUtil;
 import ir.smmh.util.impl.MapImpl;
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -129,21 +128,21 @@ public class LobbyAPI extends StandardAPIImpl {
         Server server = new StandardServerImpl(LobbyAPI.getInstance(), port);
         new Thread(server::start).start();
         new Thread(() -> {
-            Client c1 = new StandardClientImpl(port, hostAddress);
-            JSONObject auth1 = signUpAndSignIn(c1, "p1");
-            String roomId = methodicalRequest(c1, "create_room", auth1, map("game_name", "ttt")).getJSONObject("results").getString("room_id");
-            methodicalRequest(c1, "enter_room", auth1, map("room_id", roomId));
+//            Client c1 = new StandardClientImpl(port, hostAddress);
+//            JSONObject auth1 = signUpAndSignIn(c1, "p1");
+//            String roomId = methodicalRequest(c1, "create_room", auth1, map("game_name", "ttt")).getJSONObject("results").getString("room_id");
+//            methodicalRequest(c1, "enter_room", auth1, map("room_id", roomId));
+//
+//            Client c2 = new StandardClientImpl(port, hostAddress);
+//            JSONObject auth2 = signUpAndSignIn(c2, "p2");
+//            methodicalRequest(c2, "enter_room", auth2, map("room_id", roomId));
+//
+//            int roomPort = methodicalRequest(c1, "get_room_port", auth1, map("room_id", roomId)).getJSONObject("results").getInt("room_port");
+//
+//            methodicalRequest(c1, "start_game", auth1, map("room_id", roomId));
 
-            Client c2 = new StandardClientImpl(port, hostAddress);
-            JSONObject auth2 = signUpAndSignIn(c2, "p2");
-            methodicalRequest(c2, "enter_room", auth2, map("room_id", roomId));
-
-            int roomPort = methodicalRequest(c1, "get_room_port", auth1, map("room_id", roomId)).getJSONObject("results").getInt("room_port");
-
-            methodicalRequest(c1, "start_game", auth1, map("room_id", roomId));
-
-            new Thread(() -> new DesktopClient(roomPort, hostAddress, auth1)).start();
-            new Thread(() -> new DesktopClient(roomPort, hostAddress, auth2)).start();
+//            new Thread(() -> new DesktopClient(roomPort, hostAddress, auth1)).start();
+//            new Thread(() -> new DesktopClient(roomPort, hostAddress, auth2)).start();
 
 //            boolean turn = false;
 //            try (Scanner scanner = new Scanner(System.in)) {
@@ -164,7 +163,7 @@ public class LobbyAPI extends StandardAPIImpl {
         return map("username", shorthand, "token", shorthand);
     }
 
-    private static JSONObject methodicalRequest(Client client, String method, JSONObject auth, JSONObject params) {
+    private static JSONObject methodicalRequest(Client client, String method, JSONObject auth, JSONObject params) throws JSONException {
         return JSONUtil.parse(client.sendRequest(new JSONObject()
                 .put("method", method)
                 .put("authentication", auth)

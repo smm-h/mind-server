@@ -1,5 +1,6 @@
 package ir.smmh.mind;
 
+import ir.smmh.apps.ontologue.Ontologue;
 import sensitive.TelegramBotTokens;
 
 class OntologueMain {

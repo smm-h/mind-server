@@ -1,6 +1,5 @@
 package ir.smmh.util;
 
-import ir.smmh.Backward;
 import ir.smmh.nile.adj.Sequential;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,7 +47,7 @@ public interface StringUtil {
     }
 
     static String repeat(char ch, int count) {
-        return Backward.repeat(Character.toString(ch), count);
+        return repeat(Character.toString(ch), count);
     }
 
     static byte valueOfSymbol(char c, byte radix) {
@@ -227,7 +226,7 @@ public interface StringUtil {
         if (n > length) {
             return cut ? (leftwards ? input.substring(n - length) : input.substring(0, length)) : input;
         } else {
-            String addition = Backward.repeat(filler, (int) Math.ceil((length - n) / (float) filler.length()));
+            String addition = repeat(filler, (int) Math.ceil((length - n) / (float) filler.length()));
             if (addition.length() > length) addition = addition.substring(0, length);
             return leftwards ? addition + input : input + addition;
         }
@@ -311,5 +310,37 @@ public interface StringUtil {
 
     static String removePrefix(String string, String prefix) {
         return string.substring(prefix.length());
+    }
+
+    static String repeat(String string, int count) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            builder.append(string);
+        }
+        return builder.toString();
+    }
+
+    static int lastLeftmostConsecutiveWhitespaceIndex(String s) {
+        int n = s.length();
+        int i = 0;
+        while (i < n && CharacterPredicates.WHITESPACE.test(s.charAt(i))) i++;
+        return i;
+    }
+
+    static int firstRightmostConsecutiveWhitespaceIndex(String s) {
+        int i = s.length() - 1;
+        while (i >= 0 && CharacterPredicates.WHITESPACE.test(s.charAt(i))) i--;
+        return i;
+    }
+
+    static boolean isBlank(String s) {
+        return lastLeftmostConsecutiveWhitespaceIndex(s) == s.length();
+//        return s.isBlank();
+    }
+
+    static String strip(String s) {
+        int k = lastLeftmostConsecutiveWhitespaceIndex(s);
+        return k == s.length() ? "" : s.substring(k, firstRightmostConsecutiveWhitespaceIndex(s));
+//        return input.strip();
     }
 }

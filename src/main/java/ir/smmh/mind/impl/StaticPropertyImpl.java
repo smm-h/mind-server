@@ -23,7 +23,7 @@ public class StaticPropertyImpl implements StaticProperty, CanSerialize.JSON {
         this.value = value;
     }
 
-    public StaticPropertyImpl(Idea origin, JSONObject object) {
+    public StaticPropertyImpl(Idea origin, JSONObject object) throws JSONException {
         this(origin, object.getString("name"), object.getString("type"), Value.of(object.getJSONObject("value"), origin.getMind()::findIdeaByName));
     }
 

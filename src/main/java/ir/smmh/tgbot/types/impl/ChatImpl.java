@@ -1,13 +1,13 @@
 package ir.smmh.tgbot.types.impl;
 
 import ir.smmh.tgbot.types.Chat;
-import ir.smmh.util.JSONUtil;
+import ir.smmh.util.impl.ReadOnlyJSONImpl;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class ChatImpl extends JSONUtil.ReadOnlyJSONImpl implements Chat {
+public class ChatImpl extends ReadOnlyJSONImpl implements Chat {
     private final long id;
 
     private ChatImpl(JSONObject wrapped) {

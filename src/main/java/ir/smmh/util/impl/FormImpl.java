@@ -2,6 +2,7 @@ package ir.smmh.util.impl;
 
 import ir.smmh.nile.adj.Sequential;
 import ir.smmh.nile.adj.impl.SequentialImpl;
+import ir.smmh.util.FileUtil;
 import ir.smmh.util.Form;
 import ir.smmh.util.Map;
 import ir.smmh.util.Mutable;
@@ -126,7 +127,7 @@ public class FormImpl implements Form, Mutable.WithListeners.Injected {
     @Override
     public void generateToFile(Path destination, boolean overwrite) throws IOException {
         if (overwrite || !Files.exists(destination)) {
-            Files.writeString(destination, generate());
+            FileUtil.Files_writeString(destination, generate());
         }
     }
 

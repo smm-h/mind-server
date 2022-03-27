@@ -1,5 +1,6 @@
-package ir.smmh.mind;
+package ir.smmh.apps.ontologue;
 
+import ir.smmh.mind.MindsAPI;
 import ir.smmh.tgbot.impl.StandardAPITelegramBotImpl;
 import org.json.JSONObject;
 

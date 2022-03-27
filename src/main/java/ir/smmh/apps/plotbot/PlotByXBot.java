@@ -1,6 +1,5 @@
 package ir.smmh.apps.plotbot;
 
-import annotations.Singleton;
 import ir.smmh.apps.plotbot.impl.FigureMakerImpl;
 import ir.smmh.apps.plotbot.impl.UserDataImpl;
 import ir.smmh.apps.plotbot.impl.ViewportImpl;

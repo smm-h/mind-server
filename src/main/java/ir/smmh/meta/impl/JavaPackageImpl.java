@@ -1,6 +1,7 @@
 package ir.smmh.meta.impl;
 
 import ir.smmh.meta.JavaPackage;
+import ir.smmh.util.FileUtil;
 import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +14,7 @@ public class JavaPackageImpl implements JavaPackage {
     private final @NotNull String moduleName, address;
 
     public JavaPackageImpl(@NotNull String moduleName, @NotNull String address) throws IOException {
-        this.path = Path.of("src/" + moduleName + "/java/" + StringUtil.replaceCharacter(address, '.', '/'));
+        this.path = FileUtil.pathOf("src/" + moduleName + "/java/" + StringUtil.replaceCharacter(address, '.', '/'));
         this.moduleName = moduleName;
         this.address = address;
         Files.createDirectories(path);

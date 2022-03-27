@@ -139,7 +139,7 @@ public final class MutableMindImpl implements Mind.Mutable, Mutable.WithListener
     }
 
     @Override
-    public @NotNull JSONObject serializeJSON() throws JSONException {
+    public @NotNull JSONObject serializeJSON() {
         JSONObject object = new JSONObject();
         if (clean()) {
             try {

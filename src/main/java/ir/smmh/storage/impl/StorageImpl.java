@@ -41,7 +41,7 @@ public final class StorageImpl implements Storage {
 
     @Override
     public boolean exists(@NotNull String filename) {
-        return Files.exists(Path.of(root, filename));
+        return Files.exists(FileUtil.pathOf(root, filename));
     }
 
     @Nullable
@@ -49,7 +49,7 @@ public final class StorageImpl implements Storage {
     public String read(@NotNull String filename) {
         out.log("READING FROM: " + filename);
         try {
-            return Files.readString(Path.of(root, filename));
+            return FileUtil.Files_readString(FileUtil.pathOf(root, filename));
         } catch (IOException e) {
             err.log("FAILED TO READ FROM: " + filename);
             return null;
@@ -60,7 +60,7 @@ public final class StorageImpl implements Storage {
     public boolean write(@NotNull String filename, @NotNull String contents) {
         out.log("WRITING TO: " + filename);
         try {
-            Files.writeString(Path.of(root, filename), contents);
+            FileUtil.Files_writeString(FileUtil.pathOf(root, filename), contents);
             return true;
         } catch (IOException e) {
             err.log("FAILED TO WRITE TO: " + filename);
@@ -72,7 +72,7 @@ public final class StorageImpl implements Storage {
     public boolean delete(@NotNull String filename) {
         out.log("DELETING: " + filename);
         try {
-            Files.delete(Path.of(root, filename));
+            Files.delete(FileUtil.pathOf(root, filename));
             return true;
         } catch (IOException e) {
             out.log("FAILED TO DELETE: " + filename);
@@ -84,7 +84,7 @@ public final class StorageImpl implements Storage {
     public void deleteAll() {
         out.log("DELETING ALL FILES");
         try {
-            try (Stream<Path> files = Files.list(Path.of(root))) {
+            try (Stream<Path> files = Files.list(FileUtil.pathOf(root))) {
                 for (Path file : files.collect(Collectors.toList())) {
                     try {
                         Files.delete(file);

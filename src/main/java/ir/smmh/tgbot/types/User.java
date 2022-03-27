@@ -1,13 +1,13 @@
 package ir.smmh.tgbot.types;
 
 import ir.smmh.tgbot.types.impl.UserImpl;
-import ir.smmh.util.JSONUtil;
+import ir.smmh.util.ReadOnlyJSON;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public interface User extends JSONUtil.ReadOnlyJSON {
+public interface User extends ReadOnlyJSON {
 
     @Contract("!null->!null")
     static User of(@Nullable JSONObject wrapped) {

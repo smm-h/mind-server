@@ -35,7 +35,7 @@ public class OpenFileImpl implements OpenFile {
         if (filename == null) {
             path = null;
         } else {
-            path = Path.of(filename);
+            path = FileUtil.pathOf(filename);
             if (this.ext == null)
                 this.ext = FileUtil.getExt(path.getFileName().toString());
             forceRead();
@@ -64,7 +64,7 @@ public class OpenFileImpl implements OpenFile {
     public final boolean forceRead() {
         if (path != null) {
             try {
-                contents = Files.readString(path);
+                contents = FileUtil.Files_readString(path);
                 lastSynchronized = System.currentTimeMillis();
                 return true;
             } catch (IOException ignored) {
@@ -77,7 +77,7 @@ public class OpenFileImpl implements OpenFile {
     public final boolean forceWrite() {
         if (path != null) {
             try {
-                Files.writeString(path, contents == null ? "" : contents);
+                FileUtil.Files_writeString(path, contents == null ? "" : contents);
                 lastSynchronized = System.currentTimeMillis();
                 return true;
             } catch (IOException ignored) {
@@ -97,7 +97,7 @@ public class OpenFileImpl implements OpenFile {
      */
     @Override
     public final void setFullName(String fullName) {
-        path = Path.of(fullName);
+        path = FileUtil.pathOf(fullName);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class OpenFileImpl implements OpenFile {
     public final boolean dump(String filename) {
         if (contents != null) {
             try {
-                Files.writeString(Path.of(filename), contents);
+                FileUtil.Files_writeString(FileUtil.pathOf(filename), contents);
                 return true;
             } catch (IOException | InvalidPathException ignored) {
             }

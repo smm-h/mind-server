@@ -20,4 +20,16 @@ public interface CharacterPredicates {
                 return false;
         }
     };
+
+    Predicate<Character> WHITESPACE = c -> {
+        switch (c) {
+            case ' ':
+            case '\n':
+            case '\t':
+            case '\r':
+                return true;
+            default:
+                return false;
+        }
+    };
 }

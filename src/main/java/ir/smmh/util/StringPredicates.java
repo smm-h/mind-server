@@ -1,6 +1,5 @@
 package ir.smmh.util;
 
-import ir.smmh.Backward;
 import ir.smmh.util.jile.MathUtil;
 
 import java.util.function.Predicate;
@@ -9,7 +8,7 @@ public interface StringPredicates {
 
     Predicate<String> EMPTY = String::isEmpty;
 
-    Predicate<String> BLANK = Backward::isBlank;
+    Predicate<String> BLANK = StringUtil::isBlank;
 
     Predicate<String> PALINDROME = s -> {
         if (FunctionalUtil.is(s, EMPTY))

@@ -595,7 +595,7 @@ public interface NodedTree<DataType, NodeType extends NodedTree.Node<DataType, N
         class NonLeafOnly<DataType, NodeType extends NodedTree.Node<DataType, NodeType, TreeType>, TreeType extends NodedTree<DataType, NodeType, TreeType>> implements Conditional<DataType, NodeType, TreeType> {
             @Override
             public final @NotNull Predicate<NodeType> getCondition() {
-                return Predicate.not(NodeType::isLeaf);
+                return FunctionalUtil.not(NodeType::isLeaf);
             }
         }
 

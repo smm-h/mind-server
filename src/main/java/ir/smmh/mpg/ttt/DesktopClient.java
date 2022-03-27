@@ -145,7 +145,7 @@ public final class DesktopClient extends StandardClientImpl {
             connection = reconnect();
             var i = new DataInputStream(connection.getInputStream());
             new Thread(() -> {
-                while (true){
+                while (true) {
                     try {
                         JSONObject object = JSONUtil.parse(i.readUTF());
                         switch (object.getString("update")) {

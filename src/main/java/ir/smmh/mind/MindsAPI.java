@@ -2,6 +2,7 @@ package ir.smmh.mind;
 
 import ir.smmh.mind.impl.MutableMindImpl;
 import ir.smmh.net.api.StandardAPIImpl;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -75,15 +76,15 @@ public class MindsAPI extends StandardAPIImpl {
         });
     }
 
-    private Mind.Mutable getMind(JSONObject p) {
+    private Mind.Mutable getMind(JSONObject p) throws JSONException {
         return minds.get(p.getString("mind"));
     }
 
-    private Idea.Mutable getIdea(JSONObject p, String key) {
+    private Idea.Mutable getIdea(JSONObject p, String key) throws JSONException {
         return getMind(p).findIdeaByName(p.getString(key));
     }
 
-    private Idea.Mutable getIdea(JSONObject p) {
+    private Idea.Mutable getIdea(JSONObject p) throws JSONException {
         return getIdea(p, "idea");
     }
 

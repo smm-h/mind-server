@@ -1,5 +1,6 @@
 package ir.smmh.util;
 
+
 import java.awt.*;
 
 public interface GraphicsUtil {
@@ -9,5 +10,9 @@ public interface GraphicsUtil {
 
     static int getAlpha(float transparency) {
         return ((int) (transparency * 255f)) << 24;
+    }
+
+    static int hueToRgb(float h, float s, float v) {
+        return Color.getHSBColor(h, s, v).getRGB();
     }
 }

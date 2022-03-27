@@ -1,7 +1,7 @@
 package ir.smmh.tgbot.types;
 
-import ir.smmh.util.JSONUtil;
+import ir.smmh.util.ReadOnlyJSON;
 
-public interface UpdateContent extends JSONUtil.ReadOnlyJSON {
+public interface UpdateContent extends ReadOnlyJSON {
 
 }

@@ -5,6 +5,7 @@ import ir.smmh.util.Named;
 import ir.smmh.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Set;
@@ -144,7 +145,7 @@ public interface Idea extends Named {
         return true;
     }
 
-    default Instance deserialize(JSONObject serialization) {
+    default Instance deserialize(JSONObject serialization) throws JSONException {
         Instance instance = instantiate();
         Set<Idea> d = getDirectIntensions();
         if (d != null) {
@@ -166,7 +167,12 @@ public interface Idea extends Named {
     @Nullable
     default Instance instantiate(JSONObject serialization) {
         if (canBeDeserialized(serialization)) {
-            return deserialize(serialization);
+            try {
+                return deserialize(serialization);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
         } else {
             return null;
         }

@@ -3,6 +3,7 @@ package ir.smmh.net.api;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -32,7 +33,7 @@ public interface Authenticator<U extends User, S extends Session<U>> {
 
     int signIn(String username, String password, String token);
 
-    @Nullable U authenticate(JSONObject authentication);
+    @Nullable U authenticate(JSONObject authentication) throws JSONException;
 
     @Nullable U findUser(String username);
 

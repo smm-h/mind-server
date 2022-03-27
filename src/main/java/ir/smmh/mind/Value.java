@@ -47,7 +47,7 @@ public interface Value extends CanSerialize.JSON {
 
     interface Number extends Primitive<java.lang.Number> {
         @Override
-        default @NotNull JSONObject serializeJSON() throws JSONException {
+        default @NotNull JSONObject serializeJSON() {
             try {
                 return new JSONObject("{\"~\": \"number\", \"value\": \"" + JSONObject.numberToString(getValue()) + "\"}");
             } catch (JSONException e) {
@@ -59,7 +59,7 @@ public interface Value extends CanSerialize.JSON {
 
     interface String extends Primitive<java.lang.String> {
         @Override
-        default @NotNull JSONObject serializeJSON() throws JSONException {
+        default @NotNull JSONObject serializeJSON() {
             try {
                 return new JSONObject("{\"~\": \"string\", \"value\": \"" + JSONObject.quote(getValue()) + "\"}");
             } catch (JSONException e) {

@@ -49,7 +49,8 @@ public class ClientImpl implements Client {
             throw new RuntimeException("Could not establish connection to send request");
         }
     }
-@Override
+
+    @Override
     public Socket connect() throws IOException {
         return new Socket(hostAddress, port);
     }

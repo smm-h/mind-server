@@ -1,12 +1,12 @@
 package ir.smmh.tgbot.types;
 
 import ir.smmh.tgbot.types.impl.LocationImpl;
-import ir.smmh.util.JSONUtil;
+import ir.smmh.util.ReadOnlyJSON;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public interface Location extends JSONUtil.ReadOnlyJSON {
+public interface Location extends ReadOnlyJSON {
 
     @Contract("!null->!null")
     static Location of(@Nullable JSONObject wrapped) {

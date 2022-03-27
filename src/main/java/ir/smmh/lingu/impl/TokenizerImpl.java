@@ -1,6 +1,5 @@
 package ir.smmh.lingu.impl;
 
-import ir.smmh.Backward;
 import ir.smmh.lingu.*;
 import ir.smmh.lingu.IndividualTokenType.IndividualToken;
 import ir.smmh.lingu.impl.TokenizerMakerImpl.Definition;
@@ -270,7 +269,7 @@ public class TokenizerImpl extends SingleProcessor implements Tokenizer {
             else {
 
                 // unless its closer is entirely whitespace,
-                if (!Backward.isBlank(where.closer))
+                if (!StringUtil.isBlank(where.closer))
 
                     // attach a mishap to its opener
                     tokenizing.issue(new UnclosedKept(tokens.get(tokens.size() - 1)));

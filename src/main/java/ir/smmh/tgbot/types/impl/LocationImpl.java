@@ -1,12 +1,12 @@
 package ir.smmh.tgbot.types.impl;
 
 import ir.smmh.tgbot.types.Location;
-import ir.smmh.util.JSONUtil;
+import ir.smmh.util.impl.ReadOnlyJSONImpl;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class LocationImpl extends JSONUtil.ReadOnlyJSONImpl implements Location {
+public class LocationImpl extends ReadOnlyJSONImpl implements Location {
 
     private LocationImpl(JSONObject wrapped) {
         super(wrapped);

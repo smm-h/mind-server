@@ -25,8 +25,15 @@ public class PropertyImpl implements Property, CanSerialize.JSON {
         this.defaultValue = defaultValue;
     }
 
-    public PropertyImpl(Idea origin, JSONObject object) {
-        this(origin, object.getString("name"), object.getString("type"), () -> Value.of(object.getJSONObject("defaultValue"), origin.getMind()::findIdeaByName));
+    public PropertyImpl(Idea origin, JSONObject object) throws JSONException {
+        this(origin, object.getString("name"), object.getString("type"), () -> {
+            try {
+                return Value.of(object.getJSONObject("defaultValue"), origin.getMind()::findIdeaByName);
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return null;
+            }
+        });
     }
 
     @Override
